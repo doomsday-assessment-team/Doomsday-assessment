@@ -11,9 +11,7 @@ export function HomeView(): string {
   const cards = users.map(UserCard).join('');
 
   return `
-    <section>
-      <header><h1>User Dashboard</h1></header>
-      <main>${cards}</main>
-    </section>
+    <header><h1>User Dashboard</h1></header>
+    <main>${cards}</main>
   `;
 }
