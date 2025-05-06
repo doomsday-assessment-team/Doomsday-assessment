@@ -3,10 +3,10 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY ../backend/package*.json ./
 RUN npm ci
 
-COPY . .
+COPY ../backend .
 
 RUN npm run build
 RUN npm prune --omit=dev
