@@ -2,7 +2,7 @@ name: Deploy PostgreSQL via Flyway
 
 on:
   push:
-    branches: [ main ]
+    branches: [ terraform ]
 
 jobs:
   migrate:
@@ -10,6 +10,7 @@ jobs:
     env:
       DB_USER: ${{ secrets.DB_USER }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_URL: ${{ secrets.DB_URL }}
 
     steps:
       - name: Checkout code
