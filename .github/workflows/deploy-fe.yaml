@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  S3_BUCKET_NAME: "doomsday-assessment-42c919dd"
   BUILD_DIRECTORY: "build"
+  FRONTEND_APP_PATH: "frontend"
 
 jobs:
   deploy:
@@ -25,10 +25,12 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
+        working-directory: ${{ env.FRONTEND_APP_PATH }}
         run: npm ci
 
-      - name: Build project
+      - name: Build frontend project
+        working-directory: ${{ env.FRONTEND_APP_PATH }}
         run: npm run build
 
       - name: Configure AWS Creds
