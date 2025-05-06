@@ -14,9 +14,7 @@ jobs:
   deploy:
     name: Build and Deploy SPA
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,13 +24,14 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+          scope: ${{ env.FRONTEND_APP_PATH }}
 
       - name: Install frontend dependencies
-#        working-directory: ${{ env.FRONTEND_APP_PATH }}
+        working-directory: ${{ env.FRONTEND_APP_PATH }}
         run: npm ci
 
       - name: Build frontend project
-#        working-directory: ${{ env.FRONTEND_APP_PATH }}
+        working-directory: ${{ env.FRONTEND_APP_PATH }}
         run: npm run build
 
       - name: Configure AWS Creds
