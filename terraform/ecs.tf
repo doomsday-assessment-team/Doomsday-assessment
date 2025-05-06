@@ -24,6 +24,28 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
           "hostPort" : 3000
         }
       ],
+      environment: [
+        {
+          name  = "DB_HOST"
+          value = aws_db_instance.doom_db_instance.address
+        },
+        {
+          name  = "DB_PORT"
+          value = "5432"
+        },
+        {
+          name  = "DB_NAME"
+          value = aws_db_instance.doom_db_instance.db_name
+        },
+        {
+          name  = "DB_USER"
+          valueFrom = local.db_creds.username
+        },
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = local.db_creds.password
+        },
+      ],
       secrets : [
 
       ],

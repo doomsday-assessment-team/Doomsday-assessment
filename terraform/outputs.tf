@@ -7,3 +7,8 @@ output "rds_endpoint" {
   description = "PostgreSQL RDS instance endpoint"
   value       = aws_db_instance.doom_db_instance.endpoint
 }
+
+output "rds_address" {
+  description = "PostgreSQL RDS instance endpoint"
+  value       = aws_db_instance.doom_db_instance.address
+}
