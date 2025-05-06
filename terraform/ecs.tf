@@ -11,7 +11,7 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
   cpu                = 256
   memory             = 512
   execution_role_arn = aws_iam_role.ecs_task_exec_role.arn
-  task_role_arn = aws_iam_role.ecs_task_role.arn
+  task_role_arn      = aws_iam_role.ecs_task_role.arn
 
   container_definitions = jsonencode([
     {
@@ -24,7 +24,7 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
           "hostPort" : 3000
         }
       ],
-      environment: [
+      environment : [
         {
           name  = "DB_HOST"
           value = aws_db_instance.doom_db_instance.address
@@ -42,7 +42,7 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
           value = local.db_creds.username
         },
         {
-          name      = "DB_PASSWORD"
+          name  = "DB_PASSWORD"
           value = local.db_creds.password
         },
       ],
@@ -52,9 +52,9 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group = aws_cloudwatch_log_group.ecs_logs.name
-          awslogs-create-group = "true"
-          awslogs-region = var.default_region
+          awslogs-group         = aws_cloudwatch_log_group.ecs_logs.name
+          awslogs-create-group  = "true"
+          awslogs-region        = var.default_region
           awslogs-stream-prefix = "ecs"
         }
       }
@@ -83,7 +83,7 @@ resource "aws_lb_target_group" "doomsday_app_alb_target_group" {
   health_check {
     interval            = 30
     path                = "/health"
-    port                = "80"
+    port                = "traffic-port"
     protocol            = "HTTP"
     timeout             = 5
     unhealthy_threshold = 2
