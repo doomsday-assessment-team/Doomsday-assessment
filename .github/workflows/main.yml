@@ -22,4 +22,5 @@ jobs:
           sudo ln -s $PWD/flyway-9.22.3/flyway /usr/local/bin/flyway
 
       - name: Run Flyway migrations
+        working-directory: database
         run: flyway migrate -configFiles=flyway.conf
