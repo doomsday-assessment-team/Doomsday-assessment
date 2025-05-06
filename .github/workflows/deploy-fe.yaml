@@ -14,10 +14,9 @@ jobs:
   deploy:
     name: Build and Deploy SPA
     runs-on: ubuntu-latest
-    # This ensures commands like npm ci, npm run build run in the correct context if needed at root
     defaults:
       run:
-        working-directory: ./
+        working-directory: ./frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,11 +28,11 @@ jobs:
           cache: 'npm'
 
       - name: Install frontend dependencies
-        working-directory: ${{ env.FRONTEND_APP_PATH }}
+#        working-directory: ${{ env.FRONTEND_APP_PATH }}
         run: npm ci
 
       - name: Build frontend project
-        working-directory: ${{ env.FRONTEND_APP_PATH }}
+#        working-directory: ${{ env.FRONTEND_APP_PATH }}
         run: npm run build
 
       - name: Configure AWS Creds
