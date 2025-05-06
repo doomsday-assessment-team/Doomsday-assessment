@@ -14,7 +14,10 @@ jobs:
   deploy:
     name: Build and Deploy SPA
     runs-on: ubuntu-latest
-
+    # This ensures commands like npm ci, npm run build run in the correct context if needed at root
+    defaults:
+      run:
+        working-directory: ./
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
