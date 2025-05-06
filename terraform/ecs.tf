@@ -66,7 +66,7 @@ resource "aws_lb" "doomsday_app_alb" {
   name                             = "doomsday-ecs-alb"
   internal                         = false
   load_balancer_type               = "application"
-  security_groups = [aws_security_group.ecs_sg.id]
+  security_groups = [aws_security_group.alb_sg.id]
   subnets = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
   enable_deletion_protection       = false
   enable_cross_zone_load_balancing = true
