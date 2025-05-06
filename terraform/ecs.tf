@@ -20,8 +20,8 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
       essential : true,
       portMappings : [
         {
-          "containerPort" : 80,
-          "hostPort" : 80
+          "containerPort" : 3000,
+          "hostPort" : 3000
         }
       ],
       secrets : [
@@ -131,7 +131,7 @@ resource "aws_ecs_service" "doomsday_app_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.doomsday_app_alb_target_group.arn
     container_name   = "doomsday-app-container"
-    container_port   = 80
+    container_port   = 3000
   }
 
   depends_on = [aws_lb.doomsday_app_alb]
