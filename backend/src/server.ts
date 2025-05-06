@@ -5,7 +5,7 @@ dotenv.config({ path: envFile });
 
 import app from './app';
 
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000') ;
 
 console.log(`Environment: ${process.env.NODE_ENV}`);
 console.log(`Server running on port ${PORT}`);
