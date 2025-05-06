@@ -3,6 +3,9 @@ name: Deploy PostgreSQL via Flyway
 on:
   push:
     branches: [ terraform ]
+    paths:
+      - 'database/**'
+      - '.github/workflows/main.yml'
 
 jobs:
   migrate:

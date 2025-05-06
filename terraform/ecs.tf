@@ -39,11 +39,11 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
         },
         {
           name  = "DB_USER"
-          valueFrom = local.db_creds.username
+          value = local.db_creds.username
         },
         {
           name      = "DB_PASSWORD"
-          valueFrom = local.db_creds.password
+          value = local.db_creds.password
         },
       ],
       secrets : [

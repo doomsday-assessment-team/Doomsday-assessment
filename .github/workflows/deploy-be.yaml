@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - terraform
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-be.yaml'
   workflow_dispatch:
 
 jobs:

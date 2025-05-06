@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - terraform
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-fe.yaml'
   workflow_dispatch:
 
 env:
