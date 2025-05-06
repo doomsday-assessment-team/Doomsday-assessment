@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          scope: ${{ env.FRONTEND_APP_PATH }}
+          cache-dependency-path: ${{ env.FRONTEND_APP_PATH }}/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: ${{ env.FRONTEND_APP_PATH }}
