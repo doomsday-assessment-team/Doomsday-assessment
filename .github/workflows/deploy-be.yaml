@@ -1,0 +1,51 @@
+name: Deploy Node.js Backend to ECS Fargate
+
+on:
+  push:
+    branches:
+      - terraform
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build, Push, and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push docker
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.ECR_REPO_NAME }}:latest
+
+#      - name: Deploy Amazon ECS task definition
+#        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+#        with:
+#          task-definition: ${{ env.ECS_TASK_DEFINITION_FAMILY }}
+#          service: ${{ env.ECS_SERVICE }}
+#          cluster: ${{ env.ECS_CLUSTER }}
+#
+#          image-override: "${{ env.CONTAINER_NAME }}=${{ steps.build-image.outputs.image }}"
+#
+#          wait-for-service-stability: true
+
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service --cluster ${{ vars.CLUSTER_NAME }} --service ${{ vars.SERVICE_NAME }} --force-new-deployment --region ${{ vars.AWS_REGION }} --no-paginate
