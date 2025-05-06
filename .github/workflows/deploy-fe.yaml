@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  BUILD_DIRECTORY: "build"
+  BUILD_DIRECTORY: "frontend/public"
   FRONTEND_APP_PATH: "frontend"
 
 jobs:
