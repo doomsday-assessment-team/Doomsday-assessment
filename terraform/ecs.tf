@@ -75,7 +75,7 @@ resource "aws_lb" "doomsday_app_alb" {
 
 resource "aws_lb_target_group" "doomsday_app_alb_target_group" {
   name        = "doomsday-elb-target-group"
-  port        = 80
+  port        = 3000
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
