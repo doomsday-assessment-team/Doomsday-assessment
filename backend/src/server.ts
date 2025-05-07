@@ -11,5 +11,5 @@ console.log(`Environment: ${process.env.NODE_ENV}`);
 console.log(`Server running on port ${PORT}`);
 
 app.listen(PORT, () => {
-  console.log(`🚀 Listening on port ${PORT}`);
+  console.log(`🚀 Server is running at: \x1b[36mhttp://localhost:${PORT}\x1b[0m`);
 });
