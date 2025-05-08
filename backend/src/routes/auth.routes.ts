@@ -1,7 +1,6 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-import { authenticateJWT } from '../middlewares/auth.middleware';
 
 dotenv.config();
 
@@ -58,11 +57,6 @@ router.get('/google/callback', async (req, res) => {
     console.error('OAuth error', err);
     res.status(500).send('Authentication failed');
   }
-});
-
-router.get('/me', authenticateJWT, (req, res) => {
-  const user = (req as any).user;
-  res.json({ user });
 });
 
 export default router;
