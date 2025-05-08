@@ -10,7 +10,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "sourceMap": true
+    "sourceMap": true,
+    //Added this
+    "resolveJsonModule": true
+
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
