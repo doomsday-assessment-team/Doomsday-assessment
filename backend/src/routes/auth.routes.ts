@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { authenticateJWT } from '../middlewares/auth.middleware';
 
 dotenv.config();
 
@@ -28,7 +29,6 @@ router.get('/google/callback', async (req, res) => {
   const code = req.query.code as string;
 
   try {
-    // Exchange code for tokens
     const response = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -51,15 +51,18 @@ router.get('/google/callback', async (req, res) => {
 
     const user = await userInfoResponse.json();
 
-    // Sign JWT
     const token = jwt.sign(user, process.env.JWT_SECRET!, { expiresIn: '1h' });
 
-    // Redirect back to frontend with token
     res.redirect(`${FRONTEND_URL}?token=${token}`);
   } catch (err) {
     console.error('OAuth error', err);
     res.status(500).send('Authentication failed');
   }
+});
+
+router.get('/me', authenticateJWT, (req, res) => {
+  const user = (req as any).user;
+  res.json({ user });
 });
 
 export default router;
