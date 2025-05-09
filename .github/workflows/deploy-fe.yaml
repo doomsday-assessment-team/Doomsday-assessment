@@ -3,7 +3,8 @@ name: Deploy Frontend to S3
 on:
   push:
     branches:
-      - terraform
+      - dev
+      - main
     paths:
       - 'frontend/**'
       - '.github/workflows/deploy-fe.yaml'
