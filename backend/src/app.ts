@@ -16,6 +16,7 @@ app.use(authenticateJWT);
 
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
+app.use('/api/users', userRoutes);
 
 const publicPath = path.join(__dirname, '../../frontend/public');
 app.use(express.static(publicPath));
