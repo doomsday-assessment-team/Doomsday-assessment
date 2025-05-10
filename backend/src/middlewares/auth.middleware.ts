@@ -28,3 +28,12 @@ export function authenticateJWT(req: Request, res: Response, next: NextFunction)
     res.status(401).json({ message: 'Invalid token' });
   }
 }
+
+export function checkAdminRole(req: Request, res: Response, next: NextFunction): void {
+  if (!req.user || req.user.role !== 'admin') {
+    res.status(403).json({ message: 'Access denied: Admin role required' });
+    return;
+  }
+  
+  next();
+}
