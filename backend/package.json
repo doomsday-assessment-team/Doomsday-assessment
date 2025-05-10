@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "dist/server.js",
   "scripts": {
+    "prod": "NODE_ENV=production node dist/server.js",
     "build": "tsc",
-    "dev": "npm run build && concurrently \"tsc --watch\" \"nodemon --env-file=.env.development dist/server.js\"",
+    "dev": "npm run build && concurrently \"tsc --watch\" \"cross-env NODE_ENV=development nodemon --env-file=.env.development dist/server.js\"",
     "serve": "npm run build && node dist/index.js"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/pg": "^8.15.1",
     "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
     "nodemon": "^3.1.10",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3"
