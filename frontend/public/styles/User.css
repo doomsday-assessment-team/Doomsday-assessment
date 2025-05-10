@@ -1,0 +1,330 @@
+:root {
+  --theme-color: #1a1d24;
+  --theme-color-light: #2a2d36;
+  --accent-color: #a31f34;
+  --text-color: #f0c040;
+  --text-color-muted: #a0a0a0;
+  --button-color: #f4a261;
+  --danger-color: #e74c3c;
+  --focus-outline: 0.15em solid var(--text-color);
+  --border-radius: 0.25em;
+  --card-border-radius: 0.5em;
+  --base-spacing: 1rem;
+  --table-bg: rgba(0, 0, 0, 0.1);
+  --table-border: 0.1em solid var(--text-color);
+}
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: clamp(16px, 2vw, 18px);
+}
+
+body {
+  font-family: "Roboto", system-ui, sans-serif;
+  background-color: var(--theme-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* Typography */
+h1,
+h2,
+h3 {
+  font-family: "Orbitron", sans-serif;
+  color: var(--text-color);
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 5vw, 3rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+h2 {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  margin-bottom: 0.5em;
+}
+
+/* Layout Components */
+body > header {
+  padding: clamp(1.5rem, 5vh, 3rem) 1rem;
+  background-color: var(--theme-color-light);
+  border-bottom: 0.15em solid var(--accent-color);
+  text-align: center;
+}
+
+main {
+  padding: clamp(1.5rem, 3vh, 2.5rem) 1rem;
+  max-width: 75rem;
+  margin: 0 auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+body > footer {
+  padding: 1rem;
+  background-color: var(--theme-color-light);
+  border-top: 0.15em solid var(--accent-color);
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Filter Section */
+main > section:first-child {
+  background-color: var(--theme-color-light);
+  border-radius: var(--card-border-radius);
+  padding: 1.5rem;
+  box-shadow: 0 0.25em 1em rgba(0, 0, 0, 0.2);
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+legend {
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+  font-family: "Orbitron", sans-serif;
+}
+
+form ul {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+form label {
+  display: grid;
+  gap: 0.5rem;
+}
+
+input[type="search"],
+select {
+  width: 100%;
+  padding: 0.75em 1em;
+  background-color: var(--theme-color);
+  color: var(--text-color);
+  border: 0.1em solid var(--text-color-muted);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+}
+
+input[type="search"]:focus,
+select:focus {
+  outline: var(--focus-outline);
+  border-color: var(--text-color);
+}
+
+button {
+  padding: 0.75em 1.5em;
+  background-color: var(--button-color);
+  color: var(--theme-color);
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-0.15em);
+  box-shadow: 0 0.25em 0.5em rgba(0, 0, 0, 0.3);
+}
+
+button:focus {
+  outline: var(--focus-outline);
+}
+
+form > fieldset > button {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+/* User List Section */
+main > section:nth-child(2) {
+  background-color: var(--theme-color-light);
+  border-radius: var(--card-border-radius);
+  padding: 1.5rem;
+  box-shadow: 0 0.25em 1em rgba(0, 0, 0, 0.2);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th,
+td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: var(--table-border);
+}
+
+th {
+  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Role List */
+td ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+td li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 0.5em 1em;
+  border-radius: var(--border-radius);
+}
+
+td li p {
+  margin: 0;
+}
+
+td li button {
+  padding: 0 0.5em;
+  background: none;
+  color: var(--danger-color);
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+/* Add Role Form */
+td form {
+  margin-top: 1rem;
+}
+
+td fieldset {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: start;
+}
+
+td legend {
+  grid-column: 1 / -1;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+td button[type="submit"] {
+  padding: 0.5em 1em;
+  font-size: 0.875rem;
+}
+
+/* Delete Button */
+td:last-child button {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+/* Responsive Table */
+@media (max-width: 40em) {
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+  }
+
+  thead tr {
+    position: absolute;
+    top: -9999em;
+    left: -9999em;
+  }
+
+  tr {
+    border-bottom: var(--table-border);
+    margin-bottom: 1rem;
+  }
+
+  tr:last-child {
+    margin-bottom: 0;
+  }
+
+  td {
+    border: none;
+    position: relative;
+    padding-left: 50%;
+  }
+
+  td:before {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    width: 45%;
+    padding-right: 0.5rem;
+    white-space: nowrap;
+    font-weight: bold;
+  }
+
+  td:nth-of-type(1):before {
+    content: "User Name";
+  }
+  td:nth-of-type(2):before {
+    content: "Roles";
+  }
+  td:nth-of-type(3):before {
+    content: "Actions";
+  }
+}
+
+/* Focus Styles for Accessibility */
+a:focus,
+button:focus,
+input:focus,
+select:focus {
+  outline: var(--focus-outline);
+  outline-offset: 0.15em;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}

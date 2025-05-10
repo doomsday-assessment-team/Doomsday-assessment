@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz | Doomsday Readiness Test</title>
+    <link rel="stylesheet" href="/frontend/public/styles/Quiz.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Doomsday Readiness Test</h1>
+        <nav aria-label="Quiz progress">
+            <ul>
+                <li>
+                    <strong>Question</strong>
+                    <output id="current-question">1</output>
+                    <strong>of</strong>
+                    <output id="total-questions">10</output>
+                </li>
+                <li>
+                    <strong>Time:</strong>
+                    <time id="quiz-timer">00:30</time>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <article>
+            <header>
+                <h2>What is the best way to purify water in an emergency situation?</h2>
+            </header>
+            
+            <form>
+                <fieldset>
+                    <legend class="visually-hidden">Answer options</legend>
+                    <ul>
+                        <li>
+                            <label>
+                                <input type="radio" name="answer" value="1">
+                                Boiling for at least 1 minute
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="radio" name="answer" value="2">
+                                Using household bleach
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="radio" name="answer" value="3">
+                                Solar disinfection in clear bottles
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="radio" name="answer" value="4">
+                                All of the above
+                            </label>
+                        </li>
+                    </ul>
+                </fieldset>
+                <footer>
+                    <button type="button">Next Question</button>
+                </footer>
+            </form>
+        </article>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 Doomsday Readiness Test</p>
+    </footer>
+</body>
+</html>

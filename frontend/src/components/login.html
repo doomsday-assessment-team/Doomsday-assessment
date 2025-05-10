@@ -3,14 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOOMSDAY READINESS TEST</title>
+    <title>Login | DOOMSDAY READINESS TEST</title>
     <link rel="stylesheet" href="/frontend/public/styles/Login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <main>
-<h1>DOOMSDAY READINESS TEST</h1>
-<button>Sign in with Google</button>
-</main>
-
+    <header>
+        <h1>DOOMSDAY READINESS TEST</h1>
+    </header>
+    
+    <main>
+        <section>
+            <h2>Prepare for the Worst</h2>
+            
+            <p>
+                Test your survival knowledge and readiness for catastrophic scenarios.
+                Sign in to track your progress and compare with other survivors.
+            </p>
+            
+            <form action="/auth/google" method="get">
+                <fieldset>
+                    <legend class="visually-hidden">Login Options</legend>
+                    <button type="submit">
+                        <img src="https://developers.google.com/identity/images/g-logo.png" alt="" aria-hidden="true">
+                        Sign in with Google
+                    </button>
+                </fieldset>
+            </form>
+            
+            <p>
+                <small>
+                    By signing in, you agree to our <a href="/terms">Terms of Service</a> and 
+                    <a href="/privacy">Privacy Policy</a>.
+                </small>
+            </p>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 Doomsday Readiness Test</p>
+      
+    </footer>
 </body>
 </html>

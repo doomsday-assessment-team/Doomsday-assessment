@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questions and Options | Doomsday Readiness Test</title>
+    <link rel="stylesheet" href="/frontend/public/styles/Questions and Options.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Questions and Options</h1>
+    </header>
+
+    <main>
+        <section>
+            <h2>Filter Questions</h2>
+            <form>
+                <fieldset>
+                    <legend>Filter Criteria</legend>
+                    <ul>
+                        <li>
+                            <label for="scenario-filter">Scenario:</label>
+                            <select id="scenario-filter" name="scenario">
+                                <option value="">All Scenarios</option>
+                                <option value="zombie">Zombie Apocalypse</option>
+                                <option value="alien">Alien Invasion</option>
+                                <option value="nuclear">Nuclear Disaster</option>
+                                <option value="climate">Climate Catastrophe</option>
+                            </select>
+                        </li>
+                        <li>
+                            <label for="difficulty-filter">Difficulty:</label>
+                            <select id="difficulty-filter" name="difficulty">
+                                <option value="">All Difficulties</option>
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </li>
+                    </ul>
+                    <button type="reset">Clear Filters</button>
+                </fieldset>
+            </form>
+        </section>
+
+        <section>
+            <h2>Question Bank</h2>
+            <ul>
+                <li>
+                    <article>
+                        <header>
+                            <h3>What is the best way to purify water?</h3>
+                            <menu>
+                                <li><button type="button">Edit</button></li>
+                                <li><button type="button">Delete</button></li>
+                            </menu>
+                        </header>
+                        
+                        <ol>
+                            <li>
+                                <fieldset>
+                                    <legend>Option 1</legend>
+                                    <label>
+                                        Answer:
+                                        <input type="text" value="Boiling" aria-label="Option 1">
+                                    </label>
+                                    <label>
+                                        Points:
+                                        <input type="number" value="10" min="0" aria-label="Points for option 1">
+                                    </label>
+                                    <menu>
+                                        <li><button type="button">Edit</button></li>
+                                        <li><button type="button">Delete</button></li>
+                                    </menu>
+                                </fieldset>
+                            </li>
+                            <li>
+                                <fieldset>
+                                    <legend>Option 2</legend>
+                                    <label>
+                                        Answer:
+                                        <input type="text" value="Chlorination" aria-label="Option 2">
+                                    </label>
+                                    <label>
+                                        Points:
+                                        <input type="number" value="5" min="0" aria-label="Points for option 2">
+                                    </label>
+                                    <menu>
+                                        <li><button type="button">Edit</button></li>
+                                        <li><button type="button">Delete</button></li>
+                                    </menu>
+                                </fieldset>
+                            </li>
+                            <li>
+                                <fieldset>
+                                    <legend>Option 3</legend>
+                                    <label>
+                                        Answer:
+                                        <input type="text" value="Distillation" aria-label="Option 3">
+                                    </label>
+                                    <label>
+                                        Points:
+                                        <input type="number" value="8" min="0" aria-label="Points for option 3">
+                                    </label>
+                                    <menu>
+                                        <li><button type="button">Edit</button></li>
+                                        <li><button type="button">Delete</button></li>
+                                    </menu>
+                                </fieldset>
+                            </li>
+                            <li>
+                                <fieldset>
+                                    <legend>Option 4</legend>
+                                    <label>
+                                        Answer:
+                                        <input type="text" value="Filtration" aria-label="Option 4">
+                                    </label>
+                                    <label>
+                                        Points:
+                                        <input type="number" value="7" min="0" aria-label="Points for option 4">
+                                    </label>
+                                    <menu>
+                                        <li><button type="button">Edit</button></li>
+                                        <li><button type="button">Delete</button></li>
+                                    </menu>
+                                </fieldset>
+                            </li>
+                        </ol>
+                        <footer>
+                            <button type="button">Add Option</button>
+                        </footer>
+                    </article>
+                </li>
+
+                <li>
+                    <article>
+                        <header>
+                            <h3>How often should you rotate food supplies?</h3>
+                            <menu>
+                                <li><button type="button">Edit</button></li>
+                                <li><button type="button">Delete</button></li>
+                            </menu>
+                        </header>
+                        
+                        <ol>
+                            <li>
+                                <fieldset>
+                                    <legend>Option 1</legend>
+                                    <label>
+                                        Answer:
+                                        <input type="text" value="Every month" aria-label="Option 1">
+                                    </label>
+                                    <label>
+                                        Points:
+                                        <input type="number" value="3" min="0" aria-label="Points for option 1">
+                                    </label>
+                                    <menu>
+                                        <li><button type="button">Edit</button></li>
+                                        <li><button type="button">Delete</button></li>
+                                    </menu>
+                                </fieldset>
+                            </li>
+                            <li>
+                                <fieldset>
+                                    <legend>Option 2</legend>
+                                    <label>
+                                        Answer:
+                                        <input type="text" value="Every 3 months" aria-label="Option 2">
+                                    </label>
+                                    <label>
+                                        Points:
+                                        <input type="number" value="10" min="0" aria-label="Points for option 2">
+                                    </label>
+                                    <menu>
+                                        <li><button type="button">Edit</button></li>
+                                        <li><button type="button">Delete</button></li>
+                                    </menu>
+                                </fieldset>
+                            </li>
+                            <li>
+                                <fieldset>
+                                    <legend>Option 3</legend>
+                                    <label>
+                                        Answer:
+                                        <input type="text" value="Every 6 months" aria-label="Option 3">
+                                    </label>
+                                    <label>
+                                        Points:
+                                        <input type="number" value="5" min="0" aria-label="Points for option 3">
+                                    </label>
+                                    <menu>
+                                        <li><button type="button">Edit</button></li>
+                                        <li><button type="button">Delete</button></li>
+                                    </menu>
+                                </fieldset>
+                            </li>
+                            <li>
+                                <fieldset>
+                                    <legend>Option 4</legend>
+                                    <label>
+                                        Answer:
+                                        <input type="text" value="Every year" aria-label="Option 4">
+                                    </label>
+                                    <label>
+                                        Points:
+                                        <input type="number" value="1" min="0" aria-label="Points for option 4">
+                                    </label>
+                                    <menu>
+                                        <li><button type="button">Edit</button></li>
+                                        <li><button type="button">Delete</button></li>
+                                    </menu>
+                                </fieldset>
+                            </li>
+                        </ol>
+                        <footer>
+                            <button type="button">Add Option</button>
+                        </footer>
+                    </article>
+                </li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Doomsday Readiness Test</p>
+    </footer>
+</body>
+</html>

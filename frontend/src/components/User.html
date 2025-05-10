@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | Doomsday Readiness Test</title>
+    <link rel="stylesheet" href="/frontend/public/styles/User.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>User Management</h1>
+    </header>
+
+    <main>
+        <section>
+            <h2 class="visually-hidden">User Filters</h2>
+            <form>
+                <fieldset>
+                    <legend>Filter Users</legend>
+                    <ul>
+                        <li>
+                            <label for="search">Search Users:</label>
+                            <input type="search" id="search" name="search" placeholder="Search by name...">
+                        </li>
+                        <li>
+                            <label for="role-filter">Filter by Role:</label>
+                            <select id="role-filter" name="role">
+                                <option value="">All Roles</option>
+                                <option value="user">User</option>
+                                <option value="user-manager">User Manager</option>
+                                <option value="assessment-manager">Assessment Manager</option>
+                            </select>
+                        </li>
+                    </ul>
+                    <button type="reset">Clear Filters</button>
+                </fieldset>
+            </form>
+        </section>
+
+        <section>
+            <h2>Users</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">User Name</th>
+                        <th scope="col">Roles</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Alex Johnson</td>
+                        <td>
+                            <ul>
+                                <li>
+                                    <p>User</p>
+                                    <button type="button" aria-label="Remove User role">×</button>
+                                </li>
+                                <li>
+                                    <p>Assessment Manager</p>
+                                    <button type="button" aria-label="Remove Assessment Manager role">×</button>
+                                </li>
+                            </ul>
+                            <form>
+                                <fieldset>
+                                    <legend>Add Role</legend>
+                                    <select name="new-role">
+                                        <option value="">Select role...</option>
+                                        <option value="user-manager">User Manager</option>
+                                    </select>
+                                    <button type="submit">Add</button>
+                                </fieldset>
+                            </form>
+                        </td>
+                        <td>
+                            <button type="button">Delete</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Sam Wilson</td>
+                        <td>
+                            <ul>
+                                <li>
+                                    <p>User Manager</p>
+                                    <button type="button" aria-label="Remove User Manager role">×</button>
+                                </li>
+                            </ul>
+                            <form>
+                                <fieldset>
+                                    <legend>Add Role</legend>
+                                    <select name="new-role">
+                                        <option value="">Select role...</option>
+                                        <option value="user">User</option>
+                                        <option value="assessment-manager">Assessment Manager</option>
+                                    </select>
+                                    <button type="submit">Add</button>
+                                </fieldset>
+                            </form>
+                        </td>
+                        <td>
+                            <button type="button">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Doomsday Readiness Test</p>
+    </footer>
+</body>
+</html>
+

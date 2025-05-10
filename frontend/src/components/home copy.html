@@ -5,37 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOOMSDAY READINESS TEST</title>
     <link rel="stylesheet" href="/frontend/public/styles/Home copy.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header role="banner">
+    <header>
         <h1>DOOMSDAY READINESS TEST</h1>
         <p class="welcome-message">Welcome, Alex.</p>
     </header>
 
-    <main role="main">
-        <form class="test-selection">
-            <section aria-labelledby="scenarios-heading">
-                <h2 id="scenarios-heading">Choose a scenario:</h2>
-                <select id="scenario" name="scenario" aria-labelledby="scenarios-heading">
-                    <option value="">Select a scenario</option>
-                    <option value="zombie">Zombie Apocalypse</option>
-                    <option value="alien">Alien Invasion</option>
-                    <option value="nuclear">Nuclear Disaster</option>
-                </select>
-            </section>
+    <main>
+        <section class="test-card">
+            <h2 class="card-title">Begin Your Assessment</h2>
+            
+            <form class="test-selection">
+                <fieldset class="form-section">
+                    <legend id="scenarios-heading">Choose a scenario:</legend>
+                    <label class="select-container">
+                        <select id="scenario" name="scenario" aria-labelledby="scenarios-heading" required>
+                            <option value="" disabled selected>Select a scenario</option>
+                            <option value="zombie">Zombie Apocalypse</option>
+                            <option value="alien">Alien Invasion</option>
+                            <option value="nuclear">Nuclear Disaster</option>
+                            <option value="climate">Climate Catastrophe</option>
+                            <option value="pandemic">Global Pandemic</option>
+                        </select>
+                    </label>
+                </fieldset>
 
-            <section aria-labelledby="difficulty-heading">
-                <h2 id="difficulty-heading">Select difficulty:</h2>
-                <select id="difficulty" name="difficulty" aria-labelledby="difficulty-heading">
-                    <option value="">Select difficulty</option>
-                    <option value="easy">Easy</option>
-                    <option value="medium">Medium</option>
-                    <option value="hard">Hard</option>
-                </select>
-            </section>
+                <fieldset class="form-section">
+                    <legend id="difficulty-heading">Select difficulty:</legend>
+                    <ul class="difficulty-options">
+                        <li>
+                            <label class="difficulty-option">
+                                <input type="radio" name="difficulty" value="easy" required>
+                                <em class="difficulty-label easy">Easy</em>
+                            </label>
+                        </li>
+                        <li>
+                            <label class="difficulty-option">
+                                <input type="radio" name="difficulty" value="medium">
+                                <em class="difficulty-label medium">Medium</em>
+                            </label>
+                        </li>
+                        <li>
+                            <label class="difficulty-option">
+                                <input type="radio" name="difficulty" value="hard">
+                                <em class="difficulty-label hard">Hard</em>
+                            </label>
+                        </li>
+                    </ul>
+                </fieldset>
 
-            <button type="submit" class="start-button">Start Test</button>
-        </form>
+                <footer class="form-actions">
+                    <button type="submit" class="start-button">Start Test</button>
+                </footer>
+            </form>
+            
+            <aside class="info-box">
+                <h3 class="info-title">Why Test Your Readiness?</h3>
+                <p>Assess your survival knowledge and preparedness for various catastrophic scenarios. Identify strengths and weaknesses in your emergency planning.</p>
+            </aside>
+        </section>
+        
+        <nav class="quick-links">
+            <ul>
+                <li>
+                    <a href="history.html" class="quick-link">
+                        <abbr class="link-icon" title="Assessment History">📊</abbr>
+                        Assessment History
+                    </a>
+                </li>
+         
+                <li>
+                    <a href="profile.html" class="quick-link">
+                        <abbr class="link-icon" title="Your Profile">👤</abbr>
+                        Your Profile
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </main>
+    
+    <footer>
+        <p>&copy; 2025 Doomsday Readiness Test</p>
+    </footer>
 </body>
 </html>
