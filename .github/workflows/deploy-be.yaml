@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - 'backend/**'
+      - 'terraform/**'
       - '.github/workflows/deploy-be.yaml'
   workflow_dispatch:
 

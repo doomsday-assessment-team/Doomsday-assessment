@@ -4,6 +4,10 @@ import jwt from 'jsonwebtoken';
 
 export function authenticateJWT(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
+  if (req.path === '/' || req.path === '/auth/google' || req.path ==='/auth/google/callback'){
+    next();
+    return;
+  }
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     res.status(401).json({ message: 'Missing or invalid Authorization header' });
@@ -23,4 +27,13 @@ export function authenticateJWT(req: Request, res: Response, next: NextFunction)
   } catch (err) {
     res.status(401).json({ message: 'Invalid token' });
   }
+}
+
+export function checkAdminRole(req: Request, res: Response, next: NextFunction): void {
+  if (!req.user || req.user.role !== 'admin') {
+    res.status(403).json({ message: 'Access denied: Admin role required' });
+    return;
+  }
+  
+  next();
 }
