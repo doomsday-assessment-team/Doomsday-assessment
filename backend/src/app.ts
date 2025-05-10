@@ -5,6 +5,7 @@ import path from 'path';
 import userRoutes from './routes/user.routes';
 import { errorHandler } from './middlewares/error.middleware';
 import authRoutes from './routes/auth.routes';
+import quizRoutes from './routes/quiz.route';
 
 const app = express();
 
@@ -23,6 +24,8 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 
 });
+
+app.use('/quiz', quizRoutes);
 
 app.use(errorHandler);
 
