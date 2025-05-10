@@ -1,0 +1,56 @@
+name: Deploy Frontend to S3
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-fe.yaml'
+  workflow_dispatch:
+
+env:
+  BUILD_DIRECTORY: "frontend/public"
+  FRONTEND_APP_PATH: "frontend"
+
+jobs:
+  deploy:
+    name: Build and Deploy SPA
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_APP_PATH }}/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ${{ env.FRONTEND_APP_PATH }}
+        run: npm ci
+
+      - name: Build frontend project
+        working-directory: ${{ env.FRONTEND_APP_PATH }}
+        run: npm run build
+
+      - name: Configure AWS Creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Deploy static site to S3 bucket
+        # Using AWS CLI for efficient sync and deletion of old files
+        run: |
+          aws s3 sync ./${{ env.BUILD_DIRECTORY }}/ s3://${{ secrets.S3_BUCKET_NAME }}/ --delete 
+
+#      - name: Invalidate CloudFront cache (Optional)
+#        if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
+#        run: |
+#          aws cloudfront create-invalidation --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"

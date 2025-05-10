@@ -1,15 +1,15 @@
 import * as dotenv from 'dotenv';
-
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
-dotenv.config({ path: envFile });
-
 import app from './app';
+import { configureEnvironment, EnvironmentVariables, environmentTypes } from './utils/env';
 
-const PORT = process.env.PORT || 3000;
+const environmentVariables: EnvironmentVariables = configureEnvironment();
 
-console.log(`Environment: ${process.env.NODE_ENV}`);
-console.log(`Server running on port ${PORT}`);
+const PORT = environmentVariables.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Listening on port ${PORT}`);
+  if (environmentVariables.NODE_ENV === environmentTypes.DEVELOPMENT) {
+    console.log(`🚀 Listening on port ${PORT}`);
+  } else {
+    // The environment is set to production
+  }
 });

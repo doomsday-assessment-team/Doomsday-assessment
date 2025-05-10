@@ -1,16 +1,18 @@
 import pgPromise from 'pg-promise';
 import * as dotenv from 'dotenv';
+import { configureEnvironment } from '../utils/env';
 
-dotenv.config();
+const environmentVariables = configureEnvironment();
 
 const pgp = pgPromise();
 
 const db = pgp({
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  host: environmentVariables.DB_HOST,
+  port: parseInt(environmentVariables.DB_PORT || '5432'),
+  database: environmentVariables.DB_NAME,
+  user: environmentVariables.DB_USER,
+  password: environmentVariables.DB_PASSWORD,
+  ssl: { rejectUnauthorized: false }
 });
 
 export default db;
