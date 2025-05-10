@@ -17,8 +17,6 @@ app.use('/admin', adminRoutes);
 
 const publicPath = path.join(__dirname, '../../frontend/public');
 app.use(express.static(publicPath));
-
-app.use('/api/users', userRoutes);
 app.get('/health', (req, res) => {
 
   res.status(200).send('OK');
