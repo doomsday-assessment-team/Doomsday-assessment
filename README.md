@@ -14,7 +14,7 @@
 
 ## Backend Production
 1. Set up your `.env.production` file (refer to `env.example` for required variables)
-2. Run `tsc` to transpile TypeScript files to JavaScript
+2. Run `npm run build` to transpile TypeScript files to JavaScript
 3. Run `npm run prod` to start the production server
 
 ## Important Note

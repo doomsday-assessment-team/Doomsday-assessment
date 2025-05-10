@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 
-import userRoutes from './routes/user.routes';
+import adminRoutes from './routes/admin.routes';
 import { errorHandler } from './middlewares/error.middleware';
 import authRoutes from './routes/auth.routes';
 
@@ -12,11 +12,10 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
 
 const publicPath = path.join(__dirname, '../../frontend/public');
 app.use(express.static(publicPath));
-
-app.use('/api/users', userRoutes);
 
 app.use(errorHandler);
 
