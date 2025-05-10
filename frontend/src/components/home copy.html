@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOOMSDAY READINESS TEST</title>
+    <link rel="stylesheet" href="/frontend/public/styles/Home copy.css">
+</head>
+<body>
+    <header role="banner">
+        <h1>DOOMSDAY READINESS TEST</h1>
+        <p class="welcome-message">Welcome, Alex.</p>
+    </header>
+
+    <main role="main">
+        <form class="test-selection">
+            <section aria-labelledby="scenarios-heading">
+                <h2 id="scenarios-heading">Choose a scenario:</h2>
+                <select id="scenario" name="scenario" aria-labelledby="scenarios-heading">
+                    <option value="">Select a scenario</option>
+                    <option value="zombie">Zombie Apocalypse</option>
+                    <option value="alien">Alien Invasion</option>
+                    <option value="nuclear">Nuclear Disaster</option>
+                </select>
+            </section>
+
+            <section aria-labelledby="difficulty-heading">
+                <h2 id="difficulty-heading">Select difficulty:</h2>
+                <select id="difficulty" name="difficulty" aria-labelledby="difficulty-heading">
+                    <option value="">Select difficulty</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </section>
+
+            <button type="submit" class="start-button">Start Test</button>
+        </form>
+    </main>
+</body>
+</html>

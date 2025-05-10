@@ -1,5 +1,5 @@
 // src/views/Login.ts
-import loginTemplate from '../components/Login.html';
+import loginTemplate from '../components/login.html';
 
 export class Login {
   private template: string;
