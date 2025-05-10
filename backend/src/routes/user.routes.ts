@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { getAllUsers } from '../controllers/user.controller';
-import { DBPool } from '../db/pool';
 import { loginUser } from '../services/loginUser';
 
 const router = Router();
@@ -12,19 +11,19 @@ router.get('/me', (req, res) => {
   });
 
 
-  router.post('/loginUser', async (req, res) => {
-    if(req.user) {
-      const result = await loginUser (
-        req.user?.given_name, 
-        req.user?.family_name,
-        req.user?.email,
-        req.user?.id
-      );
-      res.send(result);
-      return;
+router.post('/loginUser', async (req, res) => {
+  if(req.user) {
+    const result = await loginUser (
+      req.user?.given_name, 
+      req.user?.family_name,
+      req.user?.email,
+      req.user?.id
+    );
+    res.status(200).send(result);
+    return;
     }
-    res.send("uhm.")
- 
+
+  res.status(401).json({ error: "Unauthorized: Could not log in successfully." });
   });
 
 router.get('/', getAllUsers);
