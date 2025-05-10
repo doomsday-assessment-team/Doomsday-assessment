@@ -4,7 +4,10 @@ dist/
 *.log
 
 # Environment
-backend/.env.*
+**/.env
+
+**/.env.*
+
 !backend/.env.example
 
 # IDE
@@ -21,3 +24,5 @@ backend/.env.*
 
 # Frontend
 frontend/public/js/
+
+

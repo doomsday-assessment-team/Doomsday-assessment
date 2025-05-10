@@ -34,6 +34,13 @@ resource "aws_iam_policy" "ecs_task_exec_policy" {
         ],
         Effect = "Allow",
         Resource = "*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ],
+        Resource = "*"
       }
     ]
   })

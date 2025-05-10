@@ -4,6 +4,7 @@ resource "aws_ecs_cluster" "doomsday_ecs_cluster" {
 
 data "aws_caller_identity" "current" {}
 
+
 resource "aws_ecs_task_definition" "doomsday_ecs_task" {
   family             = "doomsday-app"
   network_mode       = "awsvpc"
@@ -41,13 +42,38 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
           name  = "DB_USER"
           value = local.db_creds.username
         },
+
         {
-          name  = "DB_PASSWORD"
-          value = local.db_creds.password
+          name  = "GOOGLE_REDIRECT_URI"
+          value = "local.db_creds.password"
         },
+        {
+          name  = "FRONTEND_URL"
+          value = "http://${aws_s3_bucket_website_configuration.public_spa_bucket_website.website_endpoint}"
+        },
+
+        {
+          name  = "NODE_ENV",
+          value = "production"
+        }
       ],
       secrets : [
-
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = "${aws_secretsmanager_secret_version.s-version.arn}:password::"
+        },
+        {
+          name      = "GOOGLE_CLIENT_ID"
+          valueFrom = "${data.aws_secretsmanager_secret.google_secrets.arn}:google_client_id::"
+        },
+        {
+          name      = "GOOGLE_CLIENT_SECRET"
+          valueFrom = "${data.aws_secretsmanager_secret.google_secrets.arn}:google_client_secret::"
+        },
+        {
+          name      = "JWT_SECRET"
+          valueFrom = "${data.aws_secretsmanager_secret.jwt_secrets.arn}:jwt_secret::"
+        },
       ],
       logConfiguration = {
         logDriver = "awslogs"
