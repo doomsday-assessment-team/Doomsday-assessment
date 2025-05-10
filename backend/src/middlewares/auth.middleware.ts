@@ -4,6 +4,10 @@ import jwt from 'jsonwebtoken';
 
 export function authenticateJWT(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
+  if (req.path === '/' || req.path === '/auth/google' || req.path ==='/auth/google/callback'){
+    next();
+    return;
+  }
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     res.status(401).json({ message: 'Missing or invalid Authorization header' });
