@@ -4,6 +4,7 @@ import path from 'path';
 
 import adminRoutes from './routes/admin.routes';
 import { errorHandler } from './middlewares/error.middleware';
+import { authenticateJWT } from './middlewares/auth.middleware';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 
@@ -11,6 +12,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(authenticateJWT);
 
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
