@@ -2,12 +2,14 @@ import './views/AssessmentHistory.js';
 import './views/Login.js';
 import './views/Home.js';
 import './views/NotFound.js';
+import './views/QuestionsAndOptions.js';
 
 class App {
   static routes = {
     '/': 'home-view',
     '/login': 'login-view',
     '/assessment-history': 'assessment-history',
+    '/questions-and-options': 'questions-and-options',
   };
 
   static renderRoute(path: string) {
