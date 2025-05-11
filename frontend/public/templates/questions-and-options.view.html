@@ -24,11 +24,18 @@
     }
 
     button {
-      background: #f4a261;
-      color: #fff;
-      border: none;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
+      font-size: clamp(0.9rem, 3.5vw, 1rem);
+            padding: 0.8rem 1.5rem;
+            background-color: var(--button-color);
+            color: var(--theme-color);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 20%;
+            margin-top: 0.5rem;
+            position: relative;
+            left: 40%;
     }
  
     fieldset {
@@ -43,10 +50,19 @@
     }
 
     select, input {
-      width: 100%;
-      padding: 0.4rem;
-      background-color: var(--select-color);
-      color: var(--text-color);
+       width: 100%;
+            padding: 0.8rem;
+            font-size: clamp(0.9rem, 3.5vw, 1rem);
+            background-color: var(--select-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d4a017'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 1.2rem;
     }
 
     article {
