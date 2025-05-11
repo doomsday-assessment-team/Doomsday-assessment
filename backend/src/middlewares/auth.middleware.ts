@@ -30,7 +30,9 @@ export function authenticateJWT(req: Request, res: Response, next: NextFunction)
 }
 
 export function checkAdminRole(req: Request, res: Response, next: NextFunction): void {
-  if (!req.user || req.user.role !== 'admin') {
+  const roles = req.user?.roles;
+
+  if (!roles || !Array.isArray(roles) || !roles.includes('admin')) {
     res.status(403).json({ message: 'Access denied: Admin role required' });
     return;
   }

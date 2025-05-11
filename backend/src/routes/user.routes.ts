@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { loginUser } from '../services/loginUser';
+//import { getAllUsers } from '../controllers/user.controller';
+import { loginUser } from '../repositories/login.user';
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.post('/loginUser', async (req, res) => {
       req.user?.given_name, 
       req.user?.family_name,
       req.user?.email,
-      req.user?.id
+      req.user?.google_subject
     );
     res.status(200).send(result);
     return;
