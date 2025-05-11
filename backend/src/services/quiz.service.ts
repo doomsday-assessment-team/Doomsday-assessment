@@ -1,7 +1,8 @@
 import { ITask } from "pg-promise";
 import db from "../config/db";
-import { QuizModel } from "../models/quiz.model";
 import { Question, QuizAttemptInput, QuizAttemptResult } from "../types/quiz";
+import { createHistory, createHistoryQuestions, findQuestionsByCriteria, getPointsForOptions, getQuestion, updateQuestions } from "../repositories/quiz.repository";
+import { DatabaseError } from "pg-protocol";
 
 // Custom Error class for better status code handling
 export class ServiceError extends Error {
@@ -26,13 +27,32 @@ export class QuizService {
     if (isNaN(scenario_id)) {
       throw new ServiceError('scenario_id must be a number', 400);
     }
-    const questions = await QuizModel.findQuestionsByCriteria({scenario_id, question_difficulty_id, limit});
+
+    const questions = await findQuestionsByCriteria({ scenario_id, question_difficulty_id, limit });
+
     if (questions.length === 0) {
       throw new ServiceError('No questions found for the given criteria.', 404);
     }
     return questions;
   }
 
+  static async updateQuestion({ question_id, question_text }: { question_id: number, question_text: string }) {
+
+    if (isNaN(question_id)) {
+      throw new ServiceError('scenario_id must be a number', 400);
+    }
+
+    const qResult = await getQuestion(question_id);
+
+    if (qResult == null) {
+      throw new ServiceError('No questions found for the given criteria.', 404);
+    }
+
+    const result = await updateQuestions(question_id, question_text);
+
+    return result;
+
+  }
 
   static async submitAttempt({
     userId,
@@ -47,15 +67,14 @@ export class QuizService {
       throw new ServiceError('scenario_id and a non-empty array of selected_options are required.', 400);
     }
 
-    // Use db.tx for transactions with pg-promise
-    return db.tx(async (t: ITask<any>) => { // t is the transaction task object
+    return db.tx(async (t: ITask<any>) => {
       let totalScore = 0;
       const optionIds = selected_options.map(so => so.option_id);
       if (optionIds.some(id => isNaN(id))) {
-        throw new ServiceError('Invalid option_id found in selected_options.', 400); // This will cause rollback
+        throw new ServiceError('Invalid option_id found in selected_options.', 400);
       }
 
-      const pointsMap = await QuizModel.getPointsForOptions(optionIds, t); // Pass transaction task 't'
+      const pointsMap = await getPointsForOptions(optionIds, t);
 
       for (const so of selected_options) {
         if (pointsMap.has(so.option_id)) {
@@ -63,18 +82,14 @@ export class QuizService {
         } else {
           console.warn(`Option ID ${so.option_id} not found for user ${userId}.`);
           throw new ServiceError('Invalid option_id found in selected_options.', 400);
-        
         }
       }
 
       let resultTitle = "Survivor";
       let resultFeedback = "You made it through!";
 
-      const { history_id, timestamp } = await QuizModel.createHistory(userId, t); // Pass 't'
-      await QuizModel.createHistoryQuestions(history_id, selected_options, t); // Pass 't'
-
-      // If any query within this t.tx block throws an error, pg-promise automatically rolls back.
-      // If it completes without error, pg-promise automatically commits.
+      const { history_id, timestamp } = await createHistory(userId, t);
+      await createHistoryQuestions(history_id, selected_options, t);
 
       return {
         history_id,
@@ -86,13 +101,10 @@ export class QuizService {
         result_feedback: resultFeedback,
       };
     }).catch((error: any) => {
-      // Handle errors from the transaction
-      console.error('Error in submitAttempt transaction:', error);
-      if (error.code && error.code.startsWith('23')) { // PostgreSQL integrity constraint
+      if (error instanceof DatabaseError && error.code) {
         throw new ServiceError('Invalid input data. Please check scenario, question, or option IDs.', 400);
-      }
-      if (error instanceof ServiceError) throw error;
-      throw new ServiceError('Failed to submit quiz attempt during transaction.', 500);
+      } else if (error instanceof ServiceError) throw error;
+      else throw new ServiceError('Failed to submit quiz attempt during transaction.', 500);
     });
   }
 }
