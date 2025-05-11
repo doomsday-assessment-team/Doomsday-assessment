@@ -59,7 +59,7 @@ router.get('/google/callback', async (req, res) => {
     )
 
     const payload = {
-      role: user.role,
+      roles: user.roles,
       google_subject: googleUser.id,
       email: googleUser.email,
       verified_email: googleUser.verified_email,

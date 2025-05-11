@@ -14,11 +14,12 @@ export async function loginUser(
       u.surname,
       u.email,
       u.google_subject,
-      r.role_name AS role
+      ARRAY_AGG(r.role_name) AS roles
     FROM users u
     JOIN user_roles ur ON u.user_id = ur.user_id
     JOIN roles r ON ur.role_id = r.role_id
     WHERE u.google_subject = $1
+    GROUP BY u.user_id
     `,
     [google_subject]
   );
@@ -51,11 +52,12 @@ export async function loginUser(
       u.surname,
       u.email,
       u.google_subject,
-      r.role_name AS role
+      ARRAY_AGG(r.role_name) AS roles
     FROM users u
     JOIN user_roles ur ON u.user_id = ur.user_id
     JOIN roles r ON ur.role_id = r.role_id
     WHERE u.user_id = $1
+    GROUP BY u.user_id
     `,
     [userId]
   );
