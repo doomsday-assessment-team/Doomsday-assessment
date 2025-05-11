@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import {
-  getAllDifficulties,
-  createDifficulty,
-  deleteDifficulty
+  getAllDifficulties
 } from '../controllers/difficulty.controller';
 
 const router = Router();
