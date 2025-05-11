@@ -1,36 +1,49 @@
-// import { HomeView, initHomeView } from './views/HomeView.js';
+import './views/AssessmentHistory.js';
+import './views/Login.js';
+import './views/Home.js';
+import './views/NotFound.js';
 
+class App {
+  static routes = {
+    '/': 'home-view',
+    '/login': 'login-view',
+    '/assessment-history': 'assessment-history',
+  };
 
-// class App {
-//   static init() {
-//     const app = document.getElementById('app');
-//     if (!app) return;
-//     app.innerHTML = HomeView();
-//     initHomeView();
-//   }
-// }
+  static renderRoute(path: string) {
+    const app = document.getElementById('app');
+    if (!app) return;
 
-// document.addEventListener('DOMContentLoaded', () => App.init());
+    app.replaceChildren();
 
+    const viewTag = this.routes[path as keyof typeof App.routes];
 
+    if (viewTag) {
+      const view = document.createElement(viewTag);
+      app.appendChild(view);
+    } else {
+      window.location.hash = '/not-found';
+    }
+  }
 
+  static handleRouteChange() {
+    const path = window.location.hash.slice(1) || '/';
+    if (path === '/not-found') {
+      const app = document.getElementById('app');
+      if (!app) return;
+      app.replaceChildren();
+      const notFoundView = document.createElement('not-found');
+      app.appendChild(notFoundView);
+      return;
+    }
 
-// src/views/main.ts
-import { Login } from './views/Login.js';
+    this.renderRoute(path);
+  }
 
-// Initialize the login component
-const loginComponent = new Login();
-
-export function renderLoginToElement(elementId: string): void {
-  const container = document.getElementById(elementId);
-  if (container) {
-    loginComponent.render(container);
-  } else {
-    console.error(`Element with ID ${elementId} not found`);
+  static init() {
+    this.handleRouteChange();
+    window.addEventListener('hashchange', () => this.handleRouteChange());
   }
 }
 
-// Example usage
-document.addEventListener('DOMContentLoaded', () => {
-  renderLoginToElement('login-container');
-});
+document.addEventListener('DOMContentLoaded', () => App.init());

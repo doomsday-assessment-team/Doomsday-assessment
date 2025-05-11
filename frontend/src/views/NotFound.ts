@@ -1,6 +1,6 @@
 import { loadTemplate } from "../utils/load-template.js";
 
-export class LoginView extends HTMLElement {
+export class NotFound extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -8,7 +8,7 @@ export class LoginView extends HTMLElement {
   }
 
   async loadTemplate() {
-    const content = await loadTemplate('./templates/login.view.html');
+    const content = await loadTemplate('./templates/not-found.view.html');
     if (content){
       this.shadowRoot?.appendChild(content);
     } else {
@@ -17,4 +17,4 @@ export class LoginView extends HTMLElement {
   }
   
 }
-customElements.define('login-view', LoginView);
+customElements.define('not-found', NotFound);
