@@ -8,7 +8,5 @@ import {
 const router = Router();
 
 router.get('/difficulties', getAllDifficulties);
-router.post('/difficulties', createDifficulty);
-router.delete('/difficulties:id', deleteDifficulty);
 
 export default router;

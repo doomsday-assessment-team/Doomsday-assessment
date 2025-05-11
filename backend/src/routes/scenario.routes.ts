@@ -8,7 +8,5 @@ import {
 const router = Router();
 
 router.get('/scenarios', getAllScenarios);
-router.post('/scenarios', createScenario);
-router.delete('/scenarios:id', deleteScenario);
 
 export default router;
