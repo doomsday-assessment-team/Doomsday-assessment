@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import { loginUser } from '../repositories/login.user';
 
 dotenv.config();
 
@@ -48,9 +49,27 @@ router.get('/google/callback', async (req, res) => {
       },
     });
 
-    const user = await userInfoResponse.json();
+    const googleUser = await userInfoResponse.json();
 
-    const token = jwt.sign(user, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    const user = await loginUser(
+      googleUser.given_name,
+      googleUser.family_name,
+      googleUser.email,
+      googleUser.id
+    )
+
+    const payload = {
+      role: user.role,
+      google_subject: googleUser.id,
+      email: googleUser.email,
+      verified_email: googleUser.verified_email,
+      name: googleUser.name,
+      given_name: googleUser.given_name,
+      family_name: googleUser.family_name,
+      picture: googleUser.picture
+    }
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '1h' });
 
     res.redirect(`${FRONTEND_URL}?token=${token}`);
   } catch (err) {
