@@ -25,5 +25,4 @@ router.post('/loginUser', async (req, res) => {
   res.status(401).json({ error: "Unauthorized: Could not log in successfully." });
   });
 
-//router.get('/', getAllUsers);
 export default router;
