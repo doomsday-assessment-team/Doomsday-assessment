@@ -16,53 +16,8 @@ export interface EnvironmentVariables {
   FRONTEND_URL: string;
 }
 
-export let environmentTypes = {
-    DEVELOPMENT: 'development',
-    PRODUCTION: 'production'
-}
+const getEnvVar = (key: string, defaultValue?: string): string => {
 
-let cachedEnv: EnvironmentVariables | undefined = undefined;
-
-export function configureEnvironment(): EnvironmentVariables {
-  if (cachedEnv){
-    return cachedEnv;
-  } else {
-    try {
-        const envFile = getEnvFileName();
-        const envPath = path.resolve(process.cwd(), envFile);
-        const result = dotenv.config({ path: envPath });
-
-        if (result.error) {
-            throw new Error(`Failed to load environment file (${envPath}): ${result.error.message}`);
-        } else if (!result.parsed) {
-            throw new Error(`Environment file (${envPath}) is empty`);
-        } else {
-            console.log(`Environment variables loaded from: ${envPath}`);
-            const parsedEnv = validateAndTransformEnv(result.parsed);
-            console.log(parsedEnv);
-            cachedEnv = parsedEnv;
-            return parsedEnv;
-        }
-    } catch (error) {
-        console.error('Environment configuration failed:', error);
-        throw error;
-    }
-  }
-
-}
-
-function getEnvFileName(): string {
-  const env = process.env.NODE_ENV;
-  
-  const envFiles = {
-    production: '.env.production',
-    development: '.env.development',
-  };
-
-  return envFiles[env as keyof typeof envFiles] || '.env';
-}
-
-function validateAndTransformEnv(env: dotenv.DotenvParseOutput): EnvironmentVariables {
   const requiredVariables = {
     PORT: {
       validate: (value: string) => !isNaN(Number(value)),
@@ -110,44 +65,70 @@ function validateAndTransformEnv(env: dotenv.DotenvParseOutput): EnvironmentVari
     }
   };
 
-  const missingVariables: string[] = [];
-  const invalidVariables: Record<string, string> = {};
+  const value = process.env[key] ?? defaultValue;
 
   for (const [varName, { validate, error }] of Object.entries(requiredVariables)) {
-    const value = env[varName];
-    
     if (value === undefined || value === '') {
-      missingVariables.push(varName);
-    } else if (!validate(value)) {
-      invalidVariables[varName] = error;
+      throw new Error(`FATAL ERROR: Environment variable ${key} is not set.`);
+    } else if (varName === key && !validate(value)) {
+      throw new Error(`FATAL ERROR: ${key} ${error}`);
     }
   }
 
-  if (missingVariables.length > 0 || Object.keys(invalidVariables).length > 0) {
-    const errorMessages = [];
-    if (missingVariables.length > 0) {
-      errorMessages.push(`Missing: ${missingVariables.join(', ')}`);
+  return value!;
+};
+
+export let environmentTypes = {
+  DEVELOPMENT: 'development',
+  PRODUCTION: 'production'
+}
+
+let cachedEnv: EnvironmentVariables | undefined = undefined;
+
+export function configureEnvironment(): EnvironmentVariables {
+  if (cachedEnv) {
+    return cachedEnv;
+  } else {
+    try {
+
+      const isDevelopmentMode = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === undefined;
+      const result = dotenv.config();
+
+      if (isDevelopmentMode) {
+        if (result.error) {
+          throw new Error(`Failed to load environment file: ${result.error.message}`);
+        } else if (!result.parsed) {
+          throw new Error(`Environment file ( is empty`);
+        }
+      }
+
+      console.log("Environment variables loaded.");
+      const parsedEnv = validateAndTransformEnv();
+      console.log(parsedEnv);
+      cachedEnv = parsedEnv;
+      return parsedEnv;
+
+    } catch (error) {
+      console.error('Environment configuration failed:', error);
+      throw error;
     }
-    if (Object.keys(invalidVariables).length > 0) {
-      errorMessages.push(`Invalid: ${Object.entries(invalidVariables)
-        .map(([name, error]) => `${name} (${error})`)
-        .join(', ')}`);
-    }
-    throw new Error(`Environment validation failed:\n${errorMessages.join('\n')}`);
   }
 
+}
+
+function validateAndTransformEnv(): EnvironmentVariables {
   return {
     NODE_ENV: process.env.NODE_ENV as 'development' | 'production',
-    PORT: env.PORT,
-    DB_HOST: env.DB_HOST,
-    DB_PORT: env.DB_PORT,
-    DB_USER: env.DB_USER,
-    DB_PASSWORD: env.DB_PASSWORD,
-    DB_NAME: env.DB_NAME,
-    GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET: env.GOOGLE_CLIENT_SECRET,
-    GOOGLE_REDIRECT_URI: env.GOOGLE_REDIRECT_URI,
-    JWT_SECRET: env.JWT_SECRET,
-    FRONTEND_URL: env.FRONTEND_URL
+    PORT: getEnvVar("PORT", "3000"),
+    DB_HOST: getEnvVar("DB_HOST"),
+    DB_PORT: getEnvVar("DB_PORT"),
+    DB_USER: getEnvVar("DB_USER"),
+    DB_PASSWORD: getEnvVar("DB_PASSWORD"),
+    DB_NAME: getEnvVar("DB_NAME"),
+    GOOGLE_CLIENT_ID: getEnvVar("GOOGLE_CLIENT_ID"),
+    GOOGLE_CLIENT_SECRET: getEnvVar("GOOGLE_CLIENT_SECRET"),
+    GOOGLE_REDIRECT_URI: getEnvVar("GOOGLE_REDIRECT_URI"),
+    JWT_SECRET: getEnvVar("JWT_SECRET"),
+    FRONTEND_URL: getEnvVar("FRONTEND_URL")
   };
 }
