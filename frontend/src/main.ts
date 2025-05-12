@@ -4,8 +4,9 @@ import "./views/Home.js";
 import "./views/NotFound.js";
 import './views/QuestionsAndOptions.js';
 import { ApiService } from "./api/ApiService.js";
+import config from "./config.js";
 
-const apiService = new ApiService('http://localhost:3000');
+const apiService = new ApiService(config.apiBaseUrl);
 
 class App {
   static routes = {
@@ -34,7 +35,7 @@ class App {
     const token = queryParams.get("token");
     if (token) {
       sessionStorage.setItem("token", token);
-      window.location.href = "/frontend/public/"; // edit this this is the base url in prod will be /
+      window.location.href = config.environment === 'prod' ? '/' : "/frontend/public/"; // edit this this is the base url in prod will be /
     } else {
       const path = window.location.hash.slice(1) || "/";
       const token = sessionStorage.getItem("token");
