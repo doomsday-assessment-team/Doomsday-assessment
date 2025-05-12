@@ -1,51 +1,59 @@
-import './views/AssessmentHistory.js';
-import './views/Login.js';
-import './views/Home.js';
-import './views/NotFound.js';
+import "./views/AssessmentHistory.js";
+import "./views/Login.js";
+import "./views/Home.js";
+import "./views/NotFound.js";
 import './views/QuestionsAndOptions.js';
 
 class App {
   static routes = {
-    '/': 'home-view',
-    '/login': 'login-view',
-    '/assessment-history': 'assessment-history',
+    "/": "home-view",
+    "/login": "login-view",
+    "/assessment-history": "assessment-history",
     '/questions-and-options': 'questions-and-options',
   };
 
   static renderRoute(path: string) {
-    const app = document.getElementById('app');
+    const app = document.querySelector("main");
     if (!app) return;
-
-    app.replaceChildren();
 
     const viewTag = this.routes[path as keyof typeof App.routes];
 
     if (viewTag) {
       const view = document.createElement(viewTag);
-      app.appendChild(view);
+      app.replaceWith(view);
     } else {
-      window.location.hash = '/not-found';
+      window.location.hash = "/not-found";
     }
   }
 
   static handleRouteChange() {
-    const path = window.location.hash.slice(1) || '/';
-    if (path === '/not-found') {
-      const app = document.getElementById('app');
-      if (!app) return;
-      app.replaceChildren();
-      const notFoundView = document.createElement('not-found');
-      app.appendChild(notFoundView);
-      return;
+    const queryParams = new URLSearchParams(window.location.search);
+    const token = queryParams.get("token");
+    if (token){
+      sessionStorage.setItem("token", token);
+      window.location.href = "/frontend/public/"; // edit this this is the base url in prod will be /
+    } else {
+      const path = window.location.hash.slice(1) || "/";
+      const token = sessionStorage.getItem("token");
+      if (!token && path !== "/login") {
+        window.location.href = "#/login";
+      } else {
+        if (path === "/not-found") {
+          const app = document.querySelector("main");
+          if (app) {
+            app.replaceWith(document.createElement("not-found"));
+          }
+        }
+        this.renderRoute(path);
+      }
     }
 
-    this.renderRoute(path);
   }
 
   static init() {
     this.handleRouteChange();
-    window.addEventListener('hashchange', () => this.handleRouteChange());
+    window.addEventListener("hashchange", () => this.handleRouteChange());
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => App.init());
+document.addEventListener("DOMContentLoaded", () => App.init());
