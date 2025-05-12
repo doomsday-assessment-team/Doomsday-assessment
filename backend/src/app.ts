@@ -13,13 +13,8 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(authenticateJWT);
 
-app.use('/auth', authRoutes);
-app.use('/admin', adminRoutes);
-app.use('/api/users', userRoutes);
-app.use('/quiz', quizRoutes);
-
+// serving the static path before applying JWT auth
 const publicPath = path.join(__dirname, '../../frontend/public');
 app.use(express.static(publicPath));
 
@@ -29,7 +24,13 @@ app.get('/health', (req, res) => {
 
 });
 
+app.use(authenticateJWT);
 
+// our protected routes
+app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
+app.use('/api/users', userRoutes);
+app.use('/quiz', quizRoutes);
 
 app.use(errorHandler);
 
