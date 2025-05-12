@@ -30,6 +30,26 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ${{ env.FRONTEND_APP_PATH }}/package-lock.json
 
+      - name: Determine Environment and Config File
+        id: config_setup
+        run: |
+          CONFIG_DIR="frontend/public"
+          TARGET_CONFIG="config.js"
+          ENV_NAME="prod"
+          
+          SOURCE_CONFIG_FILE="${CONFIG_DIR}/config.${ENV_NAME}.js"
+          DEPLOY_CONFIG_FILE="${CONFIG_DIR}/${TARGET_CONFIG}"
+          
+          if [[ -f "$SOURCE_CONFIG_FILE" ]]; then
+            echo "Using config file: $SOURCE_CONFIG_FILE"
+            cp "$SOURCE_CONFIG_FILE" "$DEPLOY_CONFIG_FILE"
+            echo "::set-output name=deploy_dir::$CONFIG_DIR"
+            echo "::set-output name=config_target::$DEPLOY_CONFIG_FILE"
+          else
+            echo "::error::Config file not found for environment '$ENV_NAME': $SOURCE_CONFIG_FILE"
+            exit 1
+          fi
+
       - name: Install frontend dependencies
         working-directory: ${{ env.FRONTEND_APP_PATH }}
         run: npm ci
