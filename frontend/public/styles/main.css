@@ -1,38 +1,58 @@
 :root {
-  --theme-color: #2a2d36;
+  --theme-color: #1a1d24;
   --accent-color: #a31f34;
-  --text-color: #d4a017;
+  --theme-color-light: #2a2d36;
+  --text-color: #f0c040;
   --button-color: #f4a261;
-  --focus-outline: 0.2em solid var(--text-color);
+  --focus-outline: 0.15em solid var(--text-color);
   --section-gap: 1.5em;
   --button-gap: 0.75em;
   --border-radius: 0.25em;
   --base-font-size: 1rem;
   --select-color: #3a3f4b;
+  --primary-color: #3498db;
+  --error-color: #e74c3c;
+  --text-color-muted: #a0a0a0;
+  --base-spacing: 1rem;
+  --card-border-radius: 0.5em;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   font-family: system-ui, -apple-system, sans-serif;
   background-color: var(--theme-color);
   color: var(--text-color);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
   font-size: var(--base-font-size);
-  line-height: 1.5;
 }
 
-@media (prefers-reduced-motion) {
-  .start-button {
-    transition: none;
-  }
+header {
+  background-color: var(--theme-color-light);
+  border-bottom: 0.15em solid var(--accent-color);
+  text-align: center;
+  width: 100%;
+  flex-shrink: 0;
 }
 
-@media (prefers-contrast: more) {
-  select,
-  .start-button {
-    outline: 0.15rem solid currentColor;
-  }
+footer {
+  background-color: var(--theme-color-light);
+  border-top: 0.15em solid var(--accent-color);
+  text-align: center;
+  font-size: 0.875rem;
+  padding: var(--base-spacing);
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 5vw, 3rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
