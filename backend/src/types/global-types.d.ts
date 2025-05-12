@@ -22,3 +22,17 @@ export interface Option {
   option_text: string;
   points: number;
 }
+
+export interface GroupedQuestionData {
+  scenario_name: string;
+  history: {
+    history_id: number;
+    timestamp: string;
+    questions: Question[];
+  }[];
+}
+
+export interface Role {
+  role_id: number;
+  role_name: string;
+}
