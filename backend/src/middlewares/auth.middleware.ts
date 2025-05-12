@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 export function authenticateJWT(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
-  if (req.path === '/' || req.path === '/auth/google' || req.path ==='/auth/google/callback'){
+  if (req.path === '/' || req.path === '/health' || req.path === '/auth/google' || req.path ==='/auth/google/callback'){
     next();
     return;
   }

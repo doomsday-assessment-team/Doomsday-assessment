@@ -1,0 +1,74 @@
+<template id="assessment-item">
+  <style>
+    .assessment {
+        background-color: color-mix(in srgb, var(--theme-color) 90%, black);
+        padding: 1em;
+        border-radius: var(--border-radius);
+        margin-block-end: var(--section-gap);
+        border: 0.1em solid var(--text-color);
+    }
+
+    .assessment h4 {
+        margin-block-start: 0;
+        color: var(--button-color);
+    }
+
+    dl {
+        display: grid;
+        grid-template-columns: max-content auto;
+        gap: 0.5em 1em;
+    }
+
+    dt {
+      font-weight: bold;
+    }
+
+    details {
+      margin-block-start: 1em;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 0.5em;
+      background-color: color-mix(in srgb, var(--theme-color) 80%, black);
+      border-radius: var(--border-radius);
+    }
+
+    .questions {
+      padding-inline-start: 1.5em;
+    }
+
+    .questions li {
+      margin-block-end: 1em;
+    }
+
+    strong {
+      color: var(--button-color);
+    }
+  </style>
+
+  <article class="assessment">
+    <h4>Assessment - <span class="assessment-date"></span></h4>
+    <dl>
+      <dt>User:</dt><dd class="assessment-user"></dd>
+      <dt>Scenario:</dt><dd class="assessment-scenario"></dd>
+      <dt>Difficulty:</dt><dd class="assessment-difficulty"></dd>
+      <dt>Points:</dt><dd class="assessment-points"></dd>
+      <dt>Feedback:</dt><dd class="assessment-feedback"></dd>
+    </dl>
+
+    <details>
+      <summary>View Questions & Answers</summary>
+      <ol class="questions">
+        <li>
+          <p>What is the best way to purify water?</p>
+          <p><strong>Your answer:</strong> Boiling</p>
+        </li>
+        <li>
+          <p>How often should you rotate food supplies?</p>
+          <p><strong>Your answer:</strong> Every 6 months</p>
+        </li>
+      </ol>
+    </details>
+  </article>
+</template>

@@ -45,7 +45,7 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
 
         {
           name  = "GOOGLE_REDIRECT_URI"
-          value = "local.db_creds.password"
+          value = "http://${aws_s3_bucket_website_configuration.public_spa_bucket_website.website_endpoint}/  "
         },
         {
           name  = "FRONTEND_URL"

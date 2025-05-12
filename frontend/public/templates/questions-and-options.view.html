@@ -1,0 +1,124 @@
+<!-- templates/questions-and-options.view.html -->
+<template id="questions-and-options-view">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@400;700&display=swap');
+
+    :host {
+      font-family: 'Roboto', sans-serif;
+      display: block;
+    }
+
+    header, footer {
+      background-color: #111;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    main {
+      padding: 1rem 2rem;
+    }
+
+    h2 {
+      margin-top: 2rem;
+    }
+
+    button {
+      font-size: clamp(0.9rem, 3.5vw, 1rem);
+            padding: 0.8rem 1.5rem;
+            background-color: var(--button-color);
+            color: var(--theme-color);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 20%;
+            margin-top: 0.5rem;
+            position: relative;
+            left: 40%;
+    }
+ 
+    fieldset {
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      padding: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    select, input {
+       width: 100%;
+            padding: 0.8rem;
+            font-size: clamp(0.9rem, 3.5vw, 1rem);
+            background-color: var(--select-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d4a017'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 1.2rem;
+    }
+
+    article {
+      border: 1px solid #ccc;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    scenario-filter {
+      color: #2a2d36;
+    }
+  </style>
+
+  <header>
+    <h1>Questions and Options</h1>
+  </header>
+
+  <main>
+    <section>
+      <h2>Filter Questions</h2>
+      <form>
+        <fieldset>
+          <legend>Filter Criteria</legend>
+          <ul>
+            <li>
+              <label for="scenario-filter">Scenario:</label>
+              <select id="scenario-filter">
+                <option value="">All Scenarios</option>
+                <option value="zombie">Zombie Apocalypse</option>
+                <option value="alien">Alien Invasion</option>
+                <option value="nuclear">Nuclear Disaster</option>
+                <option value="climate">Climate Catastrophe</option>
+              </select>
+            </li>
+            <li>
+              <label for="difficulty-filter">Difficulty:</label>
+              <select id="difficulty-filter">
+                <option value="">All Difficulties</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </li>
+          </ul>
+          <button type="reset">Clear Filters</button>
+        </fieldset>
+      </form>
+    </section>
+
+    <section>
+      <h2>Question Bank</h2>
+      <!-- Question list goes here -->
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Doomsday Readiness Test</p>
+  </footer>
+</template>

@@ -3,6 +3,8 @@ import * as db from '../repositories/admin.repository';
 import { authenticateJWT, checkAdminRole } from '../middlewares/auth.middleware';
 import { validateParamsWithMessage } from '../utils/parameter-validation';
 import { ErrorResponse } from '../types/error-response';
+import { getUserQuestionPoints } from '../repositories/admin.repository';
+import { getGroupedUserQuestionHistory } from '../services/admin.service';
 
 const router = express.Router();
 
@@ -59,7 +61,7 @@ router.put('/scenarios/:id', async (req: Request, res: Response, next: NextFunct
         if (req.query.scenario_name === undefined) {
           const errorResponse: ErrorResponse = {
             error: 'MissingFieldError',
-            message: 'No fields to update. Please provide at least scenario_name.'
+            message: 'Please provide scenario_name.'
           };
           res.status(400).json(errorResponse);
         } else {
@@ -140,7 +142,8 @@ router.put('/questions/:id', async (req: Request, res: Response, next: NextFunct
     } else {
       const validationError = validateParamsWithMessage(req.query, [
         { name: 'question_difficulty_id', type: 'number', required: false },
-        { name: 'question_text', type: 'string', required: false }
+        { name: 'question_text', type: 'string', required: false },
+        { name: 'scenario_id', type: 'number', required: false }
       ]);
       
       if (validationError) {
@@ -150,16 +153,17 @@ router.put('/questions/:id', async (req: Request, res: Response, next: NextFunct
         };
         res.status(400).json(errorResponse);
       } else {
-        if (req.query.question_difficulty_id === undefined && req.query.question_text === undefined) {
+        if (req.query.question_difficulty_id === undefined && req.query.question_text === undefined && req.query.scenario_id === undefined) {
           const errorResponse: ErrorResponse = {
             error: 'MissingFieldError',
-            message: 'No fields to update. Please provide at least one of question_difficulty_id or question_text.'
+            message: 'No fields to update. Please provide at least one of scenario_id, question_difficulty_id or question_text.'
           };
           res.status(400).json(errorResponse);
         } else {
           const question = await db.updateQuestion(
             Number(id),
             req.query.question_difficulty_id ? Number(req.query.question_difficulty_id) : undefined,
+            req.query.scenario_id? Number(req.query.scenario_id) : undefined,
             req.query.question_text as string | undefined
           );
           res.json(question);
@@ -238,7 +242,8 @@ router.put('/options/:id', async (req: Request, res: Response, next: NextFunctio
     } else {
       const validationError = validateParamsWithMessage(req.query, [
         { name: 'option_text', type: 'string', required: false },
-        { name: 'points', type: 'number', required: false }
+        { name: 'points', type: 'number', required: false },
+        { name: 'question_id', type: 'number', required: false }
       ]);
       
       if (validationError) {
@@ -248,17 +253,18 @@ router.put('/options/:id', async (req: Request, res: Response, next: NextFunctio
         };
         res.status(400).json(errorResponse);
       } else {
-        if (req.query.option_text === undefined && req.query.points === undefined) {
+        if (req.query.option_text === undefined && req.query.points === undefined && req.query.question_id === undefined) {
           const errorResponse: ErrorResponse = {
             error: 'MissingFieldError',
-            message: 'No fields to update. Please provide at least one of option_text or points.'
+            message: 'No fields to update. Please provide at least one of question_id, option_text or points.'
           };
           res.status(400).json(errorResponse);
         } else {
           const option = await db.updateOption(
             Number(id),
             req.query.option_text as string | undefined,
-            req.query.points !== undefined ? Number(req.query.points) : undefined
+            req.query.points !== undefined ? Number(req.query.points) : undefined,
+            req.query.question_id !== undefined ? Number(req.query.question_id): undefined,
           );
           res.json(option);
         }
@@ -386,6 +392,111 @@ router.delete('/difficulty-levels/:id', async (req: Request, res: Response, next
   } catch (error) {
     next(error);
   }
+});
+
+router.get('/user-question-points', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const validationError = validateParamsWithMessage(req.query, [
+      { name: 'scenario_id', type: 'number', required: false },
+      { name: 'difficulty_id', type: 'number', required: false },
+      { name: 'start_date', type: 'string', required: false },
+      { name: 'end_date', type: 'string', required: false }
+    ]);
+
+    if (validationError) {
+      const errorResponse: ErrorResponse = {
+        error: 'ValidationError',
+        message: validationError
+      };
+      res.status(400).json(errorResponse);
+    } else {
+      const scenarioId = req.query.scenario_id ? Number(req.query.scenario_id) : undefined;
+      const difficultyId = req.query.difficulty_id ? Number(req.query.difficulty_id) : undefined;
+      const startDate = req.query.start_date as string | undefined;
+      const endDate = req.query.end_date as string | undefined;
+
+      const results = await getUserQuestionPoints(scenarioId, difficultyId, startDate, endDate);
+      res.json(results);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/user-question-history/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    
+    const validationError = validateParamsWithMessage({ id }, [
+      { name: 'id', type: 'number', required: true }
+    ]);
+    
+    if (validationError) {
+      const errorResponse: ErrorResponse = {
+        error: 'ValidationError',
+        message: validationError
+      };
+      res.status(400).json(errorResponse);
+    } else {
+      const groupedHistory = await getGroupedUserQuestionHistory(Number(id));
+      res.json(groupedHistory);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/user-roles', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { user_id, role_id } = req.query;
+
+    const validationError = validateParamsWithMessage({ user_id, role_id }, [
+      { name: 'user_id', type: 'number', required: true },
+      { name: 'role_id', type: 'number', required: true }
+    ]);
+    
+    if (validationError) {
+      const errorResponse: ErrorResponse = {
+        error: 'ValidationError',
+        message: validationError
+      };
+      res.status(400).json(errorResponse);
+    } else {
+      await db.addUserRole(Number(user_id), Number(role_id));
+      res.status(201).send();
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/user-roles', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { user_id, role_id } = req.query;
+
+    const validationError = validateParamsWithMessage({ user_id, role_id }, [
+      { name: 'user_id', type: 'number', required: true },
+      { name: 'role_id', type: 'number', required: true }
+    ]);
+    
+    if (validationError) {
+      const errorResponse: ErrorResponse = {
+        error: 'ValidationError',
+        message: validationError
+      };
+      res.status(400).json(errorResponse);
+    } else {
+      await db.deleteUserRole(Number(user_id), Number(role_id));
+      res.status(200).send();
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/roles', async (req: Request, res: Response, next: NextFunction) => {
+  const roles = await db.getAllRoles();
+  res.status(200).json(roles);
 });
 
 export default router;
