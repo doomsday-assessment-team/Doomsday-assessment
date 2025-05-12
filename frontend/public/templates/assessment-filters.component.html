@@ -1,127 +1,118 @@
 <template id="assessment-filters">
   <style>
-    .filters {
-      width: 100%;
-      max-width: 50em;
-    }
-
     .filter-form {
       display: flex;
-      flex-direction: column;
-      gap: var(--button-gap);
-    }
-
-    .filter-row {
-      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      margin-bottom: 2rem;
       flex-wrap: wrap;
-      gap: var(--button-gap);
+      background-color: #1e2126;
+      padding: 1rem;
+    
+      position: relative;
     }
-
+    .filter-form::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      /* background-color: #ff0000; */
+    }
     .filter-group {
-      flex: 1;
-      min-width: 10em;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
-
     label {
-      display: block;
-      margin-block-end: 0.3em;
-      font-size: 0.9em;
+      font-size: 0.875rem;
+      color: #d4af37;
+      white-space: nowrap;
     }
-
-    select {
-      width: 100%;
-      padding: 0.6em;
-      font-size: 1em;
-      background-color: color-mix(in srgb, var(--theme-color) 90%, black);
-      color: var(--text-color);
-      border: 0.1em solid var(--text-color);
-      border-radius: var(--border-radius);
-    }
-
-    button {
-      padding: 0.6em 1.5em;
-      font-size: 1em;
-      background-color: var(--button-color);
-      color: var(--theme-color);
-      border: none;
-      border-radius: var(--border-radius);
+    select, .filter-input {
+      padding: 0.5rem;
+      background-color: #2a2e35;
+      color: #ffffff;
+      border: 1px solid #3a3f48;
+      border-radius: 2px;
+      font-size: 0.875rem;
+      min-width: 12rem;
       cursor: pointer;
-      transition: transform 200ms ease, outline 200ms ease;
     }
-
-    button:hover,
-    button:focus-visible {
-      transform: scale(1.03);
-      outline: var(--focus-outline);
+    select:focus, .filter-input:focus {
+      outline: none;
+      border-color: #d4af37;
     }
-
     .clear-filters {
-      background-color: var(--accent-color);
+      padding: 0.5rem 1rem;
+      background-color: #a02a2a;
+      color: #ffffff;
+      border: none;
+      font-weight: normal;
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-decoration: none;
+      border-radius: 3px;
+      margin-left: auto;
+      align-self: flex-end;
+    }
+    .clear-filters:hover {
+      background-color: #c13030;
+    }
+    .assessment-item {
+      background-color: #1e2126;
+      border-left: 3px solid #d4af37;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    .assessment-title {
+      color: #d4af37;
+      font-size: 1.25rem;
+      font-family: 'Arial', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .difficulty-badge {
+      background-color: #e74c3c;
       color: white;
-      align-self: flex-start;
-    }
-
-    @media screen and (min-width: 37.5em) {
-      .filter-row {
-        flex-wrap: nowrap;
-      }
-
-      .clear-filters {
-        margin-inline-start: auto;
-      }
-    }
-
-    @media screen and (min-width: 56.25em) {
-      .filter-form {
-        flex-direction: row;
-        align-items: flex-end;
-      }
-
-      .filter-row {
-        flex: 1;
-      }
-
-      .clear-filters {
-        margin-inline-start: var(--button-gap);
-      }
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      float: right;
     }
   </style>
-
-  <section class="filters" aria-labelledby="filters-heading">
-    <h3 id="filters-heading" class="visually-hidden">Filters</h3>
-    <form class="filter-form">
-      <div class="filter-row">
-        <div class="filter-group">
-          <label for="date-filter">Date:</label>
-          <select id="date-filter" name="date">
-            <option value="">All Dates</option>
-            <option value="2024-05">May 2024</option>
-            <option value="2024-04">April 2024</option>
-            <option value="2024-03">March 2024</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="scenario-filter">Scenario:</label>
-          <select id="scenario-filter" name="scenario">
-            <option value="">All Scenarios</option>
-            <option value="zombie">Zombie Apocalypse</option>
-            <option value="alien">Alien Invasion</option>
-            <option value="nuclear">Nuclear Disaster</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <label for="difficulty-filter">Difficulty:</label>
-          <select id="difficulty-filter" name="difficulty">
-            <option value="">All Difficulties</option>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-          </select>
-        </div>
-      </div>
-      <button type="reset" class="clear-filters">Clear Filters</button>
-    </form>
-  </section>
+  <form class="filter-form">
+    <section class="filter-group">
+      <label for="date-filter">Date:</label>
+      <select id="date-filter" class="filter-input">
+        <option value="">All Dates</option>
+        <option value="april-2024">April 2024</option>
+        <option value="may-2024">May 2024</option>
+        <option value="june-2024">June 2024</option>
+      </select>
+    </section>
+    <section class="filter-group">
+      <label for="scenario-filter">Scenario:</label>
+      <select id="scenario-filter" class="filter-input">
+        <option value="">All Scenarios</option>
+        <option value="zombie">Zombie Apocalypse</option>
+        <option value="alien">Alien Invasion</option>
+        <option value="natural">Natural Disaster</option>
+      </select>
+    </section>
+    <section class="filter-group">
+      <label for="difficulty-filter">Difficulty:</label>
+      <select id="difficulty-filter" class="filter-input">
+        <option value="">All Difficulties</option>
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </section>
+    <button type="reset" class="clear-filters">Clear Filters</button>
+  </form>
 </template>
+

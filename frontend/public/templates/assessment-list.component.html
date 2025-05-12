@@ -1,10 +1,14 @@
 <template id="assessment-list">
   <style>
     .assessment-history {
-      width: 60em;
+      display: grid;
+      gap: 1.5rem;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem;
+      background-color: #1a1d2a;
     }
   </style>
-
   <section class="assessment-history" aria-labelledby="history-heading">
     <assessment-item
       user="John"
@@ -14,7 +18,6 @@
       points="85"
       feedback="Excellent survival knowledge, improve on first aid"
     ></assessment-item>
-
     <assessment-item
       user="Alex"
       date="April 28, 2024"
