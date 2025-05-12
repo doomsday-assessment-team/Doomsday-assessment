@@ -16,15 +16,6 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
 
   console.error(`[ERROR] ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
   console.error('Stack:', err.stack || 'No stack trace available');
-  
-  if (isDuplicateKeyError(err)) {
-    statusCode = 409;
-    errorResponse = {
-      error: 'Conflict',
-      message: 'Duplicate key violation - resource already exists'
-    };
-  }
-  
   if (err instanceof DatabaseError) { 
     switch (err.code) {
       case '23502':
@@ -79,10 +70,3 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
     // IN production or testing
   }
 };
-
-function isDuplicateKeyError(err: unknown): boolean {
-  const isError = err instanceof Error;
-  const isPgError = isError && 'code' in err;
-  const isDuplicateKey = isPgError && (err as DatabaseError).code === '23505';
-  return isDuplicateKey;
-}
