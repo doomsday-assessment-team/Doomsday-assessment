@@ -58,6 +58,8 @@ router.get('/google/callback', async (req, res) => {
       googleUser.id
     )
 
+    console.log(user);
+
     const payload = {
       roles: user.roles,
       google_subject: googleUser.id,
@@ -69,9 +71,10 @@ router.get('/google/callback', async (req, res) => {
       picture: googleUser.picture
     }
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '1h' });
 
+    const token = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '1h' });
     res.redirect(`${FRONTEND_URL}?token=${token}`);
+
   } catch (err) {
     console.error('OAuth error', err);
     res.status(500).send('Authentication failed');
