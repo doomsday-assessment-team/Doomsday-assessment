@@ -1,6 +1,5 @@
 import { loadTemplate } from '../utils/load-template.js';
 import './AssessmentItem.js';
-
 export class AssessmentList extends HTMLElement {
   constructor() {
     super();
@@ -10,12 +9,11 @@ export class AssessmentList extends HTMLElement {
   
   async loadTemplate() {
     const content = await loadTemplate('./templates/assessment-list.component.html');
-    if (content){
+    if (content) {
       this.shadowRoot?.appendChild(content);
     } else {
       // content is null
     }
   }
 }
-
 customElements.define('assessment-list', AssessmentList);
