@@ -1,4 +1,5 @@
 import db from '../config/db';
+import { DBPool } from '../db/pool';
 import {
   Scenario,
   QuestionDifficulty,
@@ -314,3 +315,23 @@ export const getAllRoles = async (): Promise<Role[]> => {
     `SELECT role_id, role_name FROM roles`
   );
 };
+
+export async function getAllUsersWithRoles() {
+  const usersRoleResult = await DBPool.query ( 
+    `
+    SELECT 
+      u.user_id,
+      u.name,
+      u.surname,
+      u.email,
+      u.google_subject,
+      ARRAY_AGG(r.role_name) AS roles
+    FROM users u
+    JOIN user_roles ur ON u.user_id = ur.user_id
+    JOIN roles r ON ur.role_id = r.role_id
+    GROUP BY u.user_id
+    `
+  );
+
+  return usersRoleResult.rows;
+}

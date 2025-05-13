@@ -499,4 +499,14 @@ router.get('/roles', async (req: Request, res: Response, next: NextFunction) => 
   res.status(200).json(roles);
 });
 
+router.get('/users', async (req, res) => {
+  try {
+    const users = await db.getAllUsersWithRoles();
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching all users with their roles: ', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 export default router;
