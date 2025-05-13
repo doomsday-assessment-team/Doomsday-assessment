@@ -2,8 +2,11 @@
   "name": "frontend",
   "version": "1.0.0",
   "scripts": {
+    "prepare-config:dev": "cp public/config.dev.js public/config.js",
     "build": "tsc",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "start:dev": "npm run prepare-config:dev &&  npm run watch",
+    "start": "npm run start:dev" 
   },
   "devDependencies": {
     "typescript": "^5.8.3"
