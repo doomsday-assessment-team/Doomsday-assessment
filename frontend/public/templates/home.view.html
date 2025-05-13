@@ -26,20 +26,7 @@
             font-size: clamp(1rem, 2vw, 1.25rem);
             margin-bottom: 0.75em;
         }
-
-        /* Layout Components */
-        header {
-            padding: clamp(1.5rem, 5vh, 3rem) 1rem;
-            background-color: var(--theme-color-light);
-            border-bottom: 0.15em solid var(--accent-color);
-            text-align: center;
-        }
-
-        .welcome-message {
-            font-size: clamp(1rem, 2vw, 1.25rem);
-            color: var(--text-color-muted);
-            margin-top: 0.5em;
-        }
+        
 
         main {
             padding: clamp(1.5rem, 3vh, 2.5rem) 1rem;
@@ -279,17 +266,24 @@
             color: var(--danger-color, red);
             font-size: 0.875em;
             margin-top: 0.25em;
-            display: block; /* Ensure it takes space */
-            min-height: 1em; /* Prevent layout jump */
+            display: block;
+            /* Ensure it takes space */
+            min-height: 1em;
+            /* Prevent layout jump */
         }
+
         /* Add style for invalid inputs */
         select.invalid,
-        fieldset.invalid { /* Style fieldset containing radios */
+        fieldset.invalid {
+            /* Style fieldset containing radios */
             border: 1px solid var(--danger-color, red);
         }
+
         select.invalid {
-             border: 1px solid var(--danger-color, red); /* Override default border */
+            border: 1px solid var(--danger-color, red);
+            /* Override default border */
         }
+
         fieldset.invalid legend {
             color: var(--danger-color, red);
         }
@@ -307,10 +301,6 @@
             }
         }
     </style>
-    <header>
-        <h1>DOOMSDAY READINESS TEST</h1>
-        <p class="welcome-message">Welcome, Alex.</p>
-    </header>
 
     <main>
         <section class="test-card">
@@ -372,7 +362,7 @@
         <nav class="quick-links">
             <ul>
                 <li>
-                    <a href="history.html" class="quick-link">
+                    <a href="#/history" class="quick-link">
                         <abbr class="link-icon" title="Assessment History">📊</abbr>
                         Assessment History
                     </a>
@@ -387,8 +377,4 @@
             </ul>
         </nav>
     </main>
-
-    <footer>
-        <p>&copy; 2025 Doomsday Readiness Test</p>
-    </footer>
 </template>
