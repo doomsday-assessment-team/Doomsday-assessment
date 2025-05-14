@@ -1,61 +1,159 @@
 <template id="assessment-item">
   <style>
     .assessment {
-        background-color: color-mix(in srgb, var(--theme-color) 90%, black);
-        padding: 1em;
-        border-radius: var(--border-radius);
-        margin-block-end: var(--section-gap);
-        border: 0.1em solid var(--text-color);
+      background-color: #1e2126;
+      padding: 1rem;
+      border-left: 0.1875rem solid #d4af37;
+      margin-bottom: 1rem;
+    }
+
+    .assessment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
     }
 
     .assessment h4 {
-        margin-block-start: 0;
-        color: var(--button-color);
+      margin: 0;
+      color: #d4af37;
+      font-size: 1.25rem;
+      text-transform: uppercase;
     }
 
-    dl {
-        display: grid;
-        grid-template-columns: max-content auto;
-        gap: 0.5em 1em;
-    }
-
-    dt {
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
       font-weight: bold;
+      text-transform: uppercase;
+      background-color: #e74c3c;
+      color: #ffffff;
+    }
+
+    .assessment-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .meta-item {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .meta-label {
+      font-weight: bold;
+      color: #d4af37;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+    }
+
+    .meta-value {
+      color: #ffffff;
+      font-size: 0.875rem;
+    }
+
+    .assessment-difficulty-class {
+      text-transform: lowercase; /* To match the toLowerCase() in updateContent */
+    }
+
+    .assessment-points-value {
+      color: #ffffff;
+      font-size: 0.875rem;
+    }
+
+    .feedback-section {
+      margin-bottom: 1rem;
+    }
+
+    .feedback-label {
+      font-weight: bold;
+      color: #d4af37;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .feedback-content {
+      color: #ffffff;
+      font-size: 0.875rem;
+      padding: 0.5rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 0.25rem;
     }
 
     details {
-      margin-block-start: 1em;
+      margin-top: 1rem;
     }
 
     summary {
       cursor: pointer;
-      padding: 0.5em;
-      background-color: color-mix(in srgb, var(--theme-color) 80%, black);
-      border-radius: var(--border-radius);
+      padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+      font-weight: bold;
+      color: #d4af37;
+      list-style: none;
+      position: relative;
+    }
+
+    summary::before {
+      content: "▶";
+      position: static;
+      margin-right: 0.5rem;
+      display: inline;
+    }
+
+    details[open] summary::before {
+      content: "▼";
     }
 
     .questions {
-      padding-inline-start: 1.5em;
+      padding-left: 2rem;
+      margin-top: 1rem;
     }
 
     .questions li {
-      margin-block-end: 1em;
+      margin-bottom: 1.5rem;
+    }
+
+    .questions p {
+      color: #a9a9a9;
     }
 
     strong {
-      color: var(--button-color);
+      color: #d4af37;
     }
   </style>
 
   <article class="assessment">
-    <h4>Assessment - <span class="assessment-date"></span></h4>
-    <dl>
-      <dt>User:</dt><dd class="assessment-user"></dd>
-      <dt>Scenario:</dt><dd class="assessment-scenario"></dd>
-      <dt>Difficulty:</dt><dd class="assessment-difficulty"></dd>
-      <dt>Points:</dt><dd class="assessment-points"></dd>
-      <dt>Feedback:</dt><dd class="assessment-feedback"></dd>
-    </dl>
+    <header class="assessment-header">
+      <h4>Assessment - <time class="assessment-date"></time></h4>
+      <mark class="badge assessment-difficulty"></mark>
+    </header>
+
+    <section class="assessment-meta">
+      <p class="meta-item">
+        <strong class="meta-label">User:</strong>
+        <em class="meta-value assessment-user"></em>
+      </p>
+      
+      <p class="meta-item">
+        <strong class="meta-label">Scenario:</strong>
+        <em class="meta-value assessment-scenario"></em>
+      </p>
+      
+      <p class="meta-item">
+        <strong class="meta-label">Points:</strong>
+        <em class="meta-value assessment-points"></em>
+      </p>
+    </section>
+
+    <section class="feedback-section">
+      <strong class="feedback-label">Feedback:</strong>
+      <p class="feedback-content assessment-feedback"></p>
+    </section>
 
     <details>
       <summary>View Questions & Answers</summary>
