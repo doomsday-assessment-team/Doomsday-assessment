@@ -35,6 +35,8 @@ class App {
     const token = queryParams.get("token");
     if (token) {
       sessionStorage.setItem("token", token);
+      window.history.replaceState(null, '', '/#/');
+      this.renderRoute('/');
       window.location.href = config.environment === 'prod' ? '/' : "/frontend/public/"; // edit this this is the base url in prod will be /
     } else {
       const path = window.location.hash.slice(1) || "/";

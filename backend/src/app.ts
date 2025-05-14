@@ -29,7 +29,7 @@ app.use(authenticateJWT);
 // our protected routes
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
-app.use('/api/users', userRoutes);
+app.use('/users', userRoutes);
 app.use('/quiz', quizRoutes);
 
 app.use(errorHandler);
