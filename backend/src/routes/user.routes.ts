@@ -10,7 +10,7 @@ router.get('/me', (req, res) => {
     res.json({ user });
   });
 
-router.post('/loginUser', async (req, res) => {
+router.post('/login', async (req, res) => {
   if(req.user) {
     const result = await loginUser (
       req.user?.given_name, 

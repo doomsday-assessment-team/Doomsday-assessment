@@ -10,5 +10,5 @@ export const DBPool = new Pool({
     database: environmentVariables.DB_NAME,
     user: environmentVariables.DB_USER,
     password: environmentVariables.DB_PASSWORD,
-    //ssl: { rejectUnauthorized: false } //will be used for RDS instance
+    ssl: { rejectUnauthorized: false } //used for RDS instance
 });
