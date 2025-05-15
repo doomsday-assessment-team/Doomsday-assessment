@@ -6,7 +6,7 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "start:dev": "npm run prepare-config:dev &&  npm run watch",
-    "start": "npm run start:dev" 
+    "start": "npm run start:dev"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

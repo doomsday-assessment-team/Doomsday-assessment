@@ -59,6 +59,10 @@ const sampleQuestions: Question[] = [ // Use your Question interface
 export class QuizQuestion extends HTMLElement {
     private _data: Question | null = null;
     private shadowRootInstance: ShadowRoot;
+    private timerInterval: number | null = null;
+    private timeLeft: number = 0;
+    private timerDisplayElement: HTMLElement | null = null;
+
     constructor() {
         super();
         this.shadowRootInstance = this.attachShadow({ mode: 'open' });
@@ -66,7 +70,74 @@ export class QuizQuestion extends HTMLElement {
 
     set data(questionData: Question) { // Expects your Question type
         this._data = questionData;
+        this.timeLeft = this._data?.difficulty_time || 0;
         this.render();
+    }
+
+    connectedCallback() {
+        // Start timer if data is already set and has a time limit
+        if (this._data && this._data.difficulty_time && this._data.difficulty_time > 0) {
+            this.startTimer();
+        }
+    }
+
+    private startTimer() {
+        this.stopTimer(); // Ensure no multiple timers
+        if (!this._data || !this._data.difficulty_time || this._data.difficulty_time <= 0) {
+            if (this.timerDisplayElement) this.timerDisplayElement.style.display = 'none';
+            return;
+        }
+
+        if (this.timerDisplayElement) this.timerDisplayElement.style.display = 'block';
+        this.timeLeft = this._data.difficulty_time;
+        this.updateTimerDisplay();
+
+        this.timerInterval = window.setInterval(() => {
+            this.timeLeft--;
+            this.updateTimerDisplay();
+            if (this.timeLeft <= 0) {
+                this.stopTimer();
+                this.handleTimeUp();
+            }
+        }, 1000); // Update every second
+    }
+
+    private stopTimer() {
+        if (this.timerInterval !== null) {
+            window.clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+    }
+
+    private updateTimerDisplay() {
+        if (this.timerDisplayElement) {
+            const minutes = Math.floor(this.timeLeft / 60);
+            const seconds = this.timeLeft % 60;
+            this.timerDisplayElement.textContent = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            if (this.timeLeft <= 10 && this.timeLeft > 0) { // Example: turn red for last 10 seconds
+                this.timerDisplayElement.style.color = 'var(--danger-color, red)';
+            } else {
+                this.timerDisplayElement.style.color = 'var(--text-color, inherit)'; // Reset color
+            }
+        }
+    }
+
+    private handleTimeUp() {
+        console.log(`QuizQuestion ${this._data?.question_id}: Time's up!`);
+        // Disable radio buttons to prevent further interaction
+        this.shadowRootInstance.querySelectorAll('input[type="radio"]').forEach(radio => {
+            (radio as HTMLInputElement).disabled = true;
+        });
+
+        // Dispatch an event to notify QuizView
+        this.dispatchEvent(new CustomEvent('timerexpired', {
+            bubbles: true,
+            composed: true,
+            detail: {
+                questionId: this._data?.question_id,
+                selectedOptionId: this.getSelectedAnswer().optionId // Include current selection
+            }
+        }));
     }
 
     get data(): Question | null {
@@ -75,13 +146,27 @@ export class QuizQuestion extends HTMLElement {
 
     private async render() {
         if (!this.shadowRootInstance || !this._data) return;
+        this.stopTimer();
 
-        const templateContent = await loadTemplate('./templates/quiz-question.component.html'); // Path relative to quiz-question.ts or utils
+        const templateContent = await loadTemplate('./templates/quiz-question.component.html');
         if (!templateContent) {
             this.shadowRootInstance.innerHTML = "<p>Error loading question template.</p>";
             return;
         }
         const clone = templateContent.cloneNode(true) as DocumentFragment;
+
+        this.timerDisplayElement = clone.querySelector('.timer-display'); // Assume you add this
+        if (!this.timerDisplayElement && this._data.difficulty_time) { // Create if not in template
+            const headerElement = clone.querySelector('header'); // Or some other appropriate place
+            if (headerElement) {
+                this.timerDisplayElement = document.createElement('p');
+                this.timerDisplayElement.classList.add('timer-display');
+                this.timerDisplayElement.style.textAlign = 'right';
+                this.timerDisplayElement.style.fontWeight = 'bold';
+                headerElement.appendChild(this.timerDisplayElement); // Append to header
+            }
+        }
+        this.updateTimerDisplay();
 
         const questionHeader = clone.querySelector('header h2');
         if (questionHeader) questionHeader.textContent = this._data.question_text;
@@ -105,6 +190,10 @@ export class QuizQuestion extends HTMLElement {
         this.shadowRootInstance.innerHTML = '';
         this.shadowRootInstance.appendChild(clone);
         this.addEventListeners();
+
+        if (this._data.difficulty_time && this._data.difficulty_time > 0) {
+            this.startTimer();
+        }
     }
 
     private addEventListeners() {
@@ -127,7 +216,7 @@ export class QuizQuestion extends HTMLElement {
             });
         });
     }
-    
+
     public getSelectedAnswer(): { optionId: number | null, points: number } {
         const checkedRadio = this.shadowRootInstance.querySelector('input[type="radio"]:checked') as HTMLInputElement | null;
         if (checkedRadio) {

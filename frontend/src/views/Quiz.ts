@@ -1,5 +1,6 @@
 import '../components/QuizQuestion.js';
 import { QuizQuestion } from '../components/QuizQuestion.js';
+import { apiService } from '../main.js';
 import { loadTemplate } from "../utils/load-template.js";
 
 interface Option {
@@ -25,48 +26,25 @@ export interface Answer {
     scenario_id: number;
 }
 
+export interface QuizAttemptPost {
+    scenario_id: number,
+    selected_options: QuizHistoryPost[]
+}
 
-async function fetchQuizQuestions(): Promise<Question[]> {
-    // Simulate API call
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve([
-                {
-                    question_id: 101,
-                    question_text: "Which of these is a primary color?",
-                    question_difficulty_id: 1, scenario_id: 1,
-                    options: [
-                        { option_id: 1, option_text: "Green", points: 0 },
-                        { option_id: 2, option_text: "Orange", points: 0 },
-                        { option_id: 3, option_text: "Blue", points: 10 },
-                        { option_id: 4, option_text: "Purple", points: 0 }
-                    ]
-                },
-                {
-                    question_id: 102,
-                    question_text: "What is the chemical symbol for water?",
-                    question_difficulty_id: 2, scenario_id: 1,
-                    options: [
-                        { option_id: 5, option_text: "O2", points: 0 },
-                        { option_id: 6, option_text: "H2O", points: 10 },
-                        { option_id: 7, option_text: "CO2", points: 0 },
-                        { option_id: 8, option_text: "NaCl", points: 0 }
-                    ]
-                },
-                {
-                    question_id: 103,
-                    question_text: "How many continents are there?",
-                    question_difficulty_id: 1, scenario_id: 2,
-                    options: [
-                        { option_id: 9, option_text: "Five", points: 0 },
-                        { option_id: 10, option_text: "Six", points: 0 },
-                        { option_id: 11, option_text: "Seven", points: 10 },
-                        { option_id: 12, option_text: "Eight", points: 0 }
-                    ]
-                }
-            ]);
-        }, 500);
-    });
+export interface QuizHistoryPost {
+    question_id: number,
+    option_id: number
+}
+
+export interface QuizAttemptResult {
+    history_id: number;
+    user_id: number;
+    timestamp: Date;
+    total_score: number;
+    scenario_id: number;
+    scenario_name?: string;
+    result_title: string;
+    result_feedback: string;
 }
 
 export class QuizView extends HTMLElement {
@@ -80,22 +58,68 @@ export class QuizView extends HTMLElement {
     private questionContainer: HTMLElement | null = null;
     private nextButton: HTMLButtonElement | null = null;
 
+    private scenarioId: number | null = null;
+    private difficultyId: number | null = null;
+
+    private isQuizSubmitted: boolean = false;
+
     constructor() {
         super();
         this.shadowRootInstance = this.attachShadow({ mode: 'open' });
+        // this.initializeQuiz();
+
+    }
+
+    connectedCallback() {
+        console.log("QuizView connected to DOM. Reading attributes.");
+        // Read attributes set by the router
+        const scenarioIdAttr = this.getAttribute('data-param-scenario');
+        const difficultyIdAttr = this.getAttribute('data-param-difficulty');
+
+        // Parse them (they will be strings)
+        this.scenarioId = scenarioIdAttr ? parseInt(scenarioIdAttr, 10) : null;
+        this.difficultyId = difficultyIdAttr ? parseInt(difficultyIdAttr, 10) : null;
+
+        if (isNaN(this.scenarioId as number)) this.scenarioId = null; // Handle if parseInt returns NaN
+        if (isNaN(this.difficultyId as number)) this.difficultyId = null;
+
+        console.log(`QuizView: Parsed scenarioId=${this.scenarioId}, difficultyId=${this.difficultyId}`);
+
+        // Now that we have the params, initialize the quiz
         this.initializeQuiz();
+    }
+
+    async fetchQuiz() {
+        try {
+            const question: Question[] = await apiService.get<Question[]>('/quiz/questions', {
+                "scenario_id": this.scenarioId?.toString() ?? '',
+                "question_difficulty_id": this.difficultyId?.toString() ?? '',
+                "limit": "10"
+            });
+
+            console.info(question);
+
+            this.allQuestions = question;
+            this.collectedAnswers = [];
+            if (this.allQuestions.length > 0) {
+                this.currentQuestionIndex = 0;
+                this.displayCurrentQuestion();
+            } else {
+                this.showNoQuestionsMessage();
+            }
+        } catch (error) {
+            // if (this.scenarioError) {
+            //     this.scenarioError.textContent = "Could not load scenarios. Please try again later.";
+            // }
+            // Optionally disable the select or show a more prominent error
+        }
     }
 
     private async initializeQuiz() {
         await this.loadViewTemplate();
-        this.allQuestions = await fetchQuizQuestions();
-        this.collectedAnswers = [];
-        if (this.allQuestions.length > 0) {
-            this.currentQuestionIndex = 0;
-            this.displayCurrentQuestion();
-        } else {
-            this.showNoQuestionsMessage();
-        }
+        this.fetchQuiz();
+        // this.allQuestions = await fetchQuizQuestions();
+
     }
 
     private async loadViewTemplate() {
@@ -110,16 +134,23 @@ export class QuizView extends HTMLElement {
             if (this.nextButton) {
                 this.nextButton.addEventListener('click', () => this.validateAndProceed());
             } else {
-                
+
             }
         } else {
-           
+
         }
+    }
+
+    private handleTimerExpired(event: CustomEvent) {
+        // const { questionId } = event.detail;
+        console.log(event);
+
+        this.proceedToNextOrSubmit(true); // Pass a flag indicating timer expiry
     }
 
     private displayCurrentQuestion() {
         if (!this.questionContainer) {
-            
+
             return;
         }
         if (this.currentQuestionIndex < 0 || this.currentQuestionIndex >= this.allQuestions.length) {
@@ -137,6 +168,9 @@ export class QuizView extends HTMLElement {
         this.currentQuestionElement.data = questionData;
 
         this.currentQuestionElement.addEventListener('answerselected', this.handleAnswerSelectedForValidation.bind(this) as EventListener);
+
+        this.currentQuestionElement.addEventListener('timerexpired', this.handleTimerExpired.bind(this) as EventListener);
+
 
         const existingQQ = this.questionContainer.querySelector('quiz-question');
         if (existingQQ) {
@@ -174,7 +208,7 @@ export class QuizView extends HTMLElement {
                 this.nextButton.setAttribute('aria-disabled', 'true');
             }
         } else if (this.nextButton) {
-            
+
             if (this.currentQuestionIndex >= this.allQuestions.length - 1 && this.allQuestions.length > 0) {
                 const selection = this.currentQuestionElement?.getSelectedAnswer();
                 this.nextButton.disabled = selection?.optionId === null;
@@ -190,9 +224,9 @@ export class QuizView extends HTMLElement {
         if (this.currentQuestionElement) {
             const selection = this.currentQuestionElement.getSelectedAnswer();
             if (selection.optionId === null && this.currentQuestionIndex < this.allQuestions.length) {
-                 
+
                 const validationMsgEl = this.shadowRootInstance.querySelector('.validation-message') as HTMLElement | null;
-                if(validationMsgEl) validationMsgEl.textContent = "Please select an answer.";
+                if (validationMsgEl) validationMsgEl.textContent = "Please select an answer.";
                 return;
             }
         }
@@ -201,7 +235,7 @@ export class QuizView extends HTMLElement {
 
     private handleAnswerSelected(event: CustomEvent) {
         const detail = event.detail;
-        
+
         const answerIndex = this.collectedAnswers.findIndex(ans => ans.question_id === detail.questionId);
         const newAnswer: Answer = {
             question_id: detail.questionId,
@@ -217,16 +251,17 @@ export class QuizView extends HTMLElement {
         }
     }
 
-    private proceedToNextOrSubmit() {
+    private proceedToNextOrSubmit(timerExpired: boolean = false) {
         if (this.currentQuestionElement) {
             const currentSelection = this.currentQuestionElement.getSelectedAnswer();
             const currentQuestionData = this.currentQuestionElement.data;
             if (currentQuestionData) {
                 const answerIndex = this.collectedAnswers.findIndex(ans => ans.question_id === currentQuestionData.question_id);
+
                 const currentAnswerRecord: Answer = {
                     question_id: currentQuestionData.question_id,
                     selected_option_id: currentSelection.optionId,
-                    points_awarded: currentSelection.points,
+                    points_awarded: timerExpired && currentSelection.optionId === null ? currentSelection.points : 0,
                     scenario_id: currentQuestionData.scenario_id
                 };
                 if (answerIndex > -1) {
@@ -236,6 +271,8 @@ export class QuizView extends HTMLElement {
                 } else if (currentSelection.optionId !== null) {
                     this.collectedAnswers.push(currentAnswerRecord);
                 }
+
+
             }
         }
 
@@ -248,13 +285,45 @@ export class QuizView extends HTMLElement {
         }
     }
 
-    private submitQuiz() {
+    private async submitQuiz() {
+        if (this.isQuizSubmitted) {
+            console.log("QuizView: Quiz already submitted, preventing duplicate submission.");
+            return; // Already submitted, do nothing
+        }
+        this.isQuizSubmitted = true;
+
         let totalPoints = 0;
         this.collectedAnswers.forEach(ans => totalPoints += ans.points_awarded);
+
+        const snn = this.collectedAnswers.map<QuizHistoryPost>(ans => ({
+            question_id: ans.question_id,
+            option_id: ans.selected_option_id ?? -1
+        }));
+
+        const attept: QuizAttemptPost = {
+            scenario_id: this.scenarioId ?? -1,
+            selected_options: snn
+        };
 
         if (this.questionContainer && this.nextButton) {
             this.questionContainer.innerHTML = `<h2>Quiz Complete!</h2><p>Your score: ${totalPoints} points.</p>`;
         }
+
+        try {
+            const result = await apiService.post<QuizAttemptResult>('/quiz/attempts', attept);
+            console.info(result);
+            if (this.questionContainer && this.nextButton) {
+                this.questionContainer.innerHTML = `<h2>Quiz Complete!</h2><p>Your score: ${totalPoints} points.</p><p>Feedback: ${result.result_feedback} points.</p>`;
+            }
+
+        } catch (error) {
+
+        }
+
+
+
+
+
     }
 
     private showNoQuestionsMessage() {
@@ -264,7 +333,7 @@ export class QuizView extends HTMLElement {
     }
 
     private showQuizCompletion() {
-       
+
     }
 
     async loadTemplate() {
@@ -272,7 +341,7 @@ export class QuizView extends HTMLElement {
         if (content) {
             this.shadowRoot?.appendChild(content);
         } else {
-            
+
         }
     }
 }

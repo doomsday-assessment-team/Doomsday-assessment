@@ -10,6 +10,9 @@ data "aws_secretsmanager_secret_version" "google_secret_version" {
   secret_id = data.aws_secretsmanager_secret.google_secrets.id
 }
 
+data "aws_secretsmanager_secret" "db_connection" {
+  name = "db-connection-string"
+}
 locals {
   google_secrets = jsondecode(data.aws_secretsmanager_secret_version.google_secret_version.secret_string)
 }

@@ -6,7 +6,7 @@ export const getAllDifficulties = async (_req: Request, res: Response, next: Nex
   try {
     const difficulties = await difficultyService.getAllDifficulties();
     const response: ApiResponse<typeof difficulties> = { data: difficulties };
-    res.json(response);
+    res.json(difficulties);
   } catch (error) {
     next(error);
   }
