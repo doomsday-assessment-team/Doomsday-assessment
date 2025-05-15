@@ -55,7 +55,6 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
           name  = "FRONTEND_URL"
           value = "http://${aws_s3_bucket_website_configuration.public_spa_bucket_website.website_endpoint}"
         },
-
         {
           name  = "NODE_ENV",
           value = "production"
@@ -78,6 +77,11 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
           name      = "JWT_SECRET"
           valueFrom = "${data.aws_secretsmanager_secret.jwt_secrets.arn}:jwt_secret::"
         },
+        {
+          name = "DB_CONNECTION_STRING",
+          valueFrom = "${data.aws_secretsmanager_secret.db_connection.arn}:db_connection::"
+        }
+
       ],
       logConfiguration = {
         logDriver = "awslogs"
