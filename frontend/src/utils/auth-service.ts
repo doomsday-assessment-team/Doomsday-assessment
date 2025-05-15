@@ -24,7 +24,7 @@ export class AuthService {
 
     constructor() {
         // Try to load token from storage on initialization
-        const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+        const storedToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
         if (storedToken) {
             this.setToken(storedToken);
         }
@@ -63,7 +63,7 @@ export class AuthService {
      */
     public setToken(token: string): void {
         this.token = token;
-        localStorage.setItem(TOKEN_STORAGE_KEY, token);
+        sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
         try {
             // this.decodedToken = jwtDecode<AppJwtPayload>(token);
         } catch (error) {
@@ -81,7 +81,7 @@ export class AuthService {
         if (this.token) {
             return this.token;
         }
-        const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+        const storedToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
         if (storedToken && storedToken !== "undefined" && storedToken !== "null") {
             this.setToken(storedToken); // Load it into memory if found in storage
             return this.token;
@@ -95,7 +95,7 @@ export class AuthService {
      */
     public getUser(): AppJwtPayload | null {
         if (!this.token && !this.decodedToken) {
-            const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+            const storedToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
             if (storedToken) this.setToken(storedToken); // Attempt to re-load if needed
         }
         return this.decodedToken;
@@ -107,7 +107,7 @@ export class AuthService {
      * @returns True if authenticated, false otherwise.
      */
     public isLoggedIn(): boolean {
-        const currentToken = this.getToken(); // Ensures token is loaded from localStorage if not in memory
+        const currentToken = this.getToken(); // Ensures token is loaded from sessionStorage if not in memory
         console.log("AuthService.isLoggedIn check: Current in-memory token:", this.token, "Decoded:", this.decodedToken);
 
         if (!this.token ) { // Check both the raw token string and the decoded object
@@ -135,7 +135,7 @@ export class AuthService {
     public logout(): void {
         this.token = null;
         this.decodedToken = null;
-        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        sessionStorage.removeItem(TOKEN_STORAGE_KEY);
         // Optionally, redirect to login page or home page
         // window.location.href = '/login';
         // Optionally, inform the backend about logout if needed
