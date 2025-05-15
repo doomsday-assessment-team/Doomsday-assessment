@@ -107,41 +107,42 @@
     .dropdown.open .dropdown-menu {
       display: block;
     }
-
   </style>
 
   <ul class="filter-list">
     <li class="filter-item">
-      <label for="date-filter">From:</label>
-      <input type="date" id="date-filter" class="filter-input">
+      <label for="from-date">From:</label>
+      <input type="date" id="from-date" class="filter-input" />
     </li>
 
     <li class="filter-item">
-      <label for="date-filter">To:</label>
-      <input type="date" id="date-filter" class="filter-input">
+      <label for="to-date">To:</label>
+      <input type="date" id="to-date" class="filter-input" />
     </li>
 
     <ul class="filters">
-  <li class="filter-item dropdown">
-    <button type="button" class="dropdown-toggle">Scenario ▾</button>
-    <ul class="dropdown-menu" id="scenarios-list">
-    </ul>
-  </li>
+      <li class="filter-item dropdown">
+        <button type="button" class="dropdown-toggle">Scenario ▾</button>
+        <ul class="dropdown-menu" id="scenarios-list"></ul>
+      </li>
 
-  <li class="filter-item dropdown">
-    <button type="button" class="dropdown-toggle">Difficulty ▾</button>
-    <ul class="dropdown-menu" id="difficulties-list">
+      <li class="filter-item dropdown">
+        <button type="button" class="dropdown-toggle">Difficulty ▾</button>
+        <ul class="dropdown-menu" id="difficulties-list"></ul>
+      </li>
     </ul>
-  </li>
-</ul>
-
 
     <li class="filter-item">
       <label for="user-filter">User:</label>
-      <input type="text" id="user-filter" class="filter-input" placeholder="Search by user">
+      <input
+        type="text"
+        id="user-filter"
+        class="filter-input"
+        placeholder="Search by user"
+      />
     </li>
 
-    <li class="filter-item" style="margin-left: auto;">
+    <li class="filter-item" style="margin-left: auto">
       <button class="clear-filters">Clear Filters</button>
     </li>
   </ul>
