@@ -1,10 +1,5 @@
 import { loadTemplate } from '../utils/load-template.js';
-
-interface Option {
-    option_id: number;
-    option_text: string;
-    points: number;
-}
+import { Option } from '../types/global-types.js';
 
 interface Question {
     question_id: number;

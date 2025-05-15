@@ -1,49 +1,49 @@
 <template id="assessment-filters">
   <style>
-    .filter-form {
+    ul.filter-list {
       display: flex;
-      gap: 1.5rem;
-      align-items: center;
-      margin-bottom: 2rem;
       flex-wrap: wrap;
-      background-color: #1e2126;
+      gap: 1.5rem;
+      align-items: flex-end;
       padding: 1rem;
-    
-      position: relative;
+      margin: 0 0 2rem 0;
+      background-color: #1e2126;
+      list-style: none;
     }
-    .filter-form::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      /* background-color: #ff0000; */
-    }
-    .filter-group {
+
+    li.filter-item {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
     }
+
     label {
       font-size: 0.875rem;
       color: #d4af37;
       white-space: nowrap;
     }
-    select, .filter-input {
+
+    .filter-input {
       padding: 0.5rem;
       background-color: #2a2e35;
       color: #ffffff;
-      border: 1px solid #3a3f48;
-      border-radius: 2px;
+      border: 0.05rem solid #3a3f48;
+      border-radius: 0.5rem;
       font-size: 0.875rem;
       min-width: 12rem;
       cursor: pointer;
     }
-    select:focus, .filter-input:focus {
+
+    .filter-input[type="date"],
+    .filter-input[type="text"] {
+      cursor: text;
+    }
+
+    .filter-input:focus {
       outline: none;
       border-color: #d4af37;
     }
+
     .clear-filters {
       padding: 0.5rem 1rem;
       background-color: #a02a2a;
@@ -53,66 +53,96 @@
       font-size: 0.875rem;
       cursor: pointer;
       text-decoration: none;
-      border-radius: 3px;
-      margin-left: auto;
+      border-radius: 0.5rem;
       align-self: flex-end;
     }
+
     .clear-filters:hover {
       background-color: #c13030;
     }
-    .assessment-item {
-      background-color: #1e2126;
-      border-left: 3px solid #d4af37;
-      padding: 1rem;
-      margin-top: 1rem;
-    }
-    .assessment-title {
-      color: #d4af37;
-      font-size: 1.25rem;
-      font-family: 'Arial', sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .difficulty-badge {
-      background-color: #e74c3c;
-      color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 1rem;
-      font-size: 0.75rem;
-      font-weight: bold;
-      text-transform: uppercase;
-      float: right;
-    }
-  </style>
-  <form class="filter-form">
-    <section class="filter-group">
-      <label for="date-filter">Date:</label>
-      <select id="date-filter" class="filter-input">
-        <option value="">All Dates</option>
-        <option value="april-2024">April 2024</option>
-        <option value="may-2024">May 2024</option>
-        <option value="june-2024">June 2024</option>
-      </select>
-    </section>
-    <section class="filter-group">
-      <label for="scenario-filter">Scenario:</label>
-      <select id="scenario-filter" class="filter-input">
-        <option value="">All Scenarios</option>
-        <option value="zombie">Zombie Apocalypse</option>
-        <option value="alien">Alien Invasion</option>
-        <option value="natural">Natural Disaster</option>
-      </select>
-    </section>
-    <section class="filter-group">
-      <label for="difficulty-filter">Difficulty:</label>
-      <select id="difficulty-filter" class="filter-input">
-        <option value="">All Difficulties</option>
-        <option value="easy">Easy</option>
-        <option value="medium">Medium</option>
-        <option value="hard">Hard</option>
-      </select>
-    </section>
-    <button type="reset" class="clear-filters">Clear Filters</button>
-  </form>
-</template>
 
+    .filters {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .filter-item {
+      position: relative;
+    }
+
+    .dropdown-toggle {
+      padding: 0.5em 1em;
+      cursor: pointer;
+      border-radius: 0.1rem;
+      border: solid 0.1rem var(--select-color);
+      background-color: #2a2e35;
+      color: #ffffff;
+      border: 0.05rem solid #3a3f48;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      background-color: #2a2e35;
+      top: 100%;
+      left: 0;
+      margin-top: 0.25em;
+      border-radius: 4px;
+      list-style: none;
+      border: solid 0.1rem var(--select-color);
+      padding: 0.5em;
+      min-width: 180px;
+      z-index: 1;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .dropdown-menu li {
+      margin-bottom: 0.3em;
+    }
+
+    .dropdown.open .dropdown-menu {
+      display: block;
+    }
+
+  </style>
+
+  <ul class="filter-list">
+    <li class="filter-item">
+      <label for="date-filter">From:</label>
+      <input type="date" id="date-filter" class="filter-input">
+    </li>
+
+    <li class="filter-item">
+      <label for="date-filter">To:</label>
+      <input type="date" id="date-filter" class="filter-input">
+    </li>
+
+    <ul class="filters">
+  <li class="filter-item dropdown">
+    <button type="button" class="dropdown-toggle">Scenario ▾</button>
+    <ul class="dropdown-menu" id="scenarios-list">
+    </ul>
+  </li>
+
+  <li class="filter-item dropdown">
+    <button type="button" class="dropdown-toggle">Difficulty ▾</button>
+    <ul class="dropdown-menu" id="difficulties-list">
+    </ul>
+  </li>
+</ul>
+
+
+    <li class="filter-item">
+      <label for="user-filter">User:</label>
+      <input type="text" id="user-filter" class="filter-input" placeholder="Search by user">
+    </li>
+
+    <li class="filter-item" style="margin-left: auto;">
+      <button class="clear-filters">Clear Filters</button>
+    </li>
+  </ul>
+</template>

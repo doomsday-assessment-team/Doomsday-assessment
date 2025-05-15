@@ -3,7 +3,6 @@ import * as db from '../repositories/admin.repository';
 import { authenticateJWT, checkAdminRole } from '../middlewares/auth.middleware';
 import { validateParamsWithMessage } from '../utils/parameter-validation';
 import { ErrorResponse } from '../types/error-response';
-import { getUserQuestionPoints } from '../repositories/admin.repository';
 import { getGroupedUserQuestionHistory } from '../services/admin.service';
 
 const router = express.Router();
@@ -394,41 +393,14 @@ router.delete('/difficulty-levels/:id', async (req: Request, res: Response, next
   }
 });
 
-router.get('/user-question-points', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get('/user-question-history', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const validationError = validateParamsWithMessage(req.query, [
       { name: 'scenario_id', type: 'number', required: false },
       { name: 'difficulty_id', type: 'number', required: false },
       { name: 'start_date', type: 'string', required: false },
-      { name: 'end_date', type: 'string', required: false }
-    ]);
-
-    if (validationError) {
-      const errorResponse: ErrorResponse = {
-        error: 'ValidationError',
-        message: validationError
-      };
-      res.status(400).json(errorResponse);
-    } else {
-      const scenarioId = req.query.scenario_id ? Number(req.query.scenario_id) : undefined;
-      const difficultyId = req.query.difficulty_id ? Number(req.query.difficulty_id) : undefined;
-      const startDate = req.query.start_date as string | undefined;
-      const endDate = req.query.end_date as string | undefined;
-
-      const results = await getUserQuestionPoints(scenarioId, difficultyId, startDate, endDate);
-      res.json(results);
-    }
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get('/user-question-history/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { id } = req.params;
-    
-    const validationError = validateParamsWithMessage({ id }, [
-      { name: 'id', type: 'number', required: true }
+      { name: 'end_date', type: 'string', required: false },
+      { name: 'user_name', type: 'string', required: false }
     ]);
     
     if (validationError) {
@@ -437,10 +409,17 @@ router.get('/user-question-history/:id', async (req: Request, res: Response, nex
         message: validationError
       };
       res.status(400).json(errorResponse);
-    } else {
-      const groupedHistory = await getGroupedUserQuestionHistory(Number(id));
-      res.json(groupedHistory);
     }
+    
+    const userName = req.query.user_name ? (req.query.user_name as string).replace(' ', '') : undefined;
+    console.log(userName);
+    const scenarioId = req.query.scenario_id ? Number(req.query.scenario_id) : undefined;
+    const difficultyId = req.query.difficulty_id ? Number(req.query.difficulty_id) : undefined;
+    const startDate = req.query.start_date as string | undefined;
+    const endDate = req.query.end_date as string | undefined;
+
+    const result = await getGroupedUserQuestionHistory(userName, scenarioId, difficultyId, startDate, endDate);
+    res.json(result);
   } catch (error) {
     next(error);
   }
