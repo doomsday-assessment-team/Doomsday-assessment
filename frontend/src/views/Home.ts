@@ -1,4 +1,5 @@
 import { apiService, App } from "../main.js";
+import { Difficulty, Scenario } from "../types/global-types.js";
 import { loadTemplate } from "../utils/load-template.js";
 
 export interface Question {
@@ -9,17 +10,6 @@ export interface Question {
     difficulty_time?: number;
     scenario_id: number;
 
-}
-export interface Scenario {
-    scenario_id: number;
-    scenario_name: string;
-    description?: string;
-}
-
-export interface Difficulty {
-    question_difficulty_id: number;
-    question_difficulty_name?: string;
-    time: number
 }
 
 export class HomeView extends HTMLElement {
@@ -79,12 +69,8 @@ export class HomeView extends HTMLElement {
         
             scenarios.map((scenario, index: number) => {
                 const optionElement = document.createElement('option');
-                optionElement.value = String(scenario.scenario_id); // Use scenario_id as the value
+                optionElement.value = String(scenario.scenario_id);
                 optionElement.textContent = scenario.scenario_name;
-                // You could add the description as a title attribute for tooltips
-                if (scenario.description) {
-                    optionElement.title = scenario.description;
-                }
                 this.scenarioSelect?.appendChild(optionElement);
             });
 

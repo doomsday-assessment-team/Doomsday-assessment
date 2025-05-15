@@ -23,16 +23,38 @@ export interface Option {
   points: number;
 }
 
-export interface GroupedQuestionData {
-  scenario_name: string;
-  history: {
-    history_id: number;
-    timestamp: string;
-    questions: Question[];
-  }[];
-}
-
 export interface Role {
   role_id: number;
   role_name: string;
+}
+
+interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+}
+
+interface AssessmentHistory {
+  history_id: number;
+  timestamp: string;
+  scenario_id: number;
+  scenario_name: string;
+  difficulty_id: number;
+  difficulty_name: string;
+  user_name: string;
+  user_id: number;
+  questions: {
+    question_id: number;
+    question_text: string;
+    selected_option_id: number;
+    options: {
+      option_id: number;
+      option_text: string;
+      points: number;
+    }[];
+  }[];
 }

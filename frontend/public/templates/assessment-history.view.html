@@ -1,55 +1,6 @@
 <template id="assessment-history-view">
   <style>
-    header {
-      padding: clamp(1.5rem, 5vh, 3rem) 0;
-      background-color: #1e2126; /* Matching the dark background from the image */
-      border-bottom: 0.10em solid #e74c3c; /* Red border from the image */
-      text-align: center;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 2.5rem; /* Larger font for "DOOMSDAY READINESS TEST" */
-      font-weight: bold;
-      color: #d4af37; /* Gold color from the image */
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    h2 {
-      margin: 0.5rem 0 0;
-      font-size: 1.5rem; /* Smaller font for "Assessment History" */
-      font-weight: normal;
-      color: #d4af37; /* Gold color */
-      text-transform: uppercase;
-    }
-
-    main {
-      padding: clamp(1.5rem, 3vh, 2.5rem) 0;
-    }
-
-    footer {
-      padding: 0.25rem 0;
-      background-color: #1e2126;
-      border-top: 0.15em solid #e74c3c;
-      text-align: center;
-      font-size: 0.875rem;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 75rem;
-      margin: 0 auto;
-      padding: 0 1rem; /* Using rem instead of var(--base-spacing) for simplicity */
-    }
   </style>
-
-  <header role="banner">
-    <section class="container">
-      <h1>DOOMSDAY READINESS TEST</h1>
-      <h2>Assessment History</h2>
-    </section>
-  </header>
 
   <main role="main">
     <section class="container">
@@ -57,10 +8,5 @@
       <assessment-list></assessment-list>
     </section>
   </main>
-
-  <footer role="contentinfo">
-    <section class="container">
-      <p>© 2025 Doomsday Readiness Test</p>
-    </section>
-  </footer>
+  
 </template>
