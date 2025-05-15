@@ -7,7 +7,7 @@ export const getAllScenarios = async (_req: Request, res: Response, next: NextFu
     const scenarios = await scenarioService.getAllScenarios();
     console.log('📦 Scenarios returned:', scenarios);
     const response: ApiResponse<typeof scenarios> = { data: scenarios };
-    res.json(response);
+    res.json(scenarios);
   } catch (error) {
     next(error);
   }

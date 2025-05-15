@@ -1,5 +1,10 @@
 <template id="login-view">
   <style>
+    .hidden {
+      display: none !important;
+      /* !important to override other display styles if necessary */
+    }
+
     h2 {
       font-size: clamp(1.25rem, 3vw, 2rem);
       margin-bottom: 0.5em;
@@ -21,11 +26,11 @@
     }
 
     main {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: var(--base-spacing);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--base-spacing);
     }
 
     main section {
@@ -110,13 +115,14 @@
       margin-top: 0.5rem;
     }
 
-    nav li + li::before {
+    nav li+li::before {
       content: "•";
       margin: 0 0.5em;
       color: var(--text-color-muted);
     }
 
     @media (prefers-reduced-motion: reduce) {
+
       *,
       *::before,
       *::after {
@@ -136,15 +142,11 @@
         Sign in to track your progress and compare with other survivors.
       </p>
 
-      <form action="http://localhost:3000/auth/google" method="get">
+      <form id="google-login-form" action="http://localhost:3000/auth/google" method="get">
         <fieldset>
           <legend class="visually-hidden">Login Options</legend>
           <button type="submit">
-            <img
-              src="https://developers.google.com/identity/images/g-logo.png"
-              alt=""
-              aria-hidden="true"
-            />
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="" aria-hidden="true" />
             Sign in with Google
           </button>
         </fieldset>

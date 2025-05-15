@@ -1,12 +1,10 @@
 import { Router } from 'express';
-//import { getAllUsers } from '../controllers/user.controller';
 import { loginUser } from '../repositories/login.user';
 
 const router = Router();
 
 router.get('/me', (req, res) => {
-  console.log((req as any).user); //TODO: REMOVE
-    const user = (req as any).user;
+    const user = req.user;
     res.json({ user });
   });
 

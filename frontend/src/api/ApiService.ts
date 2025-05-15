@@ -1,4 +1,5 @@
 import { App } from "../main.js";
+import { AuthService } from "../utils/auth-service.js";
 
 export class ApiError extends Error {
     public readonly statusCode: number;
@@ -75,6 +76,7 @@ export class ApiService {
             body: JSON.stringify(data),
             headers: {
                 'Content-Type': 'application/json',
+                
                 ...(customOptions.headers || {}),
             },
         });
@@ -114,6 +116,10 @@ export class ApiService {
     }
 
     private async _request<T>(url: string, options: RequestInit): Promise<T> {
+        const authService = new AuthService();
+        const token = authService.getToken();
+        this.setAuthToken(token);
+
         const mergedHeaders = new Headers({
             ...this.defaultHeaders,
             ...(options.headers || {})
@@ -129,11 +135,13 @@ export class ApiService {
         try {
             response = await fetch(url, fetchOptions);
         } catch (error) {
+            console.error(error);
             throw new Error(`Network error: ${error instanceof Error ? error.message : String(error)}`);
         }
 
 
         if (response.status === 401 || response.status === 403) {
+            authService.logout();
             App.navigate('/login'); 
             throw new ApiError("Unauthorized/Forbidden", response.status, response.statusText);
         }
@@ -148,6 +156,7 @@ export class ApiService {
                     errorBody = await response.text();
                 }
             } catch (parseError) {
+                console.error(parseError);
             }
 
             throw new ApiError(
@@ -166,6 +175,7 @@ export class ApiService {
             const data: T = await response.json();
             return data;
         } catch (parseError) {
+            console.error(parseError);
             throw new Error(`Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
         }
     }
@@ -178,6 +188,7 @@ export class ApiService {
         const currentHeaders: Record<string, string> = { ...this.defaultHeaders } as Record<string, string>;
         if (token) {
             currentHeaders['Authorization'] = `Bearer ${token}`;
+            console.info("Authorization header set"); 
         } else {
             delete currentHeaders['Authorization'];
         }

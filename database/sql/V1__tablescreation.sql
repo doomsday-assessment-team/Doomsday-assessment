@@ -7,7 +7,6 @@ CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     surname VARCHAR(50),
-    email VARCHAR(100) UNIQUE NOT NULL,
     google_subject VARCHAR(100) UNIQUE NOT NULL
 );
 

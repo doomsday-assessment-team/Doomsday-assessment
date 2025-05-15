@@ -1,0 +1,224 @@
+<template id="quiz-view">
+    <style>
+        h1,
+        h2,
+        h3 {
+            font-family: "Orbitron", sans-serif;
+            color: var(--text-color);
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: clamp(1.75rem, 5vw, 3rem);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            font-size: clamp(1.25rem, 3vw, 2rem);
+            margin-bottom: 1.5em;
+        }
+
+        /* Layout Components */
+        header {
+            padding: clamp(1.5rem, 5vh, 3rem) 1rem;
+            background-color: var(--theme-color-light);
+            border-bottom: 0.15em solid var(--accent-color);
+            text-align: center;
+        }
+
+        header nav {
+            margin-top: 1em;
+        }
+
+        header ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            max-width: 40rem;
+            margin: 0 auto;
+        }
+
+        header li {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+        }
+
+        output,
+        time {
+            font-weight: bold;
+            color: var(--button-color);
+        }
+
+        main {
+            padding: clamp(1.5rem, 3vh, 2.5rem) 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        footer {
+            padding: 1rem;
+            background-color: var(--theme-color-light);
+            border-top: 0.15em solid var(--accent-color);
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        /* Quiz Article */
+        main article {
+            background-color: var(--theme-color-light);
+            border-radius: var(--card-border-radius);
+            padding: 2rem;
+            max-width: 40rem;
+            width: 100%;
+            box-shadow: 0 0.25em 1em rgba(0, 0, 0, 0.2);
+        }
+
+        main article header {
+            text-align: center;
+        }
+
+        /* Form Elements */
+        form {
+            display: grid;
+            gap: 2rem;
+        }
+
+        fieldset {
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        form ul {
+            list-style: none;
+            display: grid;
+            gap: 1rem;
+        }
+
+        form li {
+            background-color: var(--option-bg);
+            border-radius: var(--border-radius);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        form li:hover {
+            transform: translateY(-0.15em);
+            box-shadow: 0 0.15em 0.5em rgba(0, 0, 0, 0.3);
+        }
+
+        label {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1em;
+            padding: 1em;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        input[type="radio"] {
+            width: 1.2em;
+            height: 1.2em;
+            accent-color: var(--button-color);
+        }
+
+        form footer {
+            display: flex;
+            justify-content: center;
+        }
+
+        button {
+            padding: 0.75em 2em;
+            background-color: var(--button-color);
+            color: var(--theme-color);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.125rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-0.15em);
+            box-shadow: 0 0.15em 0.5em rgba(0, 0, 0, 0.3);
+        }
+
+        button:focus {
+            outline: var(--focus-outline);
+        }
+
+        /* Focus Styles for Accessibility */
+        a:focus,
+        button:focus,
+        input:focus {
+            outline: var(--focus-outline);
+            outline-offset: 0.15em;
+        }
+
+        button:disabled,
+        button[aria-disabled="true"] {
+            background-color:  #cccccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms;
+                animation-iteration-count: 1;
+                transition-duration: 0.01ms;
+                scroll-behavior: auto;
+            }
+        }
+    </style>
+    
+    <main>
+        <article>
+            <!-- <h3 id="quiz-title">Loading Quiz...</h1> -->
+            <form>
+                <quiz-question></quiz-question>
+                <section class="quiz-question-slot">
+
+                </section>
+                <footer>
+                    <button type="button" id="next-question-btn">Next Question</button>
+
+                  
+                </footer>
+
+                <!-- <div id="quiz-completion-area" class="hidden">
+                    <div class="quiz-results-container">
+                        <h2 id="quiz-result-title">Quiz Complete!</h2>
+                        <p id="quiz-result-score">Your score: 0 points.</p>
+                    </div>
+                    <nav class="quiz-completion-actions">
+                        <button type="button" id="restart-quiz-btn" class="quiz-action-button">Try Again?</button>
+                        <button type="button" id="go-home-btn" class="quiz-action-button">Go to Home</button>
+                    </nav>
+                </div> -->
+            </form>
+        </article>
+    </main>
+</template>
