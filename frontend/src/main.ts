@@ -8,21 +8,25 @@ import { ApiService } from "./api/ApiService.js";
 import config from "./config.js";
 import { AuthGuard } from "./utils/guard.js";
 import { RouteGuard, Routes } from "./types/route-guard.js";
+import { AuthService } from "./utils/auth-service.js";
 
 const apiService = new ApiService(config.apiBaseUrl);
 
 class App {
   static routes: Routes = {
-    "/": { componentTag: "home-view" },
+    "/": { componentTag: "home-view", canActivate: [AuthGuard]},
     "/login": { componentTag: "login-view" },
     "/history": {
       componentTag: "assessment-history",
       canActivate: [AuthGuard]
     },
-    '/questions-and-options': { componentTag: 'questions-and-options' },
+    '/questions-and-options': { 
+      componentTag: 'questions-and-options',  
+      canActivate: [AuthGuard]
+    },
     '/quiz': {
       componentTag: 'quiz-view',
-      canActivate: [AuthGuard]
+     canActivate: [AuthGuard]
     },
     '/not-found': { componentTag: 'not-found-view' }
   };
@@ -90,6 +94,8 @@ class App {
         return;
       }
     }
+
+    const authService = new AuthService();
 
     const fullHash = window.location.hash.slice(1) || '/';
 
