@@ -35,22 +35,21 @@ router.get('/questions', async (req: Request, res: Response, next: NextFunction)
 
 router.post('/attempts', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const attemptInput = req.body as QuizAttemptInput; // Basic type assertion
+        const attemptInput = req.body as QuizAttemptInput;
         const user = req.user;
 
-        // if (!user || typeof user.user_id !== 'number') {
-        //     res.status(401).json({ error: 'User not authenticated or user_id missing from token' });
-        //     return;
-        // }
+        if (!user || typeof user.user_id !== 'number') {
+            res.status(401).json({ error: 'User not authenticated or user_id missing from token' });
+            return;
+        }
 
         if (isNaN(attemptInput.scenario_id)) {
             res.status(400).json({ error: 'scenario_id must be a number' });
             return;
         }
 
-
         const result = await QuizService.submitAttempt({
-            userId: 1,
+            userId: user.user_id,
             attemptInput,
         });
         res.status(201).json(result);
