@@ -13,7 +13,6 @@ router.post('/login', async (req, res) => {
     const result = await loginUser (
       req.user?.given_name, 
       req.user?.family_name,
-      req.user?.email,
       req.user?.google_subject
     );
     res.status(200).send(result);
