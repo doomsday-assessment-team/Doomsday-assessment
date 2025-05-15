@@ -7,7 +7,6 @@ import { getGroupedUserQuestionHistory } from '../services/admin.service';
 
 const router = express.Router();
 
-// router.use(authenticateJWT);
 // router.use(checkAdminRole);
 
 router.post('/scenarios', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -396,12 +395,15 @@ router.delete('/difficulty-levels/:id', async (req: Request, res: Response, next
 router.get('/user-question-history', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const validationError = validateParamsWithMessage(req.query, [
-      { name: 'scenario_id', type: 'number', required: false },
-      { name: 'difficulty_id', type: 'number', required: false },
+      { name: 'scenarios', type: 'string', required: false },
+      { name: 'difficulties', type: 'string', required: false },
       { name: 'start_date', type: 'string', required: false },
       { name: 'end_date', type: 'string', required: false },
       { name: 'user_name', type: 'string', required: false }
     ]);
+
+    console.log(req.query)
+
     
     if (validationError) {
       const errorResponse: ErrorResponse = {
@@ -409,17 +411,23 @@ router.get('/user-question-history', async (req: Request, res: Response, next: N
         message: validationError
       };
       res.status(400).json(errorResponse);
+    } else {
+      if (req.query.scenarios && !(/^(\d+,)*\d+$/.test(req.query.scenarios as string))) {
+        res.status(400).json({
+          error: 'ValidationError',
+          message: "scenarios must be a comma-separated list of numbers"
+        });
+      } else {
+        const userName = req.query.user_name ? (req.query.user_name as string).replace(' ', '') : undefined;
+        const scenarios = req.query.scenarios as string | undefined;
+        const difficulties = req.query.difficulties as string | undefined;
+        const startDate = req.query.start_date as string | undefined;
+        const endDate = req.query.end_date as string | undefined;
+        const result = await getGroupedUserQuestionHistory(userName, scenarios, difficulties, startDate, endDate);
+        res.json(result);
+      }
     }
-    
-    const userName = req.query.user_name ? (req.query.user_name as string).replace(' ', '') : undefined;
-    console.log(userName);
-    const scenarioId = req.query.scenario_id ? Number(req.query.scenario_id) : undefined;
-    const difficultyId = req.query.difficulty_id ? Number(req.query.difficulty_id) : undefined;
-    const startDate = req.query.start_date as string | undefined;
-    const endDate = req.query.end_date as string | undefined;
-
-    const result = await getGroupedUserQuestionHistory(userName, scenarioId, difficultyId, startDate, endDate);
-    res.json(result);
+  
   } catch (error) {
     next(error);
   }

@@ -237,8 +237,8 @@ export const deleteQuestion = async (questionId: number): Promise<void> => {
 
 export const getUserQuestionHistory = async (
   userName?: string,
-  scenarioId?: number,
-  difficultyId?: number,
+  scenarios?: string,
+  difficulties?: string,
   startDate?: string,
   endDate?: string,
   offset: number = 0,
@@ -257,24 +257,26 @@ export const getUserQuestionHistory = async (
     queryParams.push(userName);
   }
 
-  if (scenarioId !== undefined) {
-    whereConditions.push(`q.scenario_id = $${paramCounter++}`);
-    queryParams.push(scenarioId);
+  if (scenarios !== undefined) {
+    whereConditions.push(`q.scenario_id = ANY(string_to_array($${paramCounter++}, ',')::int[])`);
+    queryParams.push(scenarios);
   }
 
-  if (difficultyId !== undefined) {
-    whereConditions.push(`q.question_difficulty_id = $${paramCounter++}`);
-    queryParams.push(difficultyId);
+  if (difficulties !== undefined) {
+    whereConditions.push(`q.question_difficulty_id = ANY(string_to_array($${paramCounter++}, ',')::int[])`);
+    queryParams.push(difficulties);
   }
 
   if (startDate) {
     whereConditions.push(`h.timestamp >= $${paramCounter++}`);
-    queryParams.push(startDate);
+    queryParams.push(new Date(startDate));
   }
 
   if (endDate) {
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
     whereConditions.push(`h.timestamp <= $${paramCounter++}`);
-    queryParams.push(endDate);
+    queryParams.push(end);
   }
 
   const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
