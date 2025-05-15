@@ -20,43 +20,62 @@ export class UserProfileView extends HTMLElement {
 
   async loadUserProfile() {
     try {
-      const user = await apiService.get("/users/me"); 
-      this.renderUserProfile(user);
+      const response = await apiService.get("/users/me") as UserResponse
+      this.renderProfile(response);
     } catch (error) {
       console.error("Failed to fetch user profile", error);
-      this.shadowRoot?.querySelector("section")?.insertAdjacentHTML(
-        "beforeend",
-        `<p>Unable to load profile.</p>`
-      );
+
+      const fallbackMsg = document.createElement("p");
+      fallbackMsg.textContent = "Unable to load profile.";
+
+      this.shadowRoot?.querySelector("section")?.appendChild(fallbackMsg);
     }
   }
 
-  renderUserProfile(user: any) {
-    const section = this.shadowRoot?.querySelector("section");
-    if (!section) return;
+  renderProfile(response: { user: any }) {
+    const user = response.user;
+    const shadow = this.shadowRoot!;
 
-    section.innerHTML += `
-      <article>
-        <header>
-          <h2>${user.name} ${user.surname}</h2>
-          <p>${user.email}</p>
-        </header>
-        <dl>
-          <dt>User ID</dt>
-          <dd>${user.user_id}</dd>
+    shadow.getElementById("full-name")!.textContent = `${user.given_name} ${user.family_name}`;
+    shadow.getElementById("email")!.textContent = user.email;
 
-          <dt>Google Subject</dt>
-          <dd>${user.google_subject}</dd>
+    // Populate roles
+    const rolesList = shadow.getElementById("roles")!;
+    rolesList.textContent = ""; // Clear any existing (e.g., "Loading...")
 
-          <dt>Roles</dt>
-          <dd>
-            <ul>
-              ${user.roles?.map((role: string) => `<li>${role}</li>`).join("")}
-            </ul>
-          </dd>
-        </dl>
-      </article>
-    `;
+    if (Array.isArray(user.roles) && user.roles.length > 0) {
+      user.roles.forEach((role: string) => {
+        const li = document.createElement("li");
+        li.textContent = role;
+        rolesList.appendChild(li);
+      });
+    } else {
+      const li = document.createElement("li");
+      li.textContent = "None";
+      rolesList.appendChild(li);
+    }
+
+    // Create extra details section with <dl>
+    const extraSection = document.createElement("section");
+    const dl = document.createElement("dl");
+
+    const dtUserId = document.createElement("dt");
+    dtUserId.textContent = "User ID";
+    const ddUserId = document.createElement("dd");
+    ddUserId.textContent = user.email;
+
+    const dtGoogleSub = document.createElement("dt");
+    dtGoogleSub.textContent = "Google Subject";
+    const ddGoogleSub = document.createElement("dd");
+    ddGoogleSub.textContent = user.google_subject;
+
+    dl.appendChild(dtUserId);
+    dl.appendChild(ddUserId);
+    dl.appendChild(dtGoogleSub);
+    dl.appendChild(ddGoogleSub);
+
+    extraSection.appendChild(dl);
+    shadow.querySelector("section")?.appendChild(extraSection);
   }
 }
 
