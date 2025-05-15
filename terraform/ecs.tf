@@ -35,6 +35,10 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
           value = "5432"
         },
         {
+          name  = "PORT"
+          value = "3000"
+        },
+        {
           name  = "DB_NAME"
           value = aws_db_instance.doom_db_instance.db_name
         },
@@ -45,7 +49,7 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
 
         {
           name  = "GOOGLE_REDIRECT_URI"
-          value = "http://${aws_s3_bucket_website_configuration.public_spa_bucket_website.website_endpoint}/  "
+          value = "http://${aws_lb.doomsday_app_alb.dns_name}/auth/google/callback"
         },
         {
           name  = "FRONTEND_URL"
