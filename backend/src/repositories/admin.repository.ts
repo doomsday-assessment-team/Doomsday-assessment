@@ -1,14 +1,18 @@
 import db from '../config/db';
+import { DBPool } from '../db/pool';
 import {
   Scenario,
   QuestionDifficulty,
   Question,
-  Option
+  Option,
+  Role
 } from '../types/global-types';
+import { RawUserQuestionRow } from '../types/raw-user-question-row';
+import { UserQuestionPoints } from '../types/user-uestion-points';
 
 export const addScenario = async (scenarioName: string): Promise<Scenario> => {
   return db.one<Scenario>(
-    `INSERT INTO scenario(scenario_name) 
+    `INSERT INTO scenarios(scenario_name) 
      VALUES($1) 
      RETURNING *`,
     [scenarioName]
@@ -20,7 +24,7 @@ export const updateScenario = async (
   newScenarioName: string
 ): Promise<Scenario> => {
   return db.one<Scenario>(
-    `UPDATE scenario 
+    `UPDATE scenarios 
      SET scenario_name = $1 
      WHERE scenario_id = $2 
      RETURNING *`,
@@ -30,7 +34,7 @@ export const updateScenario = async (
 
 export const deleteScenario = async (scenarioId: number): Promise<void> => {
   await db.none(
-    'DELETE FROM scenario WHERE scenario_id = $1',
+    'DELETE FROM scenarios WHERE scenario_id = $1',
     [scenarioId]
   );
 };
@@ -41,7 +45,7 @@ export const addOption = async (
   points: number
 ): Promise<Option> => {
   return db.one<Option>(
-    `INSERT INTO option(question_id, option_text, points) 
+    `INSERT INTO options(question_id, option_text, points) 
      VALUES($1, $2, $3) 
      RETURNING *`,
     [questionId, optionText, points]
@@ -51,7 +55,8 @@ export const addOption = async (
 export const updateOption = async (
   optionId: number,
   optionText?: string,
-  points?: number
+  points?: number,
+  questionId?: number
 ): Promise<Option> => {
   const updateParts = [];
   const queryParams = [];
@@ -72,13 +77,21 @@ export const updateOption = async (
   } else {
     // Skip updating points as it wasn't provided
   }
+
+  if (questionId) {
+    updateParts.push(`question_id = $${paramIndex}`);
+    queryParams.push(questionId);
+    paramIndex++;
+  } else {
+    // Skip updating questionId as it wasn't provided
+  }
   
   if (updateParts.length === 0) {
     throw new Error('No fields to update. Please provide at least one of option_text or points.');
   } else {
     queryParams.push(optionId);
     const query = `
-      UPDATE option 
+      UPDATE options 
       SET ${updateParts.join(', ')} 
       WHERE option_id = $${paramIndex} 
       RETURNING *
@@ -90,7 +103,7 @@ export const updateOption = async (
 
 export const deleteOption = async (optionId: number): Promise<void> => {
   await db.none(
-    'DELETE FROM option WHERE option_id = $1',
+    'DELETE FROM options WHERE option_id = $1',
     [optionId]
   );
 };
@@ -100,7 +113,7 @@ export const addDifficultyLevel = async (
   timeLimit: number
 ): Promise<QuestionDifficulty> => {
   return db.one<QuestionDifficulty>(
-    `INSERT INTO question_difficulty(question_difficulty_name, time) 
+    `INSERT INTO question_difficulties(question_difficulty_name, time) 
      VALUES($1, $2) 
      RETURNING *`,
     [difficultyName, timeLimit]
@@ -137,7 +150,7 @@ export const updateDifficultyLevel = async (
   } else {
     queryParams.push(difficultyId);
     const query = `
-      UPDATE question_difficulty 
+      UPDATE question_difficulties 
       SET ${updateParts.join(', ')} 
       WHERE question_difficulty_id = $${paramIndex} 
       RETURNING *
@@ -149,7 +162,7 @@ export const updateDifficultyLevel = async (
 
 export const deleteDifficultyLevel = async (difficultyId: number): Promise<void> => {
   await db.none(
-    'DELETE FROM question_difficulty WHERE question_difficulty_id = $1',
+    'DELETE FROM question_difficulties WHERE question_difficulty_id = $1',
     [difficultyId]
   );
 };
@@ -160,7 +173,7 @@ export const addQuestion = async (
   questionText: string
 ): Promise<Question> => {
   return db.one<Question>(
-    `INSERT INTO question(question_difficulty_id, scenario_id, question_text) 
+    `INSERT INTO questions(question_difficulty_id, scenario_id, question_text) 
      VALUES($1, $2, $3) 
      RETURNING *`,
     [difficultyId, scenarioId, questionText]
@@ -170,6 +183,7 @@ export const addQuestion = async (
 export const updateQuestion = async (
   questionId: number,
   difficultyId?: number,
+  scenarioId?: number,
   questionText?: string
 ): Promise<Question> => {
   const updateParts = [];
@@ -177,7 +191,6 @@ export const updateQuestion = async (
   let paramIndex = 1;
 
   if (difficultyId) {
-    // Add question_difficulty_id field to the update query
     updateParts.push(`question_difficulty_id = $${paramIndex}`);
     queryParams.push(difficultyId);
     paramIndex++;
@@ -189,8 +202,16 @@ export const updateQuestion = async (
     updateParts.push(`question_text = $${paramIndex}`);
     queryParams.push(questionText);
     paramIndex++;
-  } else {
+  }  else {
     // Skip updating question text as it wasn't provided
+  }
+
+  if (scenarioId) {
+    updateParts.push(`scenario_id = $${paramIndex}`);
+    queryParams.push(scenarioId);
+    paramIndex++;
+  }  else {
+    // Skip updating scenario as it wasn't provided
   }
   
   if (updateParts.length === 0) {
@@ -198,7 +219,7 @@ export const updateQuestion = async (
   } else {
     queryParams.push(questionId);
     const query = `
-      UPDATE question 
+      UPDATE questions 
       SET ${updateParts.join(', ')} 
       WHERE question_id = $${paramIndex} 
       RETURNING *
@@ -210,7 +231,107 @@ export const updateQuestion = async (
 
 export const deleteQuestion = async (questionId: number): Promise<void> => {
   await db.none(
-    'DELETE FROM question WHERE question_id = $1',
+    'DELETE FROM questions WHERE question_id = $1',
     [questionId]
   );
 };
+
+export const getUserQuestionPoints = async (
+  scenarioId?: number,
+  difficultyId?: number,
+  startDate?: string,
+  endDate?: string
+): Promise<UserQuestionPoints[]> => {
+  return db.any<UserQuestionPoints>(
+    `
+    SELECT *
+    FROM user_question_points
+    WHERE ($1::int IS NULL OR scenario_id = $1)
+      AND ($2::int IS NULL OR question_difficulty_id = $2)
+      AND (
+        ($3 IS NULL AND $4 IS NULL)
+        OR (
+          timestamp BETWEEN
+            COALESCE($3::timestamp, now()) AND
+            COALESCE($4::timestamp, now())
+        )
+      )
+    `,
+    [scenarioId ?? null, difficultyId ?? null, startDate ?? null, endDate ?? null]
+  );
+};
+
+export const getUserQuestionHistoryFromDb = async (userId: number): Promise<RawUserQuestionRow[]> => {
+  return db.manyOrNone<RawUserQuestionRow>(
+    `
+    SELECT
+      u.user_id,
+      u.name,
+      u.surname,
+      u.email,
+      s.scenario_name,
+      qd.question_difficulty_id,
+      q.question_id,
+      q.scenario_id,
+      q.question_text,
+      o.option_id,
+      o.option_text,
+      o.points,
+      h.timestamp,
+      h.history_id
+    FROM history_questions hq
+    JOIN history h ON hq.history_id = h.history_id
+    JOIN users u ON h.user_id = u.user_id
+    JOIN options o ON hq.option_id = o.option_id
+    JOIN questions q ON hq.question_id = q.question_id
+    JOIN question_difficulties qd ON q.question_difficulty_id = qd.question_difficulty_id
+    JOIN scenarios s ON q.scenario_id = s.scenario_id
+    WHERE u.user_id = $1
+    ORDER BY s.scenario_name, q.question_id, o.option_id
+    `,
+    [userId]
+  );
+};
+
+export const addUserRole = async (userId: number, roleId: number): Promise<{role_id: number, user_id: number}> => {
+  return db.one(
+    `INSERT INTO user_roles (user_id, role_id) 
+     VALUES ($1, $2) 
+     RETURNING user_role_id`,
+    [userId, roleId]
+  );
+};
+
+export const deleteUserRole = async (userId: number, roleId: number) => {
+  return db.none(
+    `DELETE FROM user_roles 
+     WHERE user_id = $1 AND role_id = $2`,
+    [userId, roleId]
+  );
+};
+
+export const getAllRoles = async (): Promise<Role[]> => {
+  return db.any(
+    `SELECT role_id, role_name FROM roles`
+  );
+};
+
+export async function getAllUsersWithRoles() {
+  const usersRoleResult = await DBPool.query ( 
+    `
+    SELECT 
+      u.user_id,
+      u.name,
+      u.surname,
+      u.email,
+      u.google_subject,
+      ARRAY_AGG(r.role_name) AS roles
+    FROM users u
+    JOIN user_roles ur ON u.user_id = ur.user_id
+    JOIN roles r ON ur.role_id = r.role_id
+    GROUP BY u.user_id
+    `
+  );
+
+  return usersRoleResult.rows;
+}

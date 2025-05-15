@@ -1,163 +1,358 @@
 <template id="home-view">
     <style>
-        header {
-            text-align: center;
-            padding: 1rem 0.5rem 0;
-            margin-bottom: 1rem;
-        }
-
-        main {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0.5rem;
-            flex: 1;
-        }
-
-        h1 {
-            font-size: clamp(1.5rem, 6vw, 2.5rem);
-            margin: 0 0 0.25rem;
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: "Orbitron", sans-serif;
+            color: var(--text-color);
             line-height: 1.2;
         }
 
-        .welcome-message {
-            font-size: clamp(1rem, 4vw, 1.2rem);
-            margin: 0;
-        }
-
-        .test-selection {
-            width: 100%;
-            max-width: 30rem;
-            display: flex;
-            flex-direction: column;
-            gap: var(--section-gap);
-            padding: 0 0.5rem;
-        }
-
-        section {
-            width: 100%;
+        h1 {
+            font-size: clamp(1.75rem, 5vw, 3rem);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
 
         h2 {
-            font-size: clamp(1.1rem, 4.5vw, 1.5rem);
-            margin-bottom: 0.5rem;
+            font-size: clamp(1.25rem, 3vw, 2rem);
+            margin-bottom: 0.5em;
+        }
+
+        h3 {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            margin-bottom: 0.75em;
+        }
+        
+
+        main {
+            padding: clamp(1.5rem, 3vh, 2.5rem) 1rem;
+            max-width: 75rem;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        body>footer {
+            padding: 1rem;
+            background-color: var(--theme-color-light);
+            border-top: 0.15em solid var(--accent-color);
             text-align: center;
+            font-size: 0.875rem;
+        }
+
+        /* Card */
+        .test-card {
+            background-color: var(--theme-color-light);
+            border-radius: var(--card-border-radius);
+            overflow: hidden;
+            box-shadow: 0 0.25em 1em rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: 0.1em solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        /* Form */
+        .test-selection {
+            padding: 1.5rem;
+        }
+
+        .form-section {
+            margin-bottom: 1.5rem;
+            border: none;
+            padding: 0;
+        }
+
+        .form-section legend {
+            text-align: center;
+            font-family: "Orbitron", sans-serif;
+            color: var(--text-color);
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            margin-bottom: 0.75em;
+            width: 100%;
+        }
+
+        /* Select Styling */
+        .select-container {
+            position: relative;
+            width: 100%;
+            display: inline-flex;
+        }
+
+        .select-container::after {
+            content: "";
+            position: absolute;
+            right: 1em;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0.4em 0.4em 0 0.4em;
+            border-color: var(--text-color) transparent transparent transparent;
+            pointer-events: none;
         }
 
         select {
             width: 100%;
-            padding: 0.8rem;
-            font-size: clamp(0.9rem, 3.5vw, 1rem);
-            background-color: var(--select-color);
+            padding: 0.75em 1em;
+            background-color: var(--theme-color);
             color: var(--text-color);
-            border: none;
+            border: 0.1em solid var(--text-color-muted);
             border-radius: var(--border-radius);
-            cursor: pointer;
+            font-size: 1rem;
             appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d4a017'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 0.7rem center;
-            background-size: 1.2rem;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         select:focus {
+            outline: none;
+            border-color: var(--text-color);
+            box-shadow: 0 0 0 0.15em rgba(240, 192, 64, 0.3);
+        }
+
+        /* Difficulty Options */
+        .difficulty-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+            gap: 1rem;
+            list-style: none;
+        }
+
+        .difficulty-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .difficulty-option input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .difficulty-label {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.75em 1em;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 0.1em solid transparent;
+            font-style: normal;
+        }
+
+        .difficulty-option input:checked+.difficulty-label {
+            transform: translateY(-0.15em);
+            box-shadow: 0 0.15em 0.5em rgba(0, 0, 0, 0.3);
+        }
+
+        .difficulty-option input:focus+.difficulty-label {
             outline: var(--focus-outline);
         }
 
+        .easy {
+            background-color: var(--success-color);
+            color: #fff;
+        }
+
+        .medium {
+            background-color: var(--warning-color);
+            color: #fff;
+        }
+
+        .hard {
+            background-color: var(--danger-color);
+            color: #fff;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
         .start-button {
-            font-size: clamp(1rem, 4vw, 1.2rem);
-            padding: 0.8rem 1.5rem;
+            padding: 0.75em 2em;
             background-color: var(--button-color);
             color: var(--theme-color);
             border: none;
             border-radius: var(--border-radius);
+            font-size: 1.125rem;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s ease;
-            width: 100%;
-            margin-top: 0.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            min-width: 10rem;
         }
 
-        .start-button:hover,
+        .start-button:hover {
+            transform: translateY(-0.15em);
+            box-shadow: 0 0.15em 0.5em rgba(0, 0, 0, 0.3);
+        }
+
         .start-button:focus {
-            transform: scale(1.03);
             outline: var(--focus-outline);
         }
 
-        /* Tablet styles */
-        @media (min-width: 600px) {
-            :root {
-                --section-gap: 2rem;
-            }
-
-            header {
-                padding: 1.5rem 1rem 0;
-            }
-
-            .test-selection {
-                padding: 1rem;
-            }
-
-            select {
-                padding: 1rem;
-            }
-
-            .start-button {
-                padding: 1rem 2rem;
-                width: auto;
-                align-self: center;
-            }
+        /* Info Box */
+        .info-box {
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-top: 0.1em solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Desktop styles */
-        @media (min-width: 900px) {
-            header {
-                padding: 2rem 1rem 0;
-            }
-
-            .test-selection {
-                max-width: 35rem;
-            }
+        .info-title {
+            color: var(--button-color);
+            margin-bottom: 0.5em;
         }
 
-        /* Accessibility features */
-        @media (prefers-reduced-motion) {
-            .start-button {
-                transition: none;
-            }
+        /* Quick Links */
+        .quick-links ul {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+            gap: 1rem;
+            list-style: none;
         }
 
-        @media (prefers-contrast: more) {
-            select,
-            .start-button {
-                outline: 0.15rem solid currentColor;
+        .quick-link {
+            display: flex;
+            align-items: center;
+            padding: 1em;
+            background-color: var(--theme-color-light);
+            border-radius: var(--border-radius);
+            color: var(--text-color);
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-left: 0.25em solid var(--accent-color);
+        }
+
+        .quick-link:hover {
+            transform: translateY(-0.15em);
+            box-shadow: 0 0.15em 0.5em rgba(0, 0, 0, 0.3);
+        }
+
+        .quick-link:focus {
+            outline: var(--focus-outline);
+        }
+
+        .link-icon {
+            font-size: 1.5rem;
+            margin-right: 0.75em;
+            font-style: normal;
+            text-decoration: none;
+        }
+
+        /* Focus Styles for Accessibility */
+        a:focus,
+        button:focus,
+        select:focus,
+        input:focus {
+            outline: var(--focus-outline);
+            outline-offset: 0.15em;
+        }
+
+        .error-message {
+            color: var(--danger-color, red);
+            font-size: 0.875em;
+            margin-top: 0.25em;
+            display: block;
+            /* Ensure it takes space */
+            min-height: 1em;
+            /* Prevent layout jump */
+        }
+
+        /* Add style for invalid inputs */
+        select.invalid,
+        fieldset.invalid {
+            /* Style fieldset containing radios */
+            border: 1px solid var(--danger-color, red);
+        }
+
+        select.invalid {
+            border: 1px solid var(--danger-color, red);
+            /* Override default border */
+        }
+
+        fieldset.invalid legend {
+            color: var(--danger-color, red);
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms;
+                animation-iteration-count: 1;
+                transition-duration: 0.01ms;
+                scroll-behavior: auto;
             }
         }
     </style>
+
     <main>
-        <form class="test-selection">
-            <section>
-                <h2 id="scenarios-heading">Choose a scenario:</h2>
-                <label for="scenario" hidden>Select a scenario</label>
-                <select id="scenario" name="scenario">
-                    <option value="">Select a scenario</option>
-                    <option value="zombie">Zombie Apocalypse</option>
-                    <option value="alien">Alien Invasion</option>
-                    <option value="nuclear">Nuclear Disaster</option>
-                </select>
-            </section>
+        <section class="test-card">
+            <h2 class="card-title">Begin Your Assessment</h2>
 
-            <section>
-                <h2 id="difficulty-heading">Select difficulty:</h2>
-                <label for="difficulty" hidden>Select difficulty</label>
-                <select id="difficulty" name="difficulty">
-                    <option value="">Select difficulty</option>
-                    <option value="easy">Easy</option>
-                    <option value="medium">Medium</option>
-                    <option value="hard">Hard</option>
-                </select>
-            </section>
+            <form class="test-selection">
+                <fieldset class="form-section" novalidate>
+                    <legend id="scenarios-heading">Choose a scenario:</legend>
+                    <label class="select-container">
+                        <select id="scenario" name="scenario" aria-labelledby="scenarios-heading" required>
+                            <option value="" disabled selected>Select a scenario</option>                       
+                        </select>
+                    </label>
+                    <p class="error-message" id="scenario-error"></p>
+                </fieldset>
 
-            <button type="submit" class="start-button">Start Test</button>
-        </form>
+                <fieldset class="form-section" id="difficulty-fieldset">
+                    <legend id="difficulty-heading">Select difficulty:</legend>
+                    <ul class="difficulty-options">
+
+                    </ul>
+                    <p class="error-message" id="difficulty-error"></p>
+                </fieldset>
+
+                <footer class="form-actions">
+                    <button type="submit" class="start-button">Start Test</button>
+                </footer>
+            </form>
+
+            <aside class="info-box">
+                <h3 class="info-title">Why Test Your Readiness?</h3>
+                <p>Assess your survival knowledge and preparedness for various catastrophic scenarios. Identify
+                    strengths and weaknesses in your emergency planning.</p>
+            </aside>
+        </section>
+
+        <nav class="quick-links">
+            <ul>
+                <li>
+                    <a href="#/history" class="quick-link">
+                        <abbr class="link-icon" title="Assessment History">📊</abbr>
+                        Assessment History
+                    </a>
+                </li>
+
+                <li>
+                    <a href="profile.html" class="quick-link">
+                        <abbr class="link-icon" title="Your Profile">👤</abbr>
+                        Your Profile
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </main>
 </template>

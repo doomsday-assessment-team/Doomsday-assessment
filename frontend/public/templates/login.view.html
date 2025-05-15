@@ -1,49 +1,164 @@
 <template id="login-view">
   <style>
-    :root {
-      --text-color: #333;
-      --theme-color: #fff;
+    .hidden {
+      display: none !important;
+      /* !important to override other display styles if necessary */
     }
 
-    section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2rem;
-      text-align: center;
-      padding: 2rem;
+    h2 {
+      font-size: clamp(1.25rem, 3vw, 2rem);
+      margin-bottom: 0.5em;
     }
 
-    h1 {
-      font-size: 2.5rem;
+    a {
       color: var(--text-color);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    a:focus {
+      outline: var(--focus-outline);
+      outline-offset: 0.15em;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--base-spacing);
+    }
+
+    main section {
+      background-color: var(--theme-color-light);
+      border-radius: var(--card-border-radius);
+      padding: 2rem;
+      max-width: 30rem;
+      width: 100%;
+      box-shadow: 0 0.25em 1em rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    main p {
+      margin-bottom: 2rem;
+    }
+
+    main p:last-of-type {
+      margin-bottom: 0;
+    }
+
+    small {
+      font-size: 0.875rem;
+      color: var(--text-color-muted);
+    }
+
+    form {
+      margin-bottom: 1.5rem;
+    }
+
+    fieldset {
+      border: none;
+      padding: 0;
       margin: 0;
     }
 
-    button {
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      background-color: #f4a261; /* Yellow-orange from button in image */
-      color: var(--theme-color); /* Dark text for contrast */
-      border: none;
-      border-radius: 0.25rem;
-      cursor: pointer;
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
     }
 
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2rem;
-      }
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75em 1.5em;
+      background-color: var(--button-color);
+      color: var(--theme-color);
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin: 0 auto;
+    }
 
-      button {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
+    button:hover {
+      transform: translateY(-0.15em);
+      box-shadow: 0 0.15em 0.5em rgba(0, 0, 0, 0.3);
+    }
+
+    button:focus {
+      outline: var(--focus-outline);
+    }
+
+    button img {
+      height: 1.25em;
+      margin-right: 0.75em;
+    }
+
+    nav ul {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      margin-top: 0.5rem;
+    }
+
+    nav li+li::before {
+      content: "•";
+      margin: 0 0.5em;
+      color: var(--text-color-muted);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
+        transition-duration: 0.01ms;
+        scroll-behavior: auto;
       }
     }
   </style>
+  <main>
+    <section>
+      <h2>Prepare for the Worst</h2>
 
-  <section aria-labelledby="login-heading">
-    <h1 id="login-heading">DOOMSDAY READINESS TEST</h1>
-    <button id="google-signin-btn">Sign in with Google</button>
-  </section>
+      <p>
+        Test your survival knowledge and readiness for catastrophic scenarios.
+        Sign in to track your progress and compare with other survivors.
+      </p>
+
+      <form id="google-login-form" action="http://localhost:3000/auth/google" method="get">
+        <fieldset>
+          <legend class="visually-hidden">Login Options</legend>
+          <button type="submit">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="" aria-hidden="true" />
+            Sign in with Google
+          </button>
+        </fieldset>
+      </form>
+
+      <p>
+        <small>
+          By signing in, you agree to our
+          <a href="/terms">Terms of Service</a> and
+          <a href="/privacy">Privacy Policy</a>.
+        </small>
+      </p>
+    </section>
+  </main>
 </template>
