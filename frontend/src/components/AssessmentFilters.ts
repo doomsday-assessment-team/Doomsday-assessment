@@ -1,5 +1,6 @@
 import { apiService } from "../main.js";
 import { Difficulty, Scenario } from "../types/global-types.js";
+import { checkAdminRole } from "../utils/check-admin.js";
 import { loadTemplate } from "../utils/load-template.js";
 
 export class AssessmentFilters extends HTMLElement {
@@ -28,6 +29,7 @@ export class AssessmentFilters extends HTMLElement {
       if (fromInput) fromInput.value = oneYearAgoStr;
       if (toInput) toInput.value = todayStr;
       this.addEventListeners();
+      this.hideUserFilter();
     } else {
       // content is null
     }
@@ -73,6 +75,14 @@ export class AssessmentFilters extends HTMLElement {
     }
   }
 
+  private async hideUserFilter() {
+    const isAdmin = await checkAdminRole();
+    const userFilterItem = this.shadowRoot?.getElementById('admin-filter');
+    
+    if (userFilterItem) {
+      (userFilterItem as HTMLElement).style.display = isAdmin ? 'list-item' : 'none';
+    }
+  }
 
   private async populateDifficulties() {
     try {

@@ -1,5 +1,4 @@
 import db from '../config/db';
-import { DBPool } from '../db/pool';
 import {
   Scenario,
   QuestionDifficulty,
@@ -237,6 +236,7 @@ export const deleteQuestion = async (questionId: number): Promise<void> => {
 
 export const getUserQuestionHistory = async (
   userName?: string,
+  userId?: number,
   scenarios?: string,
   difficulties?: string,
   startDate?: string,
@@ -255,6 +255,11 @@ export const getUserQuestionHistory = async (
       CONCAT(name, surname) ILIKE '%' || $${paramCounter++} || '%'
     `;
     queryParams.push(userName);
+  }
+
+  if (userId != undefined) {
+    whereConditions.push(`u.user_id = $${paramCounter++}`);
+    queryParams.push(userId);
   }
 
   if (scenarios !== undefined) {
@@ -346,7 +351,7 @@ export const getAllRoles = async (): Promise<Role[]> => {
 };
 
 export async function getAllUsersWithRoles() {
-  const usersRoleResult = await DBPool.query ( 
+  const usersRoleResult = await db.query ( 
     `
     SELECT 
       u.user_id,
