@@ -327,12 +327,21 @@ export const getUserQuestionHistory = async (
   return db.manyOrNone<RawUserQuestionRow>(query, queryParams);
 };
 
-export const addUserRole = async (userName: number, roleId: number): Promise<{role_id: number, user_id: number}> => {
+export const addUserRole = async (userId: number, roleId: number) => {
+  const exists = await db.oneOrNone(
+    `SELECT 1 FROM user_roles WHERE user_id = $1 AND role_id = $2`,
+    [userId, roleId]
+  );
+
+  if (exists) {
+    throw new Error("User already has this role.");
+  }
+
   return db.one(
     `INSERT INTO user_roles (user_id, role_id) 
      VALUES ($1, $2) 
      RETURNING user_role_id`,
-    [userName, roleId]
+    [userId, roleId]
   );
 };
 
@@ -357,7 +366,6 @@ export async function getAllUsersWithRoles() {
       u.user_id,
       u.name,
       u.surname,
-      u.email,
       u.google_subject,
       ARRAY_AGG(r.role_name) AS roles
     FROM users u
