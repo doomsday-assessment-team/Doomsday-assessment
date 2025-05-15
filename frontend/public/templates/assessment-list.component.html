@@ -1,30 +1,15 @@
 <template id="assessment-list">
   <style>
-    .assessment-history {
+    #assessment-history {
       display: grid;
       gap: 1.5rem;
-      max-width: 100%;
       margin: 0 auto;
       padding: 1.5rem;
       background-color: #1a1d2a;
+      list-style: none;
     }
   </style>
-  <section class="assessment-history" aria-labelledby="history-heading">
-    <assessment-item
-      user="John"
-      date="May 10, 2024"
-      scenario="Zombie Apocalypse"
-      difficulty="Hard"
-      points="85"
-      feedback="Excellent survival knowledge, improve on first aid"
-    ></assessment-item>
-    <assessment-item
-      user="Alex"
-      date="April 28, 2024"
-      scenario="Nuclear Disaster"
-      difficulty="Medium"
-      points="72"
-      feedback="Good radiation knowledge, work on shelter building"
-    ></assessment-item>
-  </section>
+  <ul id="assessment-history" aria-labelledby="history-heading">
+    
+  </ul>
 </template>
