@@ -15,3 +15,8 @@ export interface Difficulty {
     question_difficulty_name: string;
     time: number;
 }
+
+export interface Role {
+  role_id: number,
+  role_name: string
+}
