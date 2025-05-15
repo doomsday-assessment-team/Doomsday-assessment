@@ -54,7 +54,6 @@ router.get('/google/callback', async (req, res) => {
     const user = await loginUser(
       googleUser.given_name,
       googleUser.family_name,
-      googleUser.email,
       googleUser.id
     )
 
