@@ -37,6 +37,19 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   }
 
+  ordered_cache_behavior {
+    path_pattern     = "/config.js"
+    target_origin_id = local.s3_origin_id
+
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
+    cached_methods  = ["GET", "HEAD"]
+
+    viewer_protocol_policy = "redirect-to-https"
+
+    cache_policy_id = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+
+  }
+
   restrictions {
     geo_restriction {
       restriction_type = "none"
@@ -80,8 +93,7 @@ resource "aws_cloudfront_distribution" "alb_cf_distribution" {
 
     viewer_protocol_policy = "redirect-to-https"
 
-    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
-
+    cache_policy_id = "78644860-371e-416c-9ffe-fda1f3de1a74"
   }
 
   restrictions {
