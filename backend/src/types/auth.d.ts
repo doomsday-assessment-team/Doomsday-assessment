@@ -1,5 +1,6 @@
 export interface JwtPayload {
     roles: string[];
+    user_id: number;
     google_subject: string;
     email: string;
     verified_email: boolean;
