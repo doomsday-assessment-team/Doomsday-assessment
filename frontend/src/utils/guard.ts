@@ -1,17 +1,16 @@
 import { RouteGuard } from "../types/route-guard";
+import { AuthService } from "./auth-service.js";
 
 export const AuthGuard: RouteGuard = (path: string, queryParams: URLSearchParams): boolean | string => {
-    // if (AuthService.isAuthenticated()) {
-    //     return true; // Allow access
-    // } else {
-    //     const originalPathAndQuery = path + (queryParams.toString() ? `?${queryParams.toString()}` : '');
-    //     sessionStorage.setItem('redirectAfterLogin', originalPathAndQuery);
-    //     return '/login';
-    // }
-
+    const authService = new AuthService();
     const originalPathAndQuery = path + (queryParams.toString() ? `?${queryParams.toString()}` : '');
     sessionStorage.setItem('redirectAfterLogin', originalPathAndQuery);
-    return '/login';
+    if (authService.isLoggedIn()) {
+        return true; // Allow access
+    } else {
+
+        return '/login';
+    }
 };
 
 
