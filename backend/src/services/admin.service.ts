@@ -3,12 +3,13 @@ import { AssessmentHistory } from '../types/global-types';
 
 export const getGroupedUserQuestionHistory = async (
   userName?: string,
+  userId?: number,
   scenarios?: string,
   difficulties?: string,
   startDate?: string,
   endDate?: string,
 ): Promise<AssessmentHistory[]> => {
-  const rows = await getUserQuestionHistory(userName, scenarios, difficulties, startDate, endDate);
+  const rows = await getUserQuestionHistory(userName, userId, scenarios, difficulties, startDate, endDate);
   const grouped = rows.reduce<Record<string, AssessmentHistory>>((acc, row) => {
     const historyId = row.history_id.toString();
     

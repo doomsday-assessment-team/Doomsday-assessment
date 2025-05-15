@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { JwtPayload } from '../types/auth';
 import jwt from 'jsonwebtoken';
+import { getUserByGoogleSubject } from '../repositories/user.repository';
 
-export function authenticateJWT(req: Request, res: Response, next: NextFunction): void {
+export async function authenticateJWT(req: Request, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
 
   if (req.path === '/' || req.path === '/health' || req.path === '/auth/google' || req.path === '/auth/google/callback') {
@@ -27,6 +28,10 @@ export function authenticateJWT(req: Request, res: Response, next: NextFunction)
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
     req.user = decoded;
+    const user = await getUserByGoogleSubject(decoded.google_subject);
+    if (user) {
+      req.user.user_id = user.user_id;
+    }
     next();
   } catch (err) {
     console.error(err);
@@ -34,11 +39,11 @@ export function authenticateJWT(req: Request, res: Response, next: NextFunction)
   }
 }
 
-export function checkAdminRole(req: Request, res: Response, next: NextFunction): void {
+export function checkAssessmentManagerRole(req: Request, res: Response, next: NextFunction): void {
   const roles = req.user?.roles;
 
-  if (!roles || !Array.isArray(roles) || !roles.includes('admin')) {
-    res.status(403).json({ message: 'Access denied: Admin role required' });
+  if (!roles || !Array.isArray(roles) || !roles.includes('Assessment manager')) {
+    res.status(403).json({ message: 'Access denied: Assessment manager role required' });
     return;
   }
 

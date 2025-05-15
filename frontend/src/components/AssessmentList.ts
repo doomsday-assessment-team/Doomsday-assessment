@@ -3,6 +3,7 @@ import "./AssessmentItem.js";
 import { AssessmentItem } from "./AssessmentItem.js";
 import { Option } from "../types/global-types.js";
 import { apiService } from "../main.js";
+import { checkAdminRole } from "../utils/check-admin.js";
 
 interface AssessmentHistoryItem {
   history_id: number;
@@ -76,7 +77,8 @@ export class AssessmentList extends HTMLElement {
     loadingItem.setAttribute("id", "loading-item");
     assessmentHistoryList.appendChild(loadingItem);
     try{
-      const assessmentHistories: AssessmentHistoryItem[] = await apiService.get("/admin/user-question-history", this.toQueryParams(filters));
+      const isAdmin = await checkAdminRole();
+      const assessmentHistories: AssessmentHistoryItem[] =  !isAdmin ? await apiService.get("/admin/user-question-history", this.toQueryParams(filters)) : await apiService.get("/users/user-question-history", this.toQueryParams(filters))
       assessmentHistoryList.replaceChildren();
       if (assessmentHistories.length === 0) {
         const emptyItem = document.createElement("li");

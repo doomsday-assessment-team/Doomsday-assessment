@@ -49,11 +49,11 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
 
         {
           name  = "GOOGLE_REDIRECT_URI"
-          value = "http://${aws_lb.doomsday_app_alb.dns_name}/auth/google/callback"
+          value = "https://${aws_cloudfront_distribution.alb_cf_distribution.domain_name}/auth/google/callback"
         },
         {
           name  = "FRONTEND_URL"
-          value = "http://${aws_s3_bucket_website_configuration.public_spa_bucket_website.website_endpoint}"
+          value = "https://${aws_cloudfront_distribution.s3_distribution.domain_name}"
         },
         {
           name  = "NODE_ENV",
