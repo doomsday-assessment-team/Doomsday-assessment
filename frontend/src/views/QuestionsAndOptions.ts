@@ -1,366 +1,310 @@
 import { loadTemplate } from '../utils/load-template.js';
+import { apiService } from '../main.js';
+
+interface Option {
+  option_id: number;
+  question_id : number;
+  option_text: string;
+  points: number;
+}
+
+interface Question {
+  question_id: number;
+  question_text: string;
+  scenario_id: number;
+  question_difficulty_id: number;
+  options: { option_text: string; points: number }[];
+}
+
+interface Scenario {
+  scenario_id: number;
+  scenario_name: string;
+}
+
+interface Difficulty {
+  question_difficulty_id: number;
+  question_difficulty_name: string;
+}
 
 export class QuestionsAndOptions extends HTMLElement {
+  private scenarioMap: Map<number, string> = new Map();
+  private difficultyMap: Map<number, string> = new Map();
+  private questions: Question[] = [];
+  
+
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
     this.loadTemplate();
   }
 
-  private questions = [
-    {
-      text: "What’s the best first move in a zombie apocalypse?",
-      scenario: "zombie",
-      difficulty: "medium",
-      options: [
-        "Find weapons",
-        "Secure water",
-        "Find allies",
-        "Head to rural area",
-        "Barricade your home"
-      ]
-    },
-    {
-      text: "How should you communicate with others during an alien invasion?",
-      scenario: "alien",
-      difficulty: "hard",
-      options: [
-        "Use coded messages",
-        "Avoid all broadcasts",
-        "Only use satellite phones",
-        "Join government communication",
-        "Send out distress beacons"
-      ]
-    },
-    {
-      text: "Where is the safest place during a nuclear disaster?",
-      scenario: "nuclear",
-      difficulty: "medium",
-      options: [
-        "Underground bunker",
-        "Concrete basement",
-        "Evacuate the area",
-        "Inside a lead-lined room",
-        "Near a large body of water"
-      ]
-    },
-    {
-      text: "What food should you prioritize in a climate catastrophe?",
-      scenario: "climate",
-      difficulty: "easy",
-      options: [
-        "Non-perishable canned goods",
-        "Fresh vegetables",
-        "Frozen meat",
-        "Dairy products",
-        "Bread and grains"
-      ]
-    },
-    {
-      text: "How do you protect your shelter in a zombie apocalypse?",
-      scenario: "zombie",
-      difficulty: "hard",
-      options: [
-        "Use steel reinforcements",
-        "Set perimeter alarms",
-        "Stay quiet and hidden",
-        "Cover windows with wood",
-        "Have an escape route"
-      ]
-    },
-    {
-      text: "What’s the best way to purify water during a climate crisis?",
-      scenario: "climate",
-      difficulty: "medium",
-      options: [
-        "Boiling",
-        "Solar stills",
-        "Chemical tablets",
-        "Filtration pumps",
-        "Rainwater collection"
-      ]
+  private async loadTemplate() {
+    try {
+      const content = await loadTemplate('./templates/questions-and-options.view.html');
+      if (content) {
+        this.shadowRoot?.appendChild(content);
+        await this.populateFilters();
+        await this.fetchAndRenderQuestions();
+        this.setupEventListeners();
+        this.addDefaultOption();
+      }
+    } catch (error) {
+      console.error('Failed to load template:', error);
     }
-  ];
+  }
 
-  async loadTemplate() {
-    const content = await loadTemplate('./templates/questions-and-options.view.html');
-    if (content) {
-      this.shadowRoot?.appendChild(content);
-      this.setupEventListeners();
-      this.renderQuestionBank();
+  private async fetchAndRenderQuestions(): Promise<void> {
+    try {
+      this.questions = await apiService.get<Question[]>('/questions');
+      console.log('Fetched questions:', this.questions);
+      this.renderQuestionBank(this.questions);
+    } catch (error) {
+      console.error('Error fetching questions:', error);
     }
+  }
+
+  private async populateFilters(): Promise<void> {
+    try {
+      const [scenarios, difficulties] = await Promise.all([
+        apiService.get<Scenario[]>('/scenarios'),
+        apiService.get<Difficulty[]>('/difficulties'),
+      ]);
+
+      const shadow = this.shadowRoot!;
+      const scenarioSelects = shadow.querySelectorAll('select[data-type="scenario"]') as NodeListOf<HTMLSelectElement>;
+      const difficultySelects = shadow.querySelectorAll('select[data-type="difficulty"]') as NodeListOf<HTMLSelectElement>;
+
+      this.scenarioMap = new Map(scenarios.map(s => [s.scenario_id, s.scenario_name]));
+      this.difficultyMap = new Map(difficulties.map(d => [d.question_difficulty_id, d.question_difficulty_name]));
+
+      scenarioSelects.forEach(select => {
+        this.populateSelect(select, scenarios, 'scenario_id', 'scenario_name', '-- Select Scenario --');
+      });
+
+      difficultySelects.forEach(select => {
+        this.populateSelect(select, difficulties, 'question_difficulty_id', 'question_difficulty_name', '-- Select Difficulty --');
+      });
+    } catch (error) {
+      console.error('Error loading filter data:', error);
+    }
+  }
+
+  private populateSelect<T>(
+    select: HTMLSelectElement,
+    items: T[],
+    valueKey: keyof T,
+    textKey: keyof T,
+    defaultLabel: string
+  ) {
+    select.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = defaultLabel;
+    select.appendChild(defaultOption);
+
+    items.forEach(item => {
+      const option = document.createElement('option');
+      option.value = String(item[valueKey]);
+      option.textContent = String(item[textKey]);
+      select.appendChild(option);
+    });
   }
 
   private setupEventListeners(): void {
-    const shadow = this.shadowRoot;
-    if (!shadow) return;
-
+    const shadow = this.shadowRoot!;
     const scenarioFilter = shadow.getElementById('scenario-filter') as HTMLSelectElement;
     const difficultyFilter = shadow.getElementById('difficulty-filter') as HTMLSelectElement;
-    const clearBtn = shadow.querySelector('button[type="reset"]') as HTMLButtonElement;
-    const addOptionBtn = shadow.getElementById('add-option-button') as HTMLButtonElement;
-    const optionList = shadow.getElementById('dynamic-option-list') as HTMLUListElement;
+    const clearBtn = shadow.querySelector('button[type="reset"]')!;
     const showAddBtn = shadow.getElementById('show-add-question') as HTMLButtonElement;
-    const addQuestionSection = shadow.getElementById('add-question-section') as HTMLElement;
+    const addSection = shadow.getElementById('add-question-section')!;
 
-    // Add Option Button
-    if (addOptionBtn && optionList) {
-      addOptionBtn.addEventListener('click', () => {
-        const optionIndex = optionList.children.length + 1;
-        const li = document.createElement('li');
+    scenarioFilter.addEventListener('change', () => this.filterQuestions());
+    difficultyFilter.addEventListener('change', () => this.filterQuestions());
 
-        const label = document.createElement('label');
-        label.textContent = `Option ${optionIndex}:`;
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.placeholder = `Enter option ${optionIndex}`;
-
-        li.appendChild(label);
-        li.appendChild(input);
-        optionList.appendChild(li);
-      });
-    }
-
-    // Show/Hide Add Section
-    if (showAddBtn && addQuestionSection) {
-      showAddBtn.addEventListener('click', () => {
-        addQuestionSection.classList.toggle('hidden');
-      });
-    }
-
-    // Filter change
-    scenarioFilter?.addEventListener('change', () => this.filterQuestions());
-    difficultyFilter?.addEventListener('change', () => this.filterQuestions());
-
-    // Clear Filters
-    clearBtn?.addEventListener('click', (e) => {
+    clearBtn.addEventListener('click', e => {
       e.preventDefault();
       scenarioFilter.value = '';
       difficultyFilter.value = '';
-      this.filterQuestions();
+      this.renderQuestionBank(this.questions);
     });
 
-    // Save New Question
-    const saveQuestionBtn = shadow.querySelector('#add-question-section button[type="submit"]') as HTMLButtonElement;
-    const questionTextInput = shadow.getElementById('new-question') as HTMLInputElement;
+    showAddBtn.addEventListener('click', () => {
+      addSection.classList.toggle('hidden');
+    });
+
+    const addOptionBtn = shadow.getElementById('add-option-button') as HTMLButtonElement;
+    addOptionBtn.addEventListener('click', () => this.addOption());
+
+    const submitBtn = shadow.querySelector('#add-question-section button[type="submit"]')!;
+    submitBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await this.handleNewQuestionSubmit();
+    });
+  }
+
+  private addOption(): void {
+    const shadow = this.shadowRoot!;
+    const optionList = shadow.getElementById('dynamic-option-list') as HTMLUListElement;
+    const index = optionList.children.length + 1;
+
+    const li = document.createElement('li');
+
+    const label = document.createElement('label');
+    label.textContent = `Option ${index}:`;
+
+    const inputText = document.createElement('input');
+    inputText.type = 'text';
+    inputText.placeholder = `Enter option ${index}`;
+
+    const inputPoints = document.createElement('input');
+    inputPoints.type = 'number';
+    inputPoints.placeholder = 'Points';
+    inputPoints.min = '0';
+
+    li.appendChild(label);
+    li.appendChild(inputText);
+    li.appendChild(inputPoints);
+
+    optionList.appendChild(li);
+  }
+
+  private addDefaultOption(): void {
+    const shadow = this.shadowRoot!;
+    const optionList = shadow.getElementById('dynamic-option-list') as HTMLUListElement;
+    optionList.innerHTML = ''; // clear
+    this.addOption(); // add first
+  }
+
+  private async handleNewQuestionSubmit(): Promise<void> {
+    const shadow = this.shadowRoot!;
+    const textInput = shadow.getElementById('new-question') as HTMLInputElement;
     const scenarioSelect = shadow.getElementById('new-scenario') as HTMLSelectElement;
     const difficultySelect = shadow.getElementById('new-difficulty') as HTMLSelectElement;
+    const optionList = shadow.getElementById('dynamic-option-list') as HTMLUListElement;
 
-    if (saveQuestionBtn && questionTextInput && scenarioSelect && difficultySelect && optionList) {
-      saveQuestionBtn.addEventListener('click', (e) => {
-        e.preventDefault();
+    const questionText = textInput.value.trim();
+    const scenario = scenarioSelect.value;
+    const difficulty = difficultySelect.value;
 
-        const questionText = questionTextInput.value.trim();
-        const scenario = scenarioSelect.value;
-        const difficulty = difficultySelect.value;
+    const options: { option_text: string; points: number }[] = [];
+    optionList.querySelectorAll('li').forEach(li => {
+      const inputs = li.querySelectorAll('input');
+      const optionText = (inputs[0] as HTMLInputElement)?.value.trim();
+      const pointsValue = parseInt((inputs[1] as HTMLInputElement)?.value.trim(), 10);
+      if (optionText && !isNaN(pointsValue)) {
+        options.push({ option_text: optionText, points: pointsValue });
+      }
+    });
 
-        const optionInputs = optionList.querySelectorAll('input[type="text"]');
-        const options = Array.from(optionInputs)
-          .map(input => (input as HTMLInputElement).value.trim())
-          .filter(val => val !== '');
+    if (!questionText || !scenario || !difficulty || options.length === 0) {
+      alert('Please fill all fields and add at least one valid option.');
+      return;
+    }
 
-        if (!questionText || !scenario || !difficulty || options.length === 0) {
-          alert('Please fill out all fields and enter at least one option.');
-          return;
-        }
-
-        const newQuestion = { text: questionText, scenario, difficulty, options };
-        this.questions.push(newQuestion);
-        this.renderQuestionBank();
-
-        // Reset form
-        questionTextInput.value = '';
-        scenarioSelect.value = '';
-        difficultySelect.value = '';
-        optionList.innerHTML = '';
-        const firstOption = document.createElement('li');
-        firstOption.innerHTML = `
-          <label>Option 1:</label>
-          <input type="text" placeholder="Enter option 1">
-        `;
-        optionList.appendChild(firstOption);
+    try {
+      await apiService.post('/questions', {
+        question_text: questionText,
+        scenario_id: Number(scenario),
+        question_difficulty_id: Number(difficulty),
+        options
       });
+
+      await this.fetchAndRenderQuestions();
+
+      textInput.value = '';
+      scenarioSelect.value = '';
+      difficultySelect.value = '';
+      this.addDefaultOption();
+    } catch (error) {
+      console.error('Failed to submit new question:', error);
     }
   }
 
-  private renderQuestionBank(): void {
-    const shadow = this.shadowRoot;
-    if (!shadow) return;
-
-    const container = shadow.getElementById('question-bank');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    this.questions.forEach((q, index) => {
-      const article = document.createElement('article');
-
-      const header = document.createElement('header');
-      const title = document.createElement('h4');
-      title.textContent = q.text;
-
-      const meta = document.createElement('p');
-      meta.innerHTML = `<strong>Scenario:</strong> ${q.scenario} | <strong>Difficulty:</strong> ${q.difficulty}`;
-      header.appendChild(title);
-      header.appendChild(meta);
-      header.style.cursor = 'pointer';
-
-      const section = document.createElement('section');
-      section.hidden = true;
-
-      const questionInput = document.createElement('input');
-      questionInput.type = 'text';
-      questionInput.value = q.text;
-      questionInput.hidden = true;
-
-      const optionsList = document.createElement('ul');
-      q.options.forEach(opt => {
-        const li = document.createElement('li');
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = opt;
-        input.disabled = true;
-        li.appendChild(input);
-        optionsList.appendChild(li);
-      });
-
-      const editBtn = document.createElement('button');
-      editBtn.textContent = 'Edit';
-
-      const saveBtn = document.createElement('button');
-      saveBtn.textContent = 'Save';
-      saveBtn.hidden = true;
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = 'Delete';
-
-      header.addEventListener('click', () => {
-        section.hidden = !section.hidden;
-      });
-
-      editBtn.addEventListener('click', () => {
-        questionInput.hidden = false;
-        optionsList.querySelectorAll('input').forEach(i => i.removeAttribute('disabled'));
-        editBtn.hidden = true;
-        saveBtn.hidden = false;
-      });
-
-      saveBtn.addEventListener('click', () => {
-        q.text = questionInput.value;
-        q.options = Array.from(optionsList.querySelectorAll('input')).map(i => i.value);
-        this.renderQuestionBank();
-      });
-
-      deleteBtn.addEventListener('click', () => {
-        this.questions.splice(index, 1);
-        this.renderQuestionBank();
-      });
-
-      section.appendChild(questionInput);
-      section.appendChild(optionsList);
-      section.appendChild(editBtn);
-      section.appendChild(saveBtn);
-      section.appendChild(deleteBtn);
-
-      article.appendChild(header);
-      article.appendChild(section);
-      container.appendChild(article);
-    });
+  private async deleteQuestion(id: number): Promise<void> {
+    try {
+      await apiService.delete(`/questions/${id}`);
+      this.questions = this.questions.filter(q => q.question_id !== id);
+      
+      this.renderQuestionBank(this.questions);
+    } catch (error) {
+      console.error(`Failed to delete question ${id}:`, error);
+    }
   }
 
-  private filterQuestions(): void {
-    const shadow = this.shadowRoot;
-    if (!shadow) return;
+ private renderQuestionBank(questions: Question[]): void {
+    const container = this.shadowRoot!.getElementById('question-bank')!;
+    container.textContent = '';
+    console.log('Rendering questions:', questions);
 
-    const scenario = (shadow.getElementById('scenario-filter') as HTMLSelectElement).value;
-    const difficulty = (shadow.getElementById('difficulty-filter') as HTMLSelectElement).value;
+    questions.forEach(q => {
+        const article = document.createElement('article');
+        console.log('Article:', article);
+
+        const header = document.createElement('header');
+        const h4 = document.createElement('h4');
+        h4.textContent = q.question_text;
+
+        const p = document.createElement('p');
+        const scenarioName = this.scenarioMap.get(q.scenario_id) ?? `Scenario ${q.scenario_id}`;
+        const difficultyName = this.difficultyMap.get(q.question_difficulty_id) ?? `Difficulty ${q.question_difficulty_id}`;
+        p.textContent = `Scenario: ${scenarioName} | Difficulty: ${difficultyName}`;
+        header.appendChild(h4);
+        header.appendChild(p);
+        header.style.cursor = 'pointer';
+
+        const section = document.createElement('section');
+        section.hidden = true;
+
+        const questionInput = document.createElement('input');
+        questionInput.value = q.question_text;
+        questionInput.hidden = true;
+
+        const optionList = document.createElement('ul');
+        q.options.forEach(opt => {
+            const li = document.createElement('li');
+
+            const textInput = document.createElement('input');
+            textInput.type = 'text';
+            textInput.value = opt.option_text;
+            textInput.disabled = true;
+
+            const pointInput = document.createElement('input');
+            pointInput.type = 'number';
+            pointInput.value = String(opt.points);
+            pointInput.disabled = true;
+
+            li.appendChild(textInput);
+            li.appendChild(pointInput);
+            optionList.appendChild(li);
+        });
+        console.log('Option List:', optionList);
+
+        header.addEventListener('click', () => {
+            section.hidden = !section.hidden;
+        });
+
+        section.appendChild(questionInput);
+        section.appendChild(optionList);
+
+        article.appendChild(header);
+        article.appendChild(section);
+        container.appendChild(article);
+    });
+}
+
+private filterQuestions(): void {
+    const shadow = this.shadowRoot!;
+    const scenarioVal = (shadow.getElementById('scenario-filter') as HTMLSelectElement).value;
+    const difficultyVal = (shadow.getElementById('difficulty-filter') as HTMLSelectElement).value;
 
     const filtered = this.questions.filter(q => {
-      const matchesScenario = !scenario || q.scenario === scenario;
-      const matchesDifficulty = !difficulty || q.difficulty === difficulty;
-      return matchesScenario && matchesDifficulty;
+        const matchScenario = !scenarioVal || q.scenario_id.toString() === scenarioVal;
+        const matchDifficulty = !difficultyVal || q.question_difficulty_id.toString() === difficultyVal;
+        return matchScenario && matchDifficulty;
     });
 
-    const container = shadow.getElementById('question-bank');
-    if (!container) return;
-
-    container.innerHTML = '';
-    filtered.forEach((q, index) => {
-      const article = document.createElement('article');
-
-      const header = document.createElement('header');
-      const title = document.createElement('h4');
-      title.textContent = q.text;
-
-      const meta = document.createElement('p');
-      meta.innerHTML = `<strong>Scenario:</strong> ${q.scenario} | <strong>Difficulty:</strong> ${q.difficulty}`;
-      header.appendChild(title);
-      header.appendChild(meta);
-      header.style.cursor = 'pointer';
-
-      const section = document.createElement('section');
-      section.hidden = true;
-
-      const questionInput = document.createElement('input');
-      questionInput.type = 'text';
-      questionInput.value = q.text;
-      questionInput.hidden = true;
-
-      const optionsList = document.createElement('ul');
-      q.options.forEach(opt => {
-        const li = document.createElement('li');
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = opt;
-        input.disabled = true;
-        li.appendChild(input);
-        optionsList.appendChild(li);
-      });
-
-      const editBtn = document.createElement('button');
-      editBtn.textContent = 'Edit';
-
-      const saveBtn = document.createElement('button');
-      saveBtn.textContent = 'Save';
-      saveBtn.hidden = true;
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = 'Delete';
-
-      header.addEventListener('click', () => {
-        section.hidden = !section.hidden;
-      });
-
-      editBtn.addEventListener('click', () => {
-        questionInput.hidden = false;
-        optionsList.querySelectorAll('input').forEach(i => i.removeAttribute('disabled'));
-        editBtn.hidden = true;
-        saveBtn.hidden = false;
-      });
-
-      saveBtn.addEventListener('click', () => {
-        q.text = questionInput.value;
-        q.options = Array.from(optionsList.querySelectorAll('input')).map(i => i.value);
-        this.renderQuestionBank();
-      });
-
-      deleteBtn.addEventListener('click', () => {
-        this.questions.splice(index, 1);
-        this.renderQuestionBank();
-      });
-
-      section.appendChild(questionInput);
-      section.appendChild(optionsList);
-      section.appendChild(editBtn);
-      section.appendChild(saveBtn);
-      section.appendChild(deleteBtn);
-
-      article.appendChild(header);
-      article.appendChild(section);
-      container.appendChild(article);
-    });
-  }
+    this.renderQuestionBank(filtered);
 }
+  }
 
 customElements.define('questions-and-options', QuestionsAndOptions);
