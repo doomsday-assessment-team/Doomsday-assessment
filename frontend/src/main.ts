@@ -1,4 +1,5 @@
 import "./views/AssessmentHistory.js";
+import "./views/UserProfile.js";
 import "./views/Login.js";
 import "./views/Home.js";
 import "./views/NotFound.js";
@@ -28,7 +29,12 @@ class App {
       componentTag: 'quiz-view',
      canActivate: [AuthGuard]
     },
-    '/not-found': { componentTag: 'not-found-view' }
+    '/not-found': { componentTag: 'not-found-view' },
+
+    '/user-profile': { 
+      componentTag: 'user-profile-view',
+      canActivate: [AuthGuard]
+    }
   };
 
   private static appContainer: HTMLElement | null = null;

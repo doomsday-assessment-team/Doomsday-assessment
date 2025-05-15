@@ -1,0 +1,51 @@
+<template id="user-profile-view">
+  <style>
+    :host {
+      display: block;
+      padding: 1rem;
+    }
+
+    header h2 {
+      margin-top: 0;
+    }
+
+    dl {
+      margin: 1rem 0;
+    }
+
+    dt {
+      font-weight: bold;
+    }
+
+    dd {
+      margin: 0 0 1rem 0;
+    }
+
+    section {
+      max-width: 600px;
+    }
+  </style>
+
+  <section>
+    <header>
+      <h2>User Profile</h2>
+    </header>
+
+    <article>
+      <dl>
+        <dt>Full Name</dt>
+        <dd id="full-name">Loading...</dd>
+
+        <dt>Email Address</dt>
+        <dd id="email">Loading...</dd>
+
+        <dt>Roles</dt>
+        <dd>
+          <ul id="roles">
+            <li>Loading...</li>
+          </ul>
+        </dd>
+      </dl>
+    </article>
+  </section>
+</template>
