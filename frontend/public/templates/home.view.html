@@ -1,5 +1,31 @@
 <template id="home-view">
     <style>
+       *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color, #e0e0e0);
+            background-color: var(--theme-color, #1a1a2e);
+            line-height: 1.6;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100%;
+        }
+
         h1,
         h2,
         h3,
@@ -7,65 +33,64 @@
         h5,
         h6 {
             font-family: "Orbitron", sans-serif;
-            color: var(--text-color);
+            color: var(--text-color, #e0e0e0);
             line-height: 1.2;
+            margin-bottom: 0.5em;
         }
 
         h1 {
-            font-size: clamp(1.75rem, 5vw, 3rem);
+            font-size: 2.25rem;
             letter-spacing: 0.05em;
             text-transform: uppercase;
         }
 
         h2 {
-            font-size: clamp(1.25rem, 3vw, 2rem);
-            margin-bottom: 0.5em;
+            font-size: 1.75rem;
         }
 
         h3 {
-            font-size: clamp(1rem, 2vw, 1.25rem);
-            margin-bottom: 0.75em;
+            font-size: 1.25rem;
         }
 
-
         main {
-            padding: clamp(1.5rem, 3vh, 2.5rem) clamp(1rem, 4vw, 2.5rem);
-            max-width: 75rem;
-            margin: 0 auto;
             width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
 
         body>footer {
+            width: 100%;
+            max-width: 1000px;
             padding: 1rem;
-            background-color: var(--theme-color-light);
-            border-top: 0.15em solid var(--accent-color);
+            background-color: var(--theme-color-light, #2a2a4e);
+            border-top: 0.15em solid var(--accent-color, #f0c040);
             text-align: center;
             font-size: 0.875rem;
+            margin-top: 2rem;
         }
 
         .hidden {
             display: none;
         }
 
-        /* Card */
         .test-card {
-            background-color: var(--theme-color-light);
-            border-radius: var(--card-border-radius);
+            background-color: var(--theme-color-light, #2a2a4e);
+            border-radius: var(--card-border-radius, 0.5rem);
             overflow: hidden;
             box-shadow: 0 0.25em 1em rgba(0, 0, 0, 0.2);
-            margin-bottom: 2rem;
         }
 
         .card-title {
-            padding: clamp(1rem, 4vw, 1.5rem);
+            padding: 1rem 1.5rem;
             background-color: rgba(0, 0, 0, 0.2);
             border-bottom: 0.1em solid rgba(255, 255, 255, 0.1);
             text-align: center;
         }
 
-        /* Form */
         .test-selection {
-            padding: clamp(1rem, 4vw, 1.5rem);
+            padding: 1rem 1.5rem;
         }
 
         .form-section {
@@ -77,13 +102,12 @@
         .form-section legend {
             text-align: center;
             font-family: "Orbitron", sans-serif;
-            color: var(--text-color);
-            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: var(--text-color, #e0e0e0);
+            font-size: 1.15rem;
             margin-bottom: 0.75em;
             width: 100%;
         }
 
-        /* Select Styling */
         .select-container {
             position: relative;
             width: 100%;
@@ -100,30 +124,30 @@
             height: 0;
             border-style: solid;
             border-width: 0.4em 0.4em 0 0.4em;
-            border-color: var(--text-color) transparent transparent transparent;
+            border-color: var(--text-color, #e0e0e0) transparent transparent transparent;
             pointer-events: none;
         }
 
         select {
             width: 100%;
             padding: 0.75em 1em;
-            background-color: var(--theme-color);
-            color: var(--text-color);
-            border: 0.1em solid var(--text-color-muted);
-            border-radius: var(--border-radius);
+            background-color: var(--theme-color, #1a1a2e);
+            color: var(--text-color, #e0e0e0);
+            border: 0.1em solid var(--text-color-muted, #888);
+            border-radius: var(--border-radius, 0.25rem);
             font-size: 1rem;
             appearance: none;
             cursor: pointer;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-family: inherit;
         }
 
         select:focus {
             outline: none;
-            border-color: var(--text-color);
-            box-shadow: 0 0 0 0.15em rgba(240, 192, 64, 0.3);
+            border-color: var(--text-color, #e0e0e0);
+            box-shadow: 0 0 0 0.15em rgba(var(--accent-color-rgb, 240, 192, 64), 0.3);
         }
 
-        /* Difficulty Options */
         .difficulty-options {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
@@ -149,11 +173,12 @@
             justify-content: center;
             align-items: center;
             padding: 0.75em 1em;
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius, 0.25rem);
             font-weight: bold;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             border: 0.1em solid transparent;
             font-style: normal;
+            text-align: center;
         }
 
         .difficulty-option input:checked+.difficulty-label {
@@ -162,25 +187,25 @@
         }
 
         .difficulty-option input:focus+.difficulty-label {
-            outline: var(--focus-outline);
+            outline: var(--focus-outline, 2px solid var(--accent-color, #f0c040));
+            outline-offset: 2px;
         }
 
         .easy {
-            background-color: var(--success-color);
+            background-color: var(--success-color, #28a745);
             color: #fff;
         }
 
         .medium {
-            background-color: var(--warning-color);
-            color: #fff;
+            background-color: var(--warning-color, #ffc107);
+            color: #000;
         }
 
         .hard {
-            background-color: var(--danger-color);
+            background-color: var(--danger-color, #dc3545);
             color: #fff;
         }
 
-        /* Form Actions */
         .form-actions {
             display: flex;
             justify-content: center;
@@ -189,15 +214,16 @@
 
         .start-button {
             padding: 0.75em 2em;
-            background-color: var(--button-color);
-            color: var(--theme-color);
+            background-color: var(--button-color, #f0c040);
+            color: var(--theme-color, #1a1a2e);
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius, 0.25rem);
             font-size: 1.125rem;
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             min-width: 10rem;
+            text-align: center;
         }
 
         .start-button:hover {
@@ -205,11 +231,6 @@
             box-shadow: 0 0.15em 0.5em rgba(0, 0, 0, 0.3);
         }
 
-        .start-button:focus {
-            outline: var(--focus-outline);
-        }
-
-        /* Info Box */
         .info-box {
             padding: 1.5rem;
             background-color: rgba(0, 0, 0, 0.1);
@@ -217,11 +238,14 @@
         }
 
         .info-title {
-            color: var(--button-color);
+            color: var(--button-color, #f0c040);
             margin-bottom: 0.5em;
         }
 
-        /* Quick Links */
+        .quick-links {
+            width: 100%;
+        }
+
         .quick-links ul {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
@@ -233,12 +257,12 @@
             display: flex;
             align-items: center;
             padding: 1em;
-            background-color: var(--theme-color-light);
-            border-radius: var(--border-radius);
-            color: var(--text-color);
+            background-color: var(--theme-color-light, #2a2a4e);
+            border-radius: var(--border-radius, 0.25rem);
+            color: var(--text-color, #e0e0e0);
             text-decoration: none;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            border-left: 0.25em solid var(--accent-color);
+            border-left: 0.25em solid var(--accent-color, #f0c040);
         }
 
         .quick-link:hover {
@@ -246,24 +270,26 @@
             box-shadow: 0 0.15em 0.5em rgba(0, 0, 0, 0.3);
         }
 
-        .quick-link:focus {
-            outline: var(--focus-outline);
-        }
-
         .link-icon {
             font-size: 1.5rem;
             margin-right: 0.75em;
             font-style: normal;
-            text-decoration: none;
         }
 
-        /* Focus Styles for Accessibility */
+
         a:focus,
         button:focus,
-        select:focus,
+        input[type="radio"]:focus+.difficulty-label,
         input:focus {
             outline: var(--focus-outline);
             outline-offset: 0.15em;
+            box-shadow: 0 0 0 0.15em rgba(var(--accent-color-rgb), 0.3);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--text-color);
+            box-shadow: 0 0 0 0.15em rgba(var(--accent-color-rgb), 0.3);
         }
 
         .error-message {
@@ -271,39 +297,25 @@
             font-size: 0.875em;
             margin-top: 0.25em;
             display: block;
-            /* Ensure it takes space */
             min-height: 1em;
-            /* Prevent layout jump */
         }
 
-        /* Add style for invalid inputs */
         select.invalid,
-        fieldset.invalid {
-            /* Style fieldset containing radios */
-            border: 0.0625rem solid var(--danger-color, red);
+        fieldset.invalid .select-container select {
+            border: 0.1em solid var(--danger-color, red) !important;
         }
 
-        select.invalid {
+        fieldset.invalid {
             border: 0.0625rem solid var(--danger-color, red);
-            /* Override default border */
+            padding: 0.5rem;
+            border-radius: var(--border-radius, 0.25rem);
         }
 
         fieldset.invalid legend {
             color: var(--danger-color, red);
         }
 
-        /* Reduced Motion */
-        @media (prefers-reduced-motion: reduce) {
 
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms;
-                animation-iteration-count: 1;
-                transition-duration: 0.01ms;
-                scroll-behavior: auto;
-            }
-        }
     </style>
 
     <main>
