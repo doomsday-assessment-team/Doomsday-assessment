@@ -242,7 +242,7 @@ export const getUserQuestionHistory = async (
   startDate?: string,
   endDate?: string,
   offset: number = 0,
-  itemsPerPage: number = 10
+  itemsPerPage: number = 100
 ): Promise<RawUserQuestionRow[]> => {
   const whereConditions = [];
   const queryParams: any[] = [];
@@ -288,7 +288,7 @@ export const getUserQuestionHistory = async (
 
   const query = `
     WITH limited_histories AS (
-      SELECT history_id, timestamp, user_id
+      SELECT history_id, timestamp, user_id, feedback
       FROM history
       ORDER BY history_id
       LIMIT $${paramCounter++}
