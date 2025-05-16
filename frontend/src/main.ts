@@ -19,7 +19,7 @@ class App {
     "/login": { componentTag: "login-view" },
     "/history": {
       componentTag: "assessment-history",
-      // canActivate: [AuthGuard]
+      canActivate: [AuthGuard]
     },
     '/questions-and-options': { 
       componentTag: 'questions-and-options',  

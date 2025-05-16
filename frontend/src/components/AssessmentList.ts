@@ -79,7 +79,8 @@ export class AssessmentList extends HTMLElement {
     assessmentHistoryList.appendChild(loadingItem);
     try{
       const isAdmin = await checkAdminRole();
-      const assessmentHistories: AssessmentHistoryItem[] =  !isAdmin ? await apiService.get("/admin/user-question-history", this.toQueryParams(filters)) : await apiService.get("/users/user-question-history", this.toQueryParams(filters))
+      const assessmentHistories: AssessmentHistoryItem[] =  isAdmin ? await apiService.get("/admin/user-question-history", this.toQueryParams(filters)) : await apiService.get("/users/user-question-history", this.toQueryParams(filters));
+      assessmentHistoryList.replaceChildren();
       if (assessmentHistories.length === 0) {
         loadingItem.textContent = "No assessment history found.";
       } else {

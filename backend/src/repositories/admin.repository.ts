@@ -257,7 +257,7 @@ export const getUserQuestionHistory = async (
     queryParams.push(userName);
   }
 
-  if (userId != undefined) {
+  if (userId !== undefined) {
     whereConditions.push(`u.user_id = $${paramCounter++}`);
     queryParams.push(userId);
   }
