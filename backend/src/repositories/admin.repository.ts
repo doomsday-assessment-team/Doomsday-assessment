@@ -360,7 +360,7 @@ export const getAllRoles = async (): Promise<Role[]> => {
 };
 
 export async function getAllUsersWithRoles() {
-  const usersRoleResult = await db.query ( 
+  const usersRoleResult = await db.any ( 
     `
     SELECT 
       u.user_id,
@@ -375,5 +375,5 @@ export async function getAllUsersWithRoles() {
     `
   );
 
-  return usersRoleResult.rows;
+  return usersRoleResult;
 }
