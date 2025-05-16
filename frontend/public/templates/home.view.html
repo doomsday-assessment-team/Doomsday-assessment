@@ -26,10 +26,10 @@
             font-size: clamp(1rem, 2vw, 1.25rem);
             margin-bottom: 0.75em;
         }
-        
+
 
         main {
-            padding: clamp(1.5rem, 3vh, 2.5rem) 1rem;
+            padding: clamp(1.5rem, 3vh, 2.5rem) clamp(1rem, 4vw, 2.5rem);
             max-width: 75rem;
             margin: 0 auto;
             width: 100%;
@@ -53,7 +53,7 @@
         }
 
         .card-title {
-            padding: 1.5rem;
+            padding: clamp(1rem, 4vw, 1.5rem);
             background-color: rgba(0, 0, 0, 0.2);
             border-bottom: 0.1em solid rgba(255, 255, 255, 0.1);
             text-align: center;
@@ -61,7 +61,7 @@
 
         /* Form */
         .test-selection {
-            padding: 1.5rem;
+            padding: clamp(1rem, 4vw, 1.5rem);
         }
 
         .form-section {
@@ -311,7 +311,7 @@
                     <legend id="scenarios-heading">Choose a scenario:</legend>
                     <label class="select-container">
                         <select id="scenario" name="scenario" aria-labelledby="scenarios-heading" required>
-                            <option value="" disabled selected>Select a scenario</option>                       
+                            <option value="" disabled selected>Select a scenario</option>
                         </select>
                     </label>
                     <p class="error-message" id="scenario-error"></p>
@@ -319,9 +319,12 @@
 
                 <fieldset class="form-section" id="difficulty-fieldset">
                     <legend id="difficulty-heading">Select difficulty:</legend>
-                    <ul class="difficulty-options">
+                    <label class="select-container">
+                        <select id="difficulty" name="difficulty" aria-labelledby="difficulty-heading" required>
+                            <option value="" disabled selected>Select a difficulty</option>
+                        </select>
+                    </label>
 
-                    </ul>
                     <p class="error-message" id="difficulty-error"></p>
                 </fieldset>
 
