@@ -52,6 +52,5 @@ export const getGroupedUserQuestionHistory = async (
 
     return acc;
   }, {});
-
   return Object.values(grouped);
 };

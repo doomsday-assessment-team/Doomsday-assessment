@@ -123,7 +123,7 @@ export class AssessmentList extends HTMLElement {
           );
 
           assessmentHistoryItem.setAttribute("points", totalPoints.toString());
-          assessmentHistoryItem.setAttribute("feedback", assessmentHistory.feedback);
+          assessmentHistoryItem.setAttribute("feedback", assessmentHistory.feedback || "");
 
           listItem.appendChild(assessmentHistoryItem);
           assessmentHistoryList.appendChild(listItem);
