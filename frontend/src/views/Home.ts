@@ -1,5 +1,6 @@
 import { apiService, App } from "../main.js";
 import { Difficulty, Scenario } from "../types/global-types.js";
+import { checkAdminRole } from "../utils/check-admin.js";
 import { loadTemplate } from "../utils/load-template.js";
 
 export interface Question {
@@ -22,6 +23,8 @@ export class HomeView extends HTMLElement {
     private difficultyError: HTMLElement | null = null;
     private difficultyOptionsList: HTMLSelectElement | null = null;
     private scenarios: Scenario[] = [];
+
+    private addOptionsButton: HTMLUListElement | null = null;
 
     constructor() {
         super();
@@ -51,6 +54,10 @@ export class HomeView extends HTMLElement {
         this.scenarioError = this.shadowRootInstance.querySelector('#scenario-error');
         this.difficultyError = this.shadowRootInstance.querySelector('#difficulty-error');
         this.difficultyOptionsList = this.shadowRootInstance.querySelector('#difficulty');
+        this.addOptionsButton = this.shadowRootInstance?.querySelector('#admin-questions-link-li');
+
+        this.hideAdminLinkButton();
+
     }
 
     private async populateScenarios() {
@@ -66,7 +73,7 @@ export class HomeView extends HTMLElement {
             while (this.scenarioSelect.options.length > 1) {
                 this.scenarioSelect.remove(1);
             }
-        
+
             scenarios.map((scenario, index: number) => {
                 const optionElement = document.createElement('option');
                 optionElement.value = String(scenario.scenario_id);
@@ -93,7 +100,7 @@ export class HomeView extends HTMLElement {
             while (this.difficultyOptionsList.options.length > 1) {
                 this.difficultyOptionsList.remove(1);
             }
-        
+
             difficulties.map((difficulty, index: number) => {
                 const optionElement = document.createElement('option');
                 optionElement.value = String(difficulty.question_difficulty_id);
@@ -109,6 +116,25 @@ export class HomeView extends HTMLElement {
             if (this.difficultyError) {
                 this.difficultyError.textContent = "Could not load difficulty levels.";
             }
+        }
+    }
+
+    async hideAdminLinkButton() {
+        if (this.addOptionsButton) {
+
+            try {
+                const isAdmin = await checkAdminRole();
+                if (!isAdmin) {
+                    this.addOptionsButton.classList.add('hidden');
+                } else {
+                    this.addOptionsButton.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Error checking admin role:", error);
+                this.addOptionsButton.classList.add('hidden');
+            }
+        } else {
+            console.warn("Admin link not found.");
         }
     }
 

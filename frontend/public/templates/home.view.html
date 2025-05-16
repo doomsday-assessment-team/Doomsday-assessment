@@ -43,6 +43,10 @@
             font-size: 0.875rem;
         }
 
+        .hidden {
+            display: none;
+        }
+
         /* Card */
         .test-card {
             background-color: var(--theme-color-light);
@@ -276,11 +280,11 @@
         select.invalid,
         fieldset.invalid {
             /* Style fieldset containing radios */
-            border: 1px solid var(--danger-color, red);
+            border: 0.0625rem solid var(--danger-color, red);
         }
 
         select.invalid {
-            border: 1px solid var(--danger-color, red);
+            border: 0.0625rem solid var(--danger-color, red);
             /* Override default border */
         }
 
@@ -356,7 +360,7 @@
                     </a>
                 </li>
 
-                <li>
+                <li id="admin-questions-link-li">
                     <a href="#/questions-and-options" class="quick-link">
                         <abbr class="link-icon" title="Add Questions, Options and Points">📝</abbr>
                         Add Questions, Options and Points
