@@ -356,20 +356,39 @@ export class QuizView extends HTMLElement {
             const result = await apiService.post<QuizAttemptResult>('/quiz/attempts', attept);
             console.info(result);
             if (this.questionContainer && this.nextButton) {
-                this.questionContainer.innerHTML = `
-                    <h2>Quiz Complete!</h2>
-                    <p><strong>${result.result_title || 'Your Results'}</strong></p>
-                    <p>Total Score: ${result.total_score} points.</p>
-                    <p>${result.result_feedback || 'Thank you for completing the quiz.'}</p>
-                    <button id="quiz-view-close-btn">Close</button> <!-- Example: Add a close button -->
-                `;
-                const closeButton = this.shadowRootInstance.querySelector('#quiz-view-close-btn');
-                if (closeButton) {
-                    closeButton.addEventListener('click', () => {
-                        App.navigate('/');
-                        this.dispatchEvent(new CustomEvent('quizcompleted', { bubbles: true, composed: true, detail: result }));
-                    });
-                }
+
+                this.questionContainer.innerHTML = '';
+
+                const heading = document.createElement('h2');
+                const titleParagraph = document.createElement('p');
+                const titleStrong = document.createElement('strong');
+                const scoreParagraph = document.createElement('p');
+                const feedbackParagraph = document.createElement('p');
+                const closeButton = document.createElement('button');
+
+                heading.textContent = 'Quiz Complete!';
+
+                titleStrong.textContent = result.result_title || 'Your Results';
+                titleParagraph.appendChild(titleStrong);
+
+                scoreParagraph.textContent = `Total Score: ${result.total_score} points.`;
+                feedbackParagraph.textContent = result.result_feedback || 'Thank you for completing the quiz.';
+
+                closeButton.id = 'quiz-view-close-btn';
+                closeButton.textContent = 'Close';
+
+                closeButton.addEventListener('click', () => {
+                    App.navigate('/');
+                    this.dispatchEvent(new CustomEvent('quizcompleted', { bubbles: true, composed: true, detail: result }));
+                });
+
+                this.questionContainer.appendChild(heading);
+                this.questionContainer.appendChild(titleParagraph);
+                this.questionContainer.appendChild(scoreParagraph);
+                this.questionContainer.appendChild(feedbackParagraph);
+                this.questionContainer.appendChild(closeButton);
+
+
             }
 
         } catch (error) {
