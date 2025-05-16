@@ -3,6 +3,7 @@ import db from "../config/db";
 import { Question, QuizAttemptInput, QuizAttemptResult } from "../types/quiz";
 import { createHistory, createHistoryQuestions, findQuestionsByCriteria, getPointsForOptions, getQuestion, updateQuestions } from "../repositories/quiz.repository";
 import { DatabaseError } from "pg-protocol";
+import { getgeminiFeedback } from "../routes/quiz.routes";
 
 // Custom Error class for better status code handling
 export class ServiceError extends Error {
@@ -86,9 +87,10 @@ export class QuizService {
       }
 
       let resultTitle = "Survivor";
-      let resultFeedback = "You made it through!";
 
-      const { history_id, timestamp } = await createHistory(userId, t);
+      let geminiFeedback = await getgeminiFeedback(attemptInput) ?? '';
+
+      const { history_id, timestamp, feedback } = await createHistory(userId, geminiFeedback.substring(0, 253), t);
       await createHistoryQuestions(history_id, selected_options, t);
 
       return {
@@ -98,9 +100,10 @@ export class QuizService {
         total_score: totalScore,
         scenario_id,
         result_title: resultTitle,
-        result_feedback: resultFeedback,
+        result_feedback: feedback,
       };
     }).catch((error: any) => {
+      console.error(error);
       if (error instanceof DatabaseError && error.code) {
         throw new ServiceError('Invalid input data. Please check scenario, question, or option IDs.', 400);
       } else if (error instanceof ServiceError) throw error;
