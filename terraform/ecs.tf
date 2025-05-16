@@ -80,6 +80,10 @@ resource "aws_ecs_task_definition" "doomsday_ecs_task" {
         {
           name = "DB_CONNECTION_STRING",
           valueFrom = "${data.aws_secretsmanager_secret.db_connection.arn}:db_connection::"
+        },
+        {
+          name = "GEMINI_API_KEY",
+          valueFrom = "${data.aws_secretsmanager_secret.gemini.arn}:gemini_api::"
         }
 
       ],

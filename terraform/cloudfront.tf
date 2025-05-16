@@ -23,6 +23,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   comment             = "S3 static website distribution for doomsday"
   default_root_object = "index.html"
 
+
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
@@ -30,10 +31,10 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+    default_ttl            = 0
+    max_ttl                = 0
 
-    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+    cache_policy_id = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
 
   }
 
@@ -94,6 +95,7 @@ resource "aws_cloudfront_distribution" "alb_cf_distribution" {
     viewer_protocol_policy = "redirect-to-https"
 
     cache_policy_id = "78644860-371e-416c-9ffe-fda1f3de1a74"
+
   }
 
   restrictions {

@@ -20,6 +20,7 @@ interface OptionPoints {
 interface HistoryRecord {
     history_id: number;
     timestamp: Date;
+    feedback: string;
 }
 
 export const findQuestionsByCriteria = async ({
@@ -30,7 +31,7 @@ export const findQuestionsByCriteria = async ({
     scenario_id: number;
     question_difficulty_id?: number;
     limit?: number;
-}): Promise<Question[]> =>{
+}): Promise<Question[]> => {
     let baseQuery = `
     SELECT
       q.question_id,
@@ -79,6 +80,16 @@ export const getPointsForOptions = async (optionIds: number[], t?: ITask<any>) =
     return new Map(rows.map(row => [row.option_id, row.points]));
 }
 
+export const getOptionsbyId = async (question_id: number) => {
+    const result = await db.any('SELECT * FROM options WHERE question_id = $1', [question_id]);
+    return result;
+}
+
+export const getScenarioDetailsFromDB = async (scenario_id: number) => {
+    const result = await db.oneOrNone('SELECT scenario_id, scenario_name FROM scenarios WHERE scenario_id = $1', [scenario_id]);
+    return result;
+}
+
 export const getQuestion = async (question_id: number) => {
     const result = await db.oneOrNone('SELECT * FROM questions WHERE question_id = $1', [question_id]);
     return result;
@@ -89,14 +100,14 @@ export const updateQuestions = async (question_id: number, question_text: string
     return result;
 }
 
-export const createHistory = async (userId: number, t?: ITask<any>): Promise<HistoryRecord> => {
+export const createHistory = async (userId: number, feedback: string,  t?: ITask<any>): Promise<HistoryRecord> => {
     const queryInterface = t || db;
     const historyInsertQuery = `
-    INSERT INTO history (user_id, timestamp)
-    VALUES ($1, NOW())
-    RETURNING history_id, timestamp;
+    INSERT INTO history (user_id, feedback, timestamp)
+    VALUES ($1, $2, NOW())
+    RETURNING history_id, feedback, timestamp;
   `;
-    const row = await queryInterface.one<HistoryRecord>(historyInsertQuery, [userId]);
+    const row = await queryInterface.one<HistoryRecord>(historyInsertQuery, [userId, feedback]);
     return row;
 }
 

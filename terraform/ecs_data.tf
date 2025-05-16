@@ -13,6 +13,11 @@ data "aws_secretsmanager_secret_version" "google_secret_version" {
 data "aws_secretsmanager_secret" "db_connection" {
   name = "db-connection-string"
 }
+
+data "aws_secretsmanager_secret" "gemini" {
+  name = "gemini-api"
+}
+
 locals {
   google_secrets = jsondecode(data.aws_secretsmanager_secret_version.google_secret_version.secret_string)
 }

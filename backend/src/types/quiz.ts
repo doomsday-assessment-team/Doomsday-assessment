@@ -4,7 +4,7 @@ export interface Scenario {
     description?: string;
   }
   
-  export interface Option {
+  export interface Options {
     option_id: number;
     option_text: string;
     points: number;
@@ -17,12 +17,14 @@ export interface Scenario {
     question_difficulty_name?: string;
     difficulty_time?: number;
     scenario_id: number;
-    options: Option[];
+    options: Options[];
   }
   
   export interface SelectedOptionInput {
     question_id: number;
+    question_text: string;
     option_id: number;
+    option_text: string;
   }
   
   export interface QuizAttemptInput {

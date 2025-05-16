@@ -20,7 +20,7 @@ export class HomeView extends HTMLElement {
     private difficultyFieldset: HTMLFieldSetElement | null = null;
     private scenarioError: HTMLElement | null = null;
     private difficultyError: HTMLElement | null = null;
-    private difficultyOptionsList: HTMLUListElement | null = null;
+    private difficultyOptionsList: HTMLSelectElement | null = null;
     private scenarios: Scenario[] = [];
 
     constructor() {
@@ -50,7 +50,7 @@ export class HomeView extends HTMLElement {
         this.difficultyFieldset = this.shadowRootInstance.querySelector('#difficulty-fieldset');
         this.scenarioError = this.shadowRootInstance.querySelector('#scenario-error');
         this.difficultyError = this.shadowRootInstance.querySelector('#difficulty-error');
-        this.difficultyOptionsList = this.shadowRootInstance.querySelector('.difficulty-options');
+        this.difficultyOptionsList = this.shadowRootInstance.querySelector('#difficulty');
     }
 
     private async populateScenarios() {
@@ -79,7 +79,6 @@ export class HomeView extends HTMLElement {
             if (this.scenarioError) {
                 this.scenarioError.textContent = "Could not load scenarios. Please try again later.";
             }
-            // Optionally disable the select or show a more prominent error
         }
     }
 
@@ -90,37 +89,20 @@ export class HomeView extends HTMLElement {
 
         try {
             const difficulties: Difficulty[] = await apiService.get<Difficulty[]>('/difficulties');
-            this.difficultyOptionsList.innerHTML = ''; // Clear any static <li> elements
+
+            while (this.difficultyOptionsList.options.length > 1) {
+                this.difficultyOptionsList.remove(1);
+            }
+        
+            difficulties.map((difficulty, index: number) => {
+                const optionElement = document.createElement('option');
+                optionElement.value = String(difficulty.question_difficulty_id);
+                optionElement.textContent = difficulty.question_difficulty_name;
+                this.difficultyOptionsList?.appendChild(optionElement);
+            });
 
             console.log(difficulties);
 
-            difficulties.forEach((difficulty, index) => {
-                const li = document.createElement('li');
-                const label = document.createElement('label');
-                label.classList.add('difficulty-option');
-
-                const input = document.createElement('input');
-                input.type = 'radio';
-                input.name = 'difficulty'; // All radio buttons share the same name
-                input.value = String(difficulty.question_difficulty_id); // Use ID as value
-                // Optionally set the first one as 'required' or handle it in validation
-                if (index === 0) { // For example, make first one required if needed by validation logic
-                    // input.required = true; // HTML5 validation, but we do custom
-                }
-
-                const em = document.createElement('em');
-                em.classList.add('difficulty-label');
-                // Add class based on difficulty name for styling (e.g., 'easy', 'medium', 'hard')
-                // Ensure question_difficulty_name is not undefined or null
-                const difficultyNameClass = difficulty.question_difficulty_name?.toLowerCase() || `difficulty-${difficulty.question_difficulty_id}`;
-                em.classList.add(difficultyNameClass);
-                em.textContent = difficulty.question_difficulty_name || `Level ${difficulty.question_difficulty_id}`;
-
-                label.appendChild(input);
-                label.appendChild(em);
-                li.appendChild(label);
-                this.difficultyOptionsList?.appendChild(li);
-            });
             console.log("HomeView: Difficulties populated.");
         } catch (error) {
             console.error("HomeView: Failed to fetch or populate difficulties:", error);
@@ -149,11 +131,10 @@ export class HomeView extends HTMLElement {
         if (this.validateForm()) {
             console.log("Form validation successful.");
             const scenario = this.scenarioSelect?.value;
-            const selectedDifficultyInput = this.difficultyFieldset?.querySelector('input[name="difficulty"]:checked') as HTMLInputElement | null;
-            const difficulty = selectedDifficultyInput?.value;
+            const selectedDifficultyInput = this.difficultyOptionsList?.value;
 
-            if (scenario && difficulty) {
-                const navigationPath = `/quiz?scenario=${encodeURIComponent(scenario)}&difficulty=${encodeURIComponent(difficulty)}`;
+            if (scenario && selectedDifficultyInput) {
+                const navigationPath = `/quiz?scenario=${encodeURIComponent(scenario)}&difficulty=${encodeURIComponent(selectedDifficultyInput)}`;
                 App.navigate(navigationPath);
             } else {
 
@@ -174,8 +155,8 @@ export class HomeView extends HTMLElement {
         }
 
         const selectedDifficulty = this.difficultyFieldset?.querySelector('input[name="difficulty"]:checked');
-        if (!selectedDifficulty) {
-            this.showError(this.difficultyFieldset, this.difficultyError, "Please select a difficulty level.");
+        if (!this.difficultyOptionsList || this.difficultyOptionsList.value === "") {
+            this.showError(this.difficultyOptionsList, this.difficultyError, "Please select a difficulty level.");
             isValid = false;
         } else {
             this.clearError(this.difficultyFieldset, this.difficultyError);
@@ -207,9 +188,7 @@ export class HomeView extends HTMLElement {
             inputElement.classList.remove('invalid');
         }
     }
-    private butttonEventListener() {
-        // const questionHeader = clone.querySelector('header h2')
-    }
+
 }
 
 customElements.define('home-view', HomeView);
