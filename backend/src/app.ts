@@ -10,6 +10,7 @@ import userRoutes from './routes/user.routes';
 import quizRoutes from './routes/quiz.routes';
 import scenarioRoutes from './routes/scenario.routes'
 import difficultyRoutes from './routes/difficulty.routes'
+import questionRoutes from './routes/question.routes'
 
 const app = express();
 
@@ -42,6 +43,9 @@ app.use('/users', userRoutes);
 app.use('/quiz', quizRoutes);
 app.use('', scenarioRoutes);
 app.use('', difficultyRoutes);
+app.use('/questions', questionRoutes);
+
+
 
 app.use(errorHandler);
 
