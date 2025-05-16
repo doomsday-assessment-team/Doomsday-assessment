@@ -40,6 +40,7 @@ interface PaginatedResponse<T> {
 
 interface AssessmentHistory {
   history_id: number;
+  feedback: string;
   timestamp: string;
   scenario_id: number;
   scenario_name: string;

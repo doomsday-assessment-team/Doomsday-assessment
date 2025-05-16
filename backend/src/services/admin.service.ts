@@ -16,6 +16,7 @@ export const getGroupedUserQuestionHistory = async (
     if (!acc[historyId]) {
       acc[historyId] = {
         history_id: row.history_id,
+        feedback: row.feedback,
         timestamp: row.timestamp,
         scenario_name: row.scenario_name,
         scenario_id: row.scenario_id,

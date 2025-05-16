@@ -312,7 +312,8 @@ export const getUserQuestionHistory = async (
       o.option_id,
       o.option_text,
       h.timestamp,
-      h.history_id
+      h.history_id,
+      h.feedback
     FROM history_questions hq
     INNER JOIN limited_histories h ON hq.history_id = h.history_id
     INNER JOIN filtered_users u ON h.user_id = u.user_id

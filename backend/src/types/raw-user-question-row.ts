@@ -14,4 +14,5 @@ export interface RawUserQuestionRow {
   points: number;
   timestamp: string;
   history_id: number;
+  feedback: string;
 }

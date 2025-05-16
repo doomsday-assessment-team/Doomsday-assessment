@@ -7,6 +7,7 @@ import { checkAdminRole } from "../utils/check-admin.js";
 
 interface AssessmentHistoryItem {
   history_id: number;
+  feedback: string;
   timestamp: string;
   scenario_id: number;
   scenario_name: string;
@@ -80,10 +81,10 @@ export class AssessmentList extends HTMLElement {
     try{
       const isAdmin = await checkAdminRole();
       const assessmentHistories: AssessmentHistoryItem[] =  isAdmin ? await apiService.get("/admin/user-question-history", this.toQueryParams(filters)) : await apiService.get("/users/user-question-history", this.toQueryParams(filters));
-      assessmentHistoryList.replaceChildren();
       if (assessmentHistories.length === 0) {
         loadingItem.textContent = "No assessment history found.";
       } else {
+        assessmentHistoryList.replaceChildren();
         const optionsDate: Intl.DateTimeFormatOptions = {
           weekday: "long",
           day: "numeric",
@@ -122,10 +123,7 @@ export class AssessmentList extends HTMLElement {
           );
 
           assessmentHistoryItem.setAttribute("points", totalPoints.toString());
-          assessmentHistoryItem.setAttribute(
-            "feedback",
-            totalPoints > 5 ? "Great job!" : "Needs improvement."
-          );
+          assessmentHistoryItem.setAttribute("feedback", assessmentHistory.feedback);
 
           listItem.appendChild(assessmentHistoryItem);
           assessmentHistoryList.appendChild(listItem);
