@@ -54,7 +54,6 @@ router.get('/google/callback', async (req, res) => {
     const user = await loginUser(
       googleUser.given_name,
       googleUser.family_name,
-      googleUser.email,
       googleUser.id
     )
 
@@ -62,6 +61,7 @@ router.get('/google/callback', async (req, res) => {
 
     const payload = {
       roles: user.roles,
+      user_id: user.user_id,
       google_subject: googleUser.id,
       email: googleUser.email,
       verified_email: googleUser.verified_email,

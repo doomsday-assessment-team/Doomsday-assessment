@@ -14,7 +14,15 @@ import questionRoutes from './routes/question.routes'
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: "*",
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'], 
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const publicPath = path.join(__dirname, '../../frontend/public');

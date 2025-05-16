@@ -1,5 +1,6 @@
 import { apiService } from "../main.js";
 import { Difficulty, Scenario } from "../types/global-types.js";
+import { checkAdminRole } from "../utils/check-admin.js";
 import { loadTemplate } from "../utils/load-template.js";
 
 export class AssessmentFilters extends HTMLElement {
@@ -18,7 +19,17 @@ export class AssessmentFilters extends HTMLElement {
       this.shadowRoot?.appendChild(content);
       this.populateDifficulties();
       this.populateScenarios();
+      const today = new Date();
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(today.getFullYear() - 1);
+      const todayStr = today.toISOString().split("T")[0];
+      const oneYearAgoStr = oneYearAgo.toISOString().split("T")[0];
+      const fromInput = this.shadowRoot?.getElementById("from-date") as HTMLInputElement;
+      const toInput = this.shadowRoot?.getElementById("to-date") as HTMLInputElement;
+      if (fromInput) fromInput.value = oneYearAgoStr;
+      if (toInput) toInput.value = todayStr;
       this.addEventListeners();
+      this.hideUserFilter();
     } else {
       // content is null
     }
@@ -26,17 +37,16 @@ export class AssessmentFilters extends HTMLElement {
 
   private async populateScenarios() {
     try {
-      const scenarios: Scenario[] = await apiService.get<Scenario[]>(
-        "/scenarios"
-      );
+      const scenarios: Scenario[] = await apiService.get<Scenario[]>("/scenarios");
       const scenarioList = this.shadowRoot?.getElementById("scenarios-list");
       if (!scenarioList) return;
-
+      scenarioList.replaceChildren();
       scenarios.forEach((scenario) => {
         const listItem = document.createElement("li");
-
         const listInput = document.createElement("input");
         listInput.setAttribute("type", "checkbox");
+        listInput.checked = true;
+        this.selectedScenarios.push(scenario.scenario_id);
         listInput.setAttribute("name", "scenario");
         listInput.setAttribute("value", String(scenario.scenario_id));
         listInput.addEventListener("change", (event) => {
@@ -65,6 +75,15 @@ export class AssessmentFilters extends HTMLElement {
     }
   }
 
+  private async hideUserFilter() {
+    const isAdmin = await checkAdminRole();
+    const userFilterItem = this.shadowRoot?.getElementById('admin-filter');
+    
+    if (userFilterItem) {
+      (userFilterItem as HTMLElement).style.display = isAdmin ? 'list-item' : 'none';
+    }
+  }
+
   private async populateDifficulties() {
     try {
       const scenarios: Difficulty[] = await apiService.get<Difficulty[]>(
@@ -73,11 +92,12 @@ export class AssessmentFilters extends HTMLElement {
       const difficultiesList = this.shadowRoot?.getElementById("difficulties-list");
       if (!difficultiesList) return;
       difficultiesList.replaceChildren();
-      difficultiesList.replaceChildren();
       scenarios.map((difficulty) => {
         const listItem = document.createElement("li");
         const listInput = document.createElement("input");
         listInput.setAttribute("type", "checkbox");
+        listInput.checked = true;
+        this.selectedDifficulties.push(difficulty.question_difficulty_id);
         listInput.setAttribute("name", "difficulty");
         listInput.setAttribute("value",String(difficulty.question_difficulty_id));
         listInput.addEventListener("change", (event) => {
@@ -107,12 +127,19 @@ export class AssessmentFilters extends HTMLElement {
   }
 
   addEventListeners() {
-    const dateFromInput = this.shadowRoot?.getElementById("date-filter");
-    const dateToInput = this.shadowRoot?.getElementById("date-filter");
+    const dateFromInput = this.shadowRoot?.getElementById("from-date");
+    const dateToInput = this.shadowRoot?.getElementById("to-date");
     const scenarioFilter = this.shadowRoot?.getElementById("scenario-filter");
     const difficultyFilter = this.shadowRoot?.getElementById("difficulty-filter");
     const userFilter = this.shadowRoot?.getElementById("user-filter");
-    dateFromInput?.addEventListener("input", () => this.filterChanged());
+    dateFromInput?.addEventListener("input", () => {
+      const fromInput = dateFromInput as HTMLInputElement;
+      const toInput = dateToInput as HTMLInputElement;
+      if (toInput && fromInput.value > toInput.value) {
+        toInput.value = fromInput.value;
+      }
+      this.filterChanged();
+    });
     dateToInput?.addEventListener("input", () => this.filterChanged());
     scenarioFilter?.addEventListener("change", () => this.filterChanged());
     difficultyFilter?.addEventListener("change", () => this.filterChanged());
@@ -136,55 +163,57 @@ export class AssessmentFilters extends HTMLElement {
         composed: true,
       })
     );
-    console.log("Filters applied: ", filters);
   }
 
-  getCurrentFilters() {
+  getCurrentFilters(): Filters {
     const dateFrom = (
-      this.shadowRoot?.getElementById("date-filter") as HTMLInputElement
+      this.shadowRoot?.getElementById("from-date") as HTMLInputElement
     )?.value;
     const dateTo = (
-      this.shadowRoot?.getElementById("date-filter") as HTMLInputElement
+      this.shadowRoot?.getElementById("to-date") as HTMLInputElement
     )?.value;
-    const scenario = (
-      this.shadowRoot?.getElementById("scenario-filter") as HTMLSelectElement
-    )?.value;
-    const difficulty = (
-      this.shadowRoot?.getElementById("difficulty-filter") as HTMLSelectElement
-    )?.value;
-    const user = (
+    const userName = (
       this.shadowRoot?.getElementById("user-filter") as HTMLInputElement
     )?.value;
 
     return {
-      dateFrom,
-      dateTo,
-      scenario,
-      difficulty,
-      user,
+      dateFrom: dateFrom ? new Date(dateFrom) : undefined,
+      dateTo: dateTo ? new Date(dateTo) : undefined,
+      userName,
       difficulties: this.selectedDifficulties,
       scenarios: this.selectedScenarios,
     };
   }
 
   clearFilters() {
-    const dateFilter = this.shadowRoot?.getElementById(
-      "date-filter"
-    ) as HTMLInputElement;
-    dateFilter.value = "";
-    const scenarioFilter = this.shadowRoot?.getElementById(
-      "scenario-filter"
-    ) as HTMLSelectElement;
-    scenarioFilter.value = "";
-    const difficultyFilter = this.shadowRoot?.getElementById(
-      "difficulty-filter"
-    ) as HTMLSelectElement;
-    difficultyFilter.value = "";
-    const userFilter = this.shadowRoot?.getElementById(
-      "user-filter"
-    ) as HTMLInputElement;
-    userFilter.value = "";
+    const today = new Date();
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+    const todayStr = today.toISOString().split("T")[0];
+    const oneYearAgoStr = oneYearAgo.toISOString().split("T")[0];
+
+    const fromInput = this.shadowRoot?.getElementById("from-date") as HTMLInputElement;
+    const toInput = this.shadowRoot?.getElementById("to-date") as HTMLInputElement;
+    const userFilter = this.shadowRoot?.getElementById("user-filter") as HTMLInputElement;
+
+    if (fromInput) fromInput.value = oneYearAgoStr;
+    if (toInput) toInput.value = todayStr;
+    if (userFilter) userFilter.value = "";
+    
+    const checkboxLists = ["scenarios-list", "difficulties-list"];
+    checkboxLists.forEach(listId => {
+      const list = this.shadowRoot?.getElementById(listId);
+      if (list) {
+        const checkboxes = list.querySelectorAll('input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
+        checkboxes.forEach(checkbox => {
+          checkbox.checked = true;
+        });
+      }
+    });
+
     this.filterChanged();
   }
+
 }
 customElements.define("assessment-filters", AssessmentFilters);

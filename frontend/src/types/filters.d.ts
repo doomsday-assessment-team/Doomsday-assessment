@@ -1,8 +1,8 @@
 interface Filters {
-    dateFrom: Date;
-    dateTo: Date;
-    scenario: string;
-    difficulty: string;
-    user: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+    scenarios?: number[];
+    difficulties?: number[];
+    userName?: string;
 };
 

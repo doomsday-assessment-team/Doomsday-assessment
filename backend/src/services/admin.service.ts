@@ -3,12 +3,13 @@ import { AssessmentHistory } from '../types/global-types';
 
 export const getGroupedUserQuestionHistory = async (
   userName?: string,
-  scenarioId?: number,
-  difficultyId?: number,
+  userId?: number,
+  scenarios?: string,
+  difficulties?: string,
   startDate?: string,
   endDate?: string,
 ): Promise<AssessmentHistory[]> => {
-  const rows = await getUserQuestionHistory(userName, scenarioId, difficultyId, startDate, endDate);
+  const rows = await getUserQuestionHistory(userName, userId, scenarios, difficulties, startDate, endDate);
   const grouped = rows.reduce<Record<string, AssessmentHistory>>((acc, row) => {
     const historyId = row.history_id.toString();
     
@@ -38,7 +39,6 @@ export const getGroupedUserQuestionHistory = async (
       acc[historyId].questions.push(question);
     }
 
-    // Check if option already exists to avoid duplicates
     const optionExists = question.options.some(o => o.option_id === row.option_id);
     
     if (!optionExists) {

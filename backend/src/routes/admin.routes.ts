@@ -1,14 +1,13 @@
 import express, { Request, Response, NextFunction } from 'express';
 import * as db from '../repositories/admin.repository';
-import { authenticateJWT, checkAdminRole } from '../middlewares/auth.middleware';
 import { validateParamsWithMessage } from '../utils/parameter-validation';
 import { ErrorResponse } from '../types/error-response';
 import { getGroupedUserQuestionHistory } from '../services/admin.service';
+import { checkAssessmentManagerRole } from '../middlewares/auth.middleware';
 
 const router = express.Router();
 
-// router.use(authenticateJWT);
-// router.use(checkAdminRole);
+// router.use(checkAssessmentManagerRole);
 
 router.post('/scenarios', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -396,30 +395,36 @@ router.delete('/difficulty-levels/:id', async (req: Request, res: Response, next
 router.get('/user-question-history', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const validationError = validateParamsWithMessage(req.query, [
-      { name: 'scenario_id', type: 'number', required: false },
-      { name: 'difficulty_id', type: 'number', required: false },
+      { name: 'scenarios', type: 'string', required: false },
+      { name: 'difficulties', type: 'string', required: false },
       { name: 'start_date', type: 'string', required: false },
       { name: 'end_date', type: 'string', required: false },
       { name: 'user_name', type: 'string', required: false }
     ]);
-    
+
     if (validationError) {
       const errorResponse: ErrorResponse = {
         error: 'ValidationError',
         message: validationError
       };
       res.status(400).json(errorResponse);
+    } else {
+      if (req.query.scenarios && !(/^(\d+,)*\d+$/.test(req.query.scenarios as string))) {
+        res.status(400).json({
+          error: 'ValidationError',
+          message: "scenarios must be a comma-separated list of numbers"
+        });
+      } else {
+        const userName = req.query.user_name ? (req.query.user_name as string).replace(' ', '') : undefined;
+        const scenarios = req.query.scenarios as string | undefined;
+        const difficulties = req.query.difficulties as string | undefined;
+        const startDate = req.query.start_date as string | undefined;
+        const endDate = req.query.end_date as string | undefined;
+        const result = await getGroupedUserQuestionHistory(userName, undefined, scenarios, difficulties, startDate, endDate);
+        res.json(result);
+      }
     }
-    
-    const userName = req.query.user_name ? (req.query.user_name as string).replace(' ', '') : undefined;
-    console.log(userName);
-    const scenarioId = req.query.scenario_id ? Number(req.query.scenario_id) : undefined;
-    const difficultyId = req.query.difficulty_id ? Number(req.query.difficulty_id) : undefined;
-    const startDate = req.query.start_date as string | undefined;
-    const endDate = req.query.end_date as string | undefined;
-
-    const result = await getGroupedUserQuestionHistory(userName, scenarioId, difficultyId, startDate, endDate);
-    res.json(result);
+  
   } catch (error) {
     next(error);
   }
@@ -427,7 +432,7 @@ router.get('/user-question-history', async (req: Request, res: Response, next: N
 
 router.post('/user-roles', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { user_id, role_id } = req.query;
+    const { user_id, role_id } = req.body;
 
     const validationError = validateParamsWithMessage({ user_id, role_id }, [
       { name: 'user_id', type: 'number', required: true },
@@ -442,7 +447,7 @@ router.post('/user-roles', async (req: Request, res: Response, next: NextFunctio
       res.status(400).json(errorResponse);
     } else {
       await db.addUserRole(Number(user_id), Number(role_id));
-      res.status(201).send();
+      res.status(204).send();
     }
   } catch (error) {
     next(error);
@@ -466,7 +471,7 @@ router.delete('/user-roles', async (req: Request, res: Response, next: NextFunct
       res.status(400).json(errorResponse);
     } else {
       await db.deleteUserRole(Number(user_id), Number(role_id));
-      res.status(200).send();
+      res.status(204).send();
     }
   } catch (error) {
     next(error);

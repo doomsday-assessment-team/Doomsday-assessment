@@ -7,7 +7,6 @@ CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     surname VARCHAR(50),
-    email VARCHAR(100) UNIQUE NOT NULL,
     google_subject VARCHAR(100) UNIQUE NOT NULL
 );
 
@@ -19,7 +18,7 @@ CREATE TABLE user_roles (
 
 CREATE TABLE scenarios (
     scenario_id SERIAL PRIMARY KEY,
-    scenario_name VARCHAR(100) NOT NULL
+    scenario_name VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE question_difficulties (
@@ -45,7 +44,8 @@ CREATE TABLE options (
 CREATE TABLE history (
     history_id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(user_id),
-    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    feedback VARCHAR(255)
 );
 
 CREATE TABLE history_questions (

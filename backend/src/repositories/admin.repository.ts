@@ -1,5 +1,4 @@
 import db from '../config/db';
-import { DBPool } from '../db/pool';
 import {
   Scenario,
   QuestionDifficulty,
@@ -237,8 +236,9 @@ export const deleteQuestion = async (questionId: number): Promise<void> => {
 
 export const getUserQuestionHistory = async (
   userName?: string,
-  scenarioId?: number,
-  difficultyId?: number,
+  userId?: number,
+  scenarios?: string,
+  difficulties?: string,
   startDate?: string,
   endDate?: string,
   offset: number = 0,
@@ -257,24 +257,31 @@ export const getUserQuestionHistory = async (
     queryParams.push(userName);
   }
 
-  if (scenarioId !== undefined) {
-    whereConditions.push(`q.scenario_id = $${paramCounter++}`);
-    queryParams.push(scenarioId);
+  if (userId != undefined) {
+    whereConditions.push(`u.user_id = $${paramCounter++}`);
+    queryParams.push(userId);
   }
 
-  if (difficultyId !== undefined) {
-    whereConditions.push(`q.question_difficulty_id = $${paramCounter++}`);
-    queryParams.push(difficultyId);
+  if (scenarios !== undefined) {
+    whereConditions.push(`q.scenario_id = ANY(string_to_array($${paramCounter++}, ',')::int[])`);
+    queryParams.push(scenarios);
+  }
+
+  if (difficulties !== undefined) {
+    whereConditions.push(`q.question_difficulty_id = ANY(string_to_array($${paramCounter++}, ',')::int[])`);
+    queryParams.push(difficulties);
   }
 
   if (startDate) {
     whereConditions.push(`h.timestamp >= $${paramCounter++}`);
-    queryParams.push(startDate);
+    queryParams.push(new Date(startDate));
   }
 
   if (endDate) {
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
     whereConditions.push(`h.timestamp <= $${paramCounter++}`);
-    queryParams.push(endDate);
+    queryParams.push(end);
   }
 
   const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
@@ -320,12 +327,21 @@ export const getUserQuestionHistory = async (
   return db.manyOrNone<RawUserQuestionRow>(query, queryParams);
 };
 
-export const addUserRole = async (userName: number, roleId: number): Promise<{role_id: number, user_id: number}> => {
+export const addUserRole = async (userId: number, roleId: number) => {
+  const exists = await db.oneOrNone(
+    `SELECT 1 FROM user_roles WHERE user_id = $1 AND role_id = $2`,
+    [userId, roleId]
+  );
+
+  if (exists) {
+    throw new Error("User already has this role.");
+  }
+
   return db.one(
     `INSERT INTO user_roles (user_id, role_id) 
      VALUES ($1, $2) 
      RETURNING user_role_id`,
-    [userName, roleId]
+    [userId, roleId]
   );
 };
 
@@ -344,13 +360,12 @@ export const getAllRoles = async (): Promise<Role[]> => {
 };
 
 export async function getAllUsersWithRoles() {
-  const usersRoleResult = await DBPool.query ( 
+  const usersRoleResult = await db.query ( 
     `
     SELECT 
       u.user_id,
       u.name,
       u.surname,
-      u.email,
       u.google_subject,
       ARRAY_AGG(r.role_name) AS roles
     FROM users u
