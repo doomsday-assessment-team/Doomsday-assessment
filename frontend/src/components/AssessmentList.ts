@@ -72,6 +72,7 @@ export class AssessmentList extends HTMLElement {
   async fetchHistory(filters: Filters = {}) {
     const assessmentHistoryList = this.shadowRoot?.getElementById("assessment-history");
     if (!assessmentHistoryList) return;
+    assessmentHistoryList.replaceChildren();
     const loadingItem = document.createElement("li");
     loadingItem.textContent = "Loading...";
     loadingItem.setAttribute("id", "loading-item");
@@ -79,12 +80,8 @@ export class AssessmentList extends HTMLElement {
     try{
       const isAdmin = await checkAdminRole();
       const assessmentHistories: AssessmentHistoryItem[] =  !isAdmin ? await apiService.get("/admin/user-question-history", this.toQueryParams(filters)) : await apiService.get("/users/user-question-history", this.toQueryParams(filters))
-      assessmentHistoryList.replaceChildren();
       if (assessmentHistories.length === 0) {
-        const emptyItem = document.createElement("li");
-        emptyItem.textContent = "No assessment history found.";
-        emptyItem.className = "empty-state";
-        assessmentHistoryList.appendChild(emptyItem);
+        loadingItem.textContent = "No assessment history found.";
       } else {
         const optionsDate: Intl.DateTimeFormatOptions = {
           weekday: "long",

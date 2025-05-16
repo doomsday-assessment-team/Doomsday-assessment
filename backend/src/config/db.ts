@@ -12,7 +12,7 @@ const db = pgp({
   database: environmentVariables.DB_NAME,
   user: environmentVariables.DB_USER,
   password: environmentVariables.DB_PASSWORD,
-  ssl: { rejectUnauthorized: false }
+  // ssl: { rejectUnauthorized: false }
 });
 
 export default db;

@@ -432,7 +432,7 @@ router.get('/user-question-history', async (req: Request, res: Response, next: N
 
 router.post('/user-roles', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { user_id, role_id } = req.query;
+    const { user_id, role_id } = req.body;
 
     const validationError = validateParamsWithMessage({ user_id, role_id }, [
       { name: 'user_id', type: 'number', required: true },
@@ -447,7 +447,7 @@ router.post('/user-roles', async (req: Request, res: Response, next: NextFunctio
       res.status(400).json(errorResponse);
     } else {
       await db.addUserRole(Number(user_id), Number(role_id));
-      res.status(201).send();
+      res.status(204).send();
     }
   } catch (error) {
     next(error);
@@ -471,7 +471,7 @@ router.delete('/user-roles', async (req: Request, res: Response, next: NextFunct
       res.status(400).json(errorResponse);
     } else {
       await db.deleteUserRole(Number(user_id), Number(role_id));
-      res.status(200).send();
+      res.status(204).send();
     }
   } catch (error) {
     next(error);
