@@ -13,17 +13,3 @@ export const createQuestion = async (data: {
 }) => {
   return await questionModel.addQuestion(data);
 };
-
-export const editQuestion = async (
-  id: number,
-  data: {
-    question_text: string;
-    options: { option_text: string; points: number }[];
-  }
-) => {
-  return await questionModel.updateQuestion(id, data);
-};
-
-export const removeQuestion = async (id: number) => {
-  return await questionModel.deleteQuestion(id);
-};

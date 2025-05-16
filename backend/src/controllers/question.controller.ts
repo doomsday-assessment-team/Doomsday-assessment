@@ -21,20 +21,3 @@ export const createQuestion = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const editQuestion = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await questionService.editQuestion(Number(req.params.id), req.body);
-    res.status(200).send('Updated');
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const removeQuestion = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await questionService.removeQuestion(Number(req.params.id));
-    res.status(204).send();
-  } catch (error) {
-    next(error);
-  }
-};

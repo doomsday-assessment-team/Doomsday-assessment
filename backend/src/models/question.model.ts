@@ -1,4 +1,3 @@
-// models/question.model.ts
 import db from '../config/db';
 
 interface OptionInput {
@@ -91,52 +90,5 @@ export const addQuestion = async (question: QuestionInput): Promise<number> => {
 
     await t.batch(optionQueries);
     return questionId;
-  });
-};
-
-export const updateQuestion = async (
-  questionId: number,
-  data: {
-    question_text: string;
-    options: OptionInput[];
-  }
-) => {
-  return db.tx(async t => {
-    await t.none(`
-      UPDATE questions
-      SET question_text = $1
-      WHERE question_id = $2;
-    `, [data.question_text, questionId]);
-
-    await t.none(`DELETE FROM options WHERE question_id = $1;`, [questionId]);
-
-    const optionTexts = data.options.map(o => o.option_text.trim());
-    const duplicates = optionTexts.filter((text, index) => optionTexts.indexOf(text) !== index);
-
-    if (duplicates.length > 0) {
-    throw new Error(`Duplicate option_text values in update: ${duplicates.join(', ')}`);
-    }
-
-    const uniqueOptions = Array.from(
-      new Map(
-        data.options.map(opt => [opt.option_text.trim(), opt])
-      ).values()
-    );
-
-    const insertOptions = uniqueOptions.map(opt =>
-      t.none(`
-        INSERT INTO options (question_id, option_text, points)
-        VALUES ($1, $2, $3);
-      `, [questionId, opt.option_text.trim(), opt.points])
-    );
-
-    await t.batch(insertOptions);
-  });
-};
-
-export const deleteQuestion = async (questionId: number): Promise<void> => {
-  return db.tx(async t => {
-    await t.none(`DELETE FROM options WHERE question_id = $1;`, [questionId]);
-    await t.none(`DELETE FROM questions WHERE question_id = $1;`, [questionId]);
   });
 };

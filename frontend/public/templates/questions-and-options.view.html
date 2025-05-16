@@ -58,19 +58,18 @@
       border-radius: var(--border-radius);
       box-sizing: border-box;
       margin-bottom: 0.5rem;
+      background-repeat: no-repeat;
+      background-position: right 0.7rem center;
+      background-size: 1.2rem;
     }
 
     select {
       background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d4a017'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+      -webkit-appearance: none;
+      -moz-appearance: none;
       background-repeat: no-repeat;
       background-position: right 0.7rem center;
       background-size: 1.2rem;
-      cursor: pointer;
-    }
-
-    input[type="text"] {
-      background-image: none !important;
-      cursor: text;
     }
 
     button {
@@ -123,7 +122,6 @@
       display: none;
     }
 
-    /* New styling for option list rows */
     .option-item {
       display: flex;
       flex-direction: column;

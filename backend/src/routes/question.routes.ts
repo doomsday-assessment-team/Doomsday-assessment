@@ -1,4 +1,3 @@
-// routes/question.route.ts
 import express from 'express';
 import * as questionService from '../services/question.service';
 
