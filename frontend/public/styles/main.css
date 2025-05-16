@@ -35,8 +35,6 @@ body {
 }
 
 header {
-  background-color: var(--theme-color-light);
-  border-bottom: 0.15em solid var(--accent-color);
   text-align: center;
   width: 100%;
   flex-shrink: 0;
