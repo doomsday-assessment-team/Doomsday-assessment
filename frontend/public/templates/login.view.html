@@ -1,155 +1,121 @@
 <template id="login-view">
   <style>
-    .hidden {
-      display: none !important;
-      /* !important to override other display styles if necessary */
-    }
-
-    h2 {
-      font-size: clamp(1.25rem, 3vw, 2rem);
-      margin-bottom: 0.5em;
-    }
-
-    a {
-      color: var(--text-color);
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    a:focus {
-      outline: var(--focus-outline);
-      outline-offset: 0.15em;
-    }
-
-    main {
-      flex: 1;
+    .login-view {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--base-spacing);
+      min-height: 100vh;
+      padding: 1rem;
     }
-
-    main section {
-      background-color: var(--theme-color-light);
-      border-radius: var(--card-border-radius);
-      padding: 2rem;
-      max-width: 30rem;
-      width: 100%;
-      box-shadow: 0 0.25em 1em rgba(0, 0, 0, 0.2);
-      text-align: center;
-    }
-
-    main p {
+    
+    .welcome-message {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #d5c9a6;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
       margin-bottom: 2rem;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(213, 201, 166, 0.3);
     }
 
-    main p:last-of-type {
-      margin-bottom: 0;
-    }
-
-    small {
-      font-size: 0.875rem;
-      color: var(--text-color-muted);
-    }
-
-    form {
-      margin-bottom: 1.5rem;
-    }
-
-    fieldset {
-      border: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .visually-hidden {
-      position: absolute;
-      width: 0.1rem;
-      height: 0.1rem;
-      padding: 0;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border-width: 0;
-    }
-
-    button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.75em 1.5em;
-      background-color: var(--button-color);
-      color: var(--theme-color);
-      border: none;
-      border-radius: var(--border-radius);
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    .login-section {
+      background-color: #2a2b21;
+      border-radius: 0.5rem;
+      padding: 2rem;
+      max-width: 28rem;
+      width: 100%;
+      text-align: center;
+      border: 1px solid #4a4c3e;
       margin: 0 auto;
     }
 
-    button:hover {
-      transform: translateY(-0.15em);
-      box-shadow: 0 0.15em 0.5em rgba(0, 0, 0, 0.3);
+    .app-title {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: #d5c9a6;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
     }
 
-    button:focus {
-      outline: var(--focus-outline);
+    h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: #a79e80;
+      font-weight: 500;
     }
 
-    button img {
-      height: 1.25em;
-      margin-right: 0.75em;
+    p {
+      margin-bottom: 2rem;
+      line-height: 1.5;
+      color: #a79e80;
     }
 
-    nav ul {
+    .google-btn {
       display: flex;
+      align-items: center;
       justify-content: center;
-      list-style: none;
-      margin-top: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background-color: #3a3c2e;
+      color: #d5c9a6;
+      border: 1px solid #d5c9a6;
+      border-radius: 0.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0 auto;
+      transition: background-color 0.2s ease;
     }
 
-    nav li+li::before {
-      content: "•";
-      margin: 0 0.5em;
-      color: var(--text-color-muted);
+    .google-btn:hover {
+      background-color: #4a4c3e;
     }
 
-    @media (prefers-reduced-motion: reduce) {
+    .google-icon-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      margin-right: 12px;
+      background-color: white;
+      border-radius: 50%;
+      padding: 5px;
+    }
 
-      *,
-      *::before,
-      *::after {
-        animation-duration: 0.01ms;
-        animation-iteration-count: 1;
-        transition-duration: 0.01ms;
-        scroll-behavior: auto;
-      }
+    .google-icon {
+      width: 100%;
+      height: 100%;
     }
   </style>
-  <main>
-    <section>
-      <h2>Prepare for the Worst</h2>
+  
+  <section class="login-view">
+    <h1 class="welcome-message">Welcome to Doomsday</h1>
+    
+    <section class="login-section">
+      <h2 class="app-title">Doomsday Assessment</h2>
+      <h3>Prepare for the Worst</h3>
 
       <p>
         Test your survival knowledge and readiness for catastrophic scenarios.
-        Sign in to track your progress and compare with other survivors.
+        Sign in to track your progress.
       </p>
 
       <form id="google-login-form" action="http://localhost:3000/auth/google" method="get">
-        <fieldset>
-          <legend class="visually-hidden">Login Options</legend>
-          <button type="submit">
-            <img src="https://developers.google.com/identity/images/g-logo.png" alt="" aria-hidden="true" />
-            Sign in with Google
-          </button>
-        </fieldset>
+        <button type="submit" class="google-btn">
+          <figure class="google-icon-container">
+            <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+          </figure>
+          Sign in with Google
+        </button>
       </form>
     </section>
-  </main>
+  </section>
 </template>
