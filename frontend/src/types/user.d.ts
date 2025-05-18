@@ -9,3 +9,7 @@ interface User {
 interface UserResponse {
   user: User;
 }
+
+interface IpResponse {
+  ip: string;
+}
