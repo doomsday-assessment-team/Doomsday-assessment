@@ -1,7 +1,7 @@
 import { loadTemplate } from "../utils/load-template.js";
-import { Question } from "../components/AssessmentList.js";
+import { Question } from "./AssessmentList.js";
 
-export class AssessmentItem extends HTMLElement {
+export class AssessmentCard extends HTMLElement {
   private questions: Question[] | undefined;
   setQuestions(questions: Question[]){
     this.questions = questions;
@@ -32,24 +32,14 @@ export class AssessmentItem extends HTMLElement {
       questionsSection.appendChild(questionItem);
     });
   }
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
+
+  connectedCallback() {
+    this.loadTemplate();
   }
-  async connectedCallback() {
-    await this.loadTemplate();
-    this.updateContent();
-  }
+
   async loadTemplate() {
-    const content = await loadTemplate(
-      "./templates/assessment-item.component.html"
-    );
-    if (content) {
-      this.shadowRoot?.appendChild(content);
-      this.renderQuestions();
-    } else {
-      // content is null
-    }
+    const content = await loadTemplate("./templates/assessment-card.component.html");
+    this.appendChild(content);
   }
   updateContent() {
     const root = this.shadowRoot;
@@ -63,4 +53,4 @@ export class AssessmentItem extends HTMLElement {
     root.getElementById("assessment-points")!.textContent = this.getAttribute("points") ?? "";
   }
 }
-customElements.define("assessment-item", AssessmentItem);
+customElements.define("assessment-card", AssessmentCard);

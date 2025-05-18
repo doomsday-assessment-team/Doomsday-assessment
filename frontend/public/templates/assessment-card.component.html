@@ -1,0 +1,211 @@
+<template>
+  <style>
+    .test-card {
+      background-color: var(--card-bg);
+      border-radius: 0.625rem;
+      border: 0.0625rem solid var(--border-color);
+      overflow: visible;
+      transition: all 0.3s ease;
+      display: grid;
+      grid-template-rows: auto;
+      width: 100%;
+    }
+
+    .test-card:hover {
+      transform: translateY(-0.3125rem);
+      box-shadow: 0 0.625rem 1.5625rem rgba(0, 0, 0, 0.2);
+      border-color: var(--primary-color);
+    }
+
+    .test-header {
+      padding: 0.9375rem;
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.625rem;
+    }
+
+    .difficulty-badge {
+      position: absolute;
+      top: 0.9375rem;
+      right: 0.9375rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      z-index: 1;
+    }
+
+    .badge-medium {
+      background-color: rgba(199, 167, 88, 0.2);
+      color: var(--medium-badge);
+      border: 0.0625rem solid var(--medium-badge);
+    }
+
+    .badge-easy {
+      background-color: rgba(138, 154, 91, 0.2);
+      color: var(--easy-badge);
+      border: 0.0625rem solid var(--easy-badge);
+    }
+
+    .badge-hard {
+      background-color: rgba(166, 92, 82, 0.2);
+      color: var(--hard-badge);
+      border: 0.0625rem solid var(--hard-badge);
+    }
+
+    .test-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 0.625rem;
+      padding-right: 5.5rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      line-height: 1.3;
+      min-height: auto;
+    }
+
+    .test-meta {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+      margin-bottom: 0.9375rem;
+      font-size: 0.875rem;
+      opacity: 0.8;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.3125rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .test-score {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      margin-bottom: 0.9375rem;
+    }
+
+    .score-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .score-label {
+      font-size: 0.875rem;
+      opacity: 0.7;
+    }
+
+    .test-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .view-details {
+      background-color: transparent;
+      color: var(--primary-color);
+      border: 0.0625rem solid var(--primary-color);
+      padding: 0.5rem 1rem;
+      border-radius: 0.3125rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .view-details:hover {
+      background-color: rgba(213, 201, 166, 0.1);
+      box-shadow: 0 0 0.625rem var(--primary-glow);
+    }
+
+    .view-details svg {
+      transition: transform 0.3s ease;
+    }
+
+    .action-button {
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+      border: 0.0625rem solid var(--border-color);
+      padding: 0.5rem 1rem;
+      border-radius: 0.3125rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .action-button:hover {
+      background-color: var(--button-hover);
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0.625rem var(--primary-glow);
+    }
+
+    .action-button.primary {
+      background-color: rgba(213, 201, 166, 0.1);
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .action-button.primary:hover {
+      background-color: rgba(213, 201, 166, 0.2);
+    }
+  </style>
+  <li class="test-card" id="test-card-1">
+    <header class="test-header">
+      <mark class="difficulty-badge badge-medium">MEDIUM</mark>
+      <h3 class="test-title">Global Cyber Attack</h3>
+      <section class="test-meta">
+        <time class="meta-item">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          Friday 19 May at 2:21 pm
+        </time>
+      </section>
+      <section class="test-score">
+        <output class="score-value">25</output>
+        <p class="score-label">points</p>
+      </section>
+      <footer class="test-actions">
+        <button class="view-details action-button primary" data-test-id="1">
+          View Details
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 18l6-6-6-6"></path>
+          </svg>
+        </button>
+      </footer>
+    </header>
+  </li>
+</template>

@@ -1,14 +1,14 @@
 import { loadTemplate } from "../utils/load-template.js";
 
-export class NotFound extends HTMLElement {
+export class StatsGrid extends HTMLElement {
   connectedCallback() {
     this.loadTemplate();
   }
 
   async loadTemplate() {
-    const content = await loadTemplate('./templates/not-found.view.html');
+    const content = await loadTemplate('./templates/stats-grid.component.html');
     this.appendChild(content);
   }
   
 }
-customElements.define('not-found', NotFound);
+customElements.define('stats-grid', StatsGrid);
