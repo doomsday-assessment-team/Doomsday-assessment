@@ -47,19 +47,12 @@ body {
     );
 }
 
-<<<<<<< HEAD
 #app {
   max-width: 75rem;
   margin: 0 auto;
   padding: 1.25rem;
   display: grid;
   grid-template-columns: 1fr;
-=======
-header {
-  text-align: center;
-  width: 100vw;
-  flex-shrink: 0;
->>>>>>> c970e829d79b93283640ba2da2abe6a67ed4825e
 }
 
 .radiation-overlay {
