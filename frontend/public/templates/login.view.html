@@ -2,7 +2,6 @@
   <style>
     .hidden {
       display: none !important;
-      /* !important to override other display styles if necessary */
     }
 
     h2 {
@@ -145,7 +144,7 @@
       <form id="google-login-form" action="http://localhost:3000/auth/google" method="get">
         <fieldset>
           <legend class="visually-hidden">Login Options</legend>
-          <button type="submit">
+          <button class="login-btn" type="submit">
             <img src="https://developers.google.com/identity/images/g-logo.png" alt="" aria-hidden="true" />
             Sign in with Google
           </button>
