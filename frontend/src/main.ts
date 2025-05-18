@@ -5,6 +5,7 @@ import "./views/Home.js";
 import "./views/NotFound.js";
 import './views/QuestionsAndOptions.js';
 import './views/Quiz.js';
+import './components/HeaderComponent.js'
 import { ApiService } from "./api/ApiService.js";
 import config from "./config.js";
 import { AuthGuard } from "./utils/guard.js";
@@ -55,12 +56,7 @@ class App {
   }
 
   static async renderRoute(path: string, queryParams: URLSearchParams) {
-    const app = document.querySelector("main");
-    if (!app) return;
-    if (!this.appContainer) {
-      return;
-    }
-    this.appContainer.replaceChildren();
+    this.appContainer!.replaceChildren();
 
 
     const routeConfig = this.routes[path as keyof typeof App.routes];;
@@ -84,7 +80,7 @@ class App {
         view.setAttribute(`data-param-${key.toLowerCase()}`, value);
       });
 
-      this.appContainer.appendChild(view);
+      this.appContainer!.appendChild(view);
 
     } else {
       this.navigate('/not-found');
@@ -94,13 +90,6 @@ class App {
 
 
   static async handleRouteChange() {
-    if (!this.appContainer) {
-      this.appContainer = document.getElementById('app');
-      if (!this.appContainer) {
-        return;
-      }
-    }
-
     const authService = new AuthService();
 
     const fullHash = window.location.hash.slice(1) || '/';
@@ -141,7 +130,7 @@ class App {
     }
   }
 
-  static init(appContainerId: string = 'main') {
+  static init(appContainerId: string = 'app') {
     this.appContainer = document.getElementById(appContainerId);
     if (!this.appContainer) {
       return;
@@ -153,5 +142,4 @@ class App {
 }
 
 document.addEventListener("DOMContentLoaded", () => App.init());
-
 export { App, apiService }

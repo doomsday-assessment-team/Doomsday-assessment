@@ -6,37 +6,29 @@ import { loadTemplate } from "../utils/load-template.js";
 export class AssessmentFilters extends HTMLElement {
   private selectedScenarios: number[] = [];
   private selectedDifficulties: number[] = [];
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
+  connectedCallback() {
     this.loadTemplate();
   }
   async loadTemplate() {
-    const content = await loadTemplate(
-      "./templates/assessment-filters.component.html"
-    );
-    if (content) {
-      this.shadowRoot?.appendChild(content);
-      this.populateDifficulties();
-      this.populateScenarios();
-      const today = new Date();
-      const oneYearAgo = new Date();
-      oneYearAgo.setFullYear(today.getFullYear() - 1);
-      const todayStr = today.toISOString().split("T")[0];
-      const oneYearAgoStr = oneYearAgo.toISOString().split("T")[0];
-      const fromInput = this.shadowRoot?.getElementById(
-        "from-date"
-      ) as HTMLInputElement;
-      const toInput = this.shadowRoot?.getElementById(
-        "to-date"
-      ) as HTMLInputElement;
-      if (fromInput) fromInput.value = oneYearAgoStr;
-      if (toInput) toInput.value = todayStr;
-      this.addEventListeners();
-      this.hideUserFilter();
-    } else {
-      // content is null
-    }
+    const content = await loadTemplate("./templates/assessment-filters.component.html");
+    this.appendChild(content);
+    // this.populateDifficulties();
+    // this.populateScenarios();
+    // const today = new Date();
+    // const oneYearAgo = new Date();
+    // oneYearAgo.setFullYear(today.getFullYear() - 1);
+    // const todayStr = today.toISOString().split("T")[0];
+    // const oneYearAgoStr = oneYearAgo.toISOString().split("T")[0];
+    // const fromInput = this.shadowRoot?.getElementById(
+    //   "from-date"
+    // ) as HTMLInputElement;
+    // const toInput = this.shadowRoot?.getElementById(
+    //   "to-date"
+    // ) as HTMLInputElement;
+    // if (fromInput) fromInput.value = oneYearAgoStr;
+    // if (toInput) toInput.value = todayStr;
+    // this.addEventListeners();
+    // this.hideUserFilter();
   }
 
   private async populateScenarios() {

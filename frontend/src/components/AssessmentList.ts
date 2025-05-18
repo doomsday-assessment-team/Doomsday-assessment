@@ -1,6 +1,6 @@
 import { loadTemplate } from "../utils/load-template.js";
-import "./AssessmentItem.js";
-import { AssessmentItem } from "./AssessmentItem.js";
+import "./AssessmentCard.js";
+import { AssessmentCard } from "./AssessmentCard.js";
 import { Option } from "../types/global-types.js";
 import { apiService } from "../main.js";
 import { checkAdminRole } from "../utils/check-admin.js";
@@ -26,22 +26,13 @@ export interface Question {
 }
 
 export class AssessmentList extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
+  connectedCallback() {
     this.loadTemplate();
   }
 
   async loadTemplate() {
-    const content = await loadTemplate(
-      "./templates/assessment-list.component.html"
-    );
-    if (content) {
-      this.shadowRoot?.appendChild(content);
-      await this.fetchHistory();
-    } else {
-      // content is null
-    }
+    const content = await loadTemplate("./templates/assessment-list.component.html");
+    this.appendChild(content);
   }
 
   private toQueryParams(filters: Filters): URLSearchParams {
@@ -127,7 +118,7 @@ export class AssessmentList extends HTMLElement {
 
           listItem.appendChild(assessmentHistoryItem);
           assessmentHistoryList.appendChild(listItem);
-          (assessmentHistoryItem as AssessmentItem).setQuestions(
+          (assessmentHistoryItem as AssessmentCard).setQuestions(
             assessmentHistory.questions
           );
         });
