@@ -1,15 +1,13 @@
-<template id="assessment-list">
+<template>
   <style>
-    #assessment-history {
+    .tests-grid {
       display: grid;
-      gap: 1.5rem;
-      margin: 0 auto;
-      padding: 1.5rem;
-      background-color: #1a1d2a;
-      list-style: none;
+      grid-template-columns: repeat(auto-fill, minmax(18.75rem, 1fr));
+      gap: 1.5625rem;
+      margin-top: 2rem;
     }
   </style>
-  <ul id="assessment-history" aria-labelledby="history-heading">
-    
+  <ul class="tests-grid">
+    <assessment-card></assessment-card>
   </ul>
 </template>

@@ -1,0 +1,44 @@
+<template id="header-component">
+  <style>
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 0;
+      border-bottom: 0.0625rem solid rgba(213, 201, 166, 0.2);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.125rem;
+      text-transform: uppercase;
+      color: var(--text-color);
+      text-shadow: 0 0 0.625rem rgba(213, 201, 166, 0.3);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.9375rem;
+    }
+
+    .user-avatar {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      background-color: var(--secondary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      border: 0.0625rem solid var(--border-color);
+    }
+  </style>
+  <header>
+    <h1 class="logo">DOOMSDAY</h1>
+    <figure class="user-info">
+      <figure class="user-avatar">MP</figure>
+    </figure>
+  </header>
+</template>

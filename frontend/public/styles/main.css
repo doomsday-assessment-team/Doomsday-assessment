@@ -1,48 +1,93 @@
 :root {
-  --theme-color: #1a1d24;
-  --accent-color: #a31f34;
-  --theme-color-light: #2a2d36;
-  --text-color: #f0c040;
-  --button-color: #f4a261;
-  --focus-outline: 0.15em solid var(--text-color);
-  --section-gap: 1.5em;
-  --button-gap: 0.75em;
-  --border-radius: 0.25em;
-  --border-size: 0.05;
-  --base-font-size: 1rem;
-  --select-color: #3a3f4b;
-  --primary-color: #3498db;
-  --error-color: #e74c3c;
-  --text-color-muted: #a0a0a0;
-  --base-spacing: 1rem;
-  --card-border-radius: 0.5em;
+  --primary-color: #d5c9a6;
+  --primary-glow: rgba(213, 201, 166, 0.3);
+  --secondary-color: #3a3c2e;
+  --text-color: #d5c9a6;
+  --dark-bg: #1a1a14;
+  --card-bg: #2a2b21;
+  --border-color: #4a4c3e;
+  --danger-color: #a67c52;
+  --danger-glow: rgba(166, 124, 82, 0.3);
+  --button-color: #3a3c2e;
+  --button-hover: #4a4c3e;
+  --success-color: #8a9a5b;
+  --warning-color: #c7a758;
+  --medium-badge: #c7a758;
+  --easy-badge: #8a9a5b;
+  --hard-badge: #a65c52;
+  --overlay-bg: rgba(26, 26, 20, 0.95);
+  --option-bg: rgba(58, 60, 46, 0.3);
+  --option-selected-bg: rgba(213, 201, 166, 0.15);
+  --option-selected-border: var(--primary-color);
+  --points-color: var(--primary-color);
 }
 
-html, body {
-  height: 100%;
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  font-family: "Rajdhani", sans-serif;
 }
 
 body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  width: 100vw;
-  font-family: system-ui, -apple-system, sans-serif;
-  background-color: var(--theme-color);
+  background-color: var(--dark-bg);
   color: var(--text-color);
-  font-size: var(--base-font-size);
+  min-height: 100%;
+  position: relative;
+  overflow-x: hidden;
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      rgba(58, 60, 46, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(58, 60, 46, 0.1) 0%,
+      transparent 50%
+    );
 }
 
+<<<<<<< HEAD
+#app {
+  max-width: 75rem;
+  margin: 0 auto;
+  padding: 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr;
+=======
 header {
   text-align: center;
   width: 100vw;
   flex-shrink: 0;
+>>>>>>> c970e829d79b93283640ba2da2abe6a67ed4825e
 }
 
-h1 {
-  font-size: clamp(1.75rem, 5vw, 3rem);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+.radiation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-radial-gradient(
+    circle at 50% 50%,
+    transparent 0,
+    rgba(58, 60, 46, 0.03) 2.5rem,
+    transparent 5rem
+  );
+  pointer-events: none;
+  z-index: -1;
+  animation: pulse 8s infinite alternate;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.flicker {
+  filter: brightness(0.5);
 }
