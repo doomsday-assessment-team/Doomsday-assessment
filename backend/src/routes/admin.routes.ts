@@ -2,8 +2,6 @@ import express, { Request, Response, NextFunction } from 'express';
 import * as db from '../repositories/admin.repository';
 import { validateParamsWithMessage } from '../utils/parameter-validation';
 import { ErrorResponse } from '../types/error-response';
-import { getGroupedUserQuestionHistory } from '../services/admin.service';
-import { checkAssessmentManagerRole } from '../middlewares/auth.middleware';
 
 const router = express.Router();
 
@@ -387,44 +385,6 @@ router.delete('/difficulty-levels/:id', async (req: Request, res: Response, next
       await db.deleteDifficultyLevel(Number(id));
       res.status(204).end();
     }
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get('/user-question-history', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const validationError = validateParamsWithMessage(req.query, [
-      { name: 'scenarios', type: 'string', required: false },
-      { name: 'difficulties', type: 'string', required: false },
-      { name: 'start_date', type: 'string', required: false },
-      { name: 'end_date', type: 'string', required: false },
-      { name: 'user_name', type: 'string', required: false }
-    ]);
-
-    if (validationError) {
-      const errorResponse: ErrorResponse = {
-        error: 'ValidationError',
-        message: validationError
-      };
-      res.status(400).json(errorResponse);
-    } else {
-      if (req.query.scenarios && !(/^(\d+,)*\d+$/.test(req.query.scenarios as string))) {
-        res.status(400).json({
-          error: 'ValidationError',
-          message: "scenarios must be a comma-separated list of numbers"
-        });
-      } else {
-        const userName = req.query.user_name ? (req.query.user_name as string).replace(' ', '') : undefined;
-        const scenarios = req.query.scenarios as string | undefined;
-        const difficulties = req.query.difficulties as string | undefined;
-        const startDate = req.query.start_date as string | undefined;
-        const endDate = req.query.end_date as string | undefined;
-        const result = await getGroupedUserQuestionHistory(userName, undefined, scenarios, difficulties, startDate, endDate);
-        res.json(result);
-      }
-    }
-  
   } catch (error) {
     next(error);
   }
