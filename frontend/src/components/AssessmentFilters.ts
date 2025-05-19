@@ -37,7 +37,6 @@ export class AssessmentFilters extends HTMLElement {
     const scenarioSelect = document.getElementById(
       "scenario-filter"
     ) as HTMLSelectElement;
-    scenarioSelect.options.length = 1;
     scenarios.forEach((scenario) => {
       const option = document.createElement("option");
       option.value = scenario.scenario_id.toString();

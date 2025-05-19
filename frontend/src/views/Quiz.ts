@@ -74,7 +74,6 @@ export class QuizView extends HTMLElement {
     }
 
     connectedCallback() {
-        console.log("QuizView connected to DOM. Reading attributes.");
         const scenarioIdAttr = this.getAttribute('data-param-scenario');
         const difficultyIdAttr = this.getAttribute('data-param-difficulty');
 
@@ -83,8 +82,6 @@ export class QuizView extends HTMLElement {
 
         if (isNaN(this.scenarioId as number)) this.scenarioId = null;
         if (isNaN(this.difficultyId as number)) this.difficultyId = null;
-
-        console.log(`QuizView: Parsed scenarioId=${this.scenarioId}, difficultyId=${this.difficultyId}`);
 
         this.initializeQuiz();
     }
@@ -142,8 +139,6 @@ export class QuizView extends HTMLElement {
     }
 
     private handleTimerExpired(event: CustomEvent) {
-        console.log("QuizView: Timer expired for question.", event);
-
         this.proceedToNextOrSubmit(true);
     }
 
@@ -327,7 +322,6 @@ export class QuizView extends HTMLElement {
 
     private async submitQuiz() {
         if (this.isQuizSubmitted) {
-            console.log("QuizView: Quiz already submitted, preventing duplicate submission.");
             return;
         }
         this.isQuizSubmitted = true;
@@ -352,7 +346,6 @@ export class QuizView extends HTMLElement {
         }
 
         try {
-            console.log(attept);
             const result = await apiService.post<QuizAttemptResult>('/quiz/attempts', attept);
             console.info(result);
             if (this.questionContainer && this.nextButton) {

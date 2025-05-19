@@ -166,8 +166,6 @@ export class HomeView extends HTMLElement {
       if (this.difficultyOptionsList.options[0]) {
         this.difficultyOptionsList.options[0].disabled = true;
       }
-
-      console.log("HomeView: Difficulties populated.");
     } catch (error) {
       console.error(
         "HomeView: Failed to fetch or populate difficulties:",
@@ -236,7 +234,6 @@ export class HomeView extends HTMLElement {
     event.preventDefault();
 
     if (this.validateForm()) {
-      console.log("Form validation successful.");
       const scenario = this.scenarioSelect?.value;
       const selectedDifficultyInput = this.difficultyOptionsList?.value;
 
