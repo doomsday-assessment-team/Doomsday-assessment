@@ -98,11 +98,23 @@ export class AssessmentFilters extends HTMLElement {
     if (scenarioSelect) {
       scenarioSelect.addEventListener("change", () => this.filterChanged());
     }
+    const today = new Date().toISOString().split('T')[0];
     if (fromDateInput) {
-      fromDateInput.addEventListener("change", () => this.filterChanged());
+      fromDateInput.addEventListener("change", () => {
+        if (fromDateInput.value > today) {
+          fromDateInput.value = today;
+        }
+        this.filterChanged();
+      });
     }
+
     if (toDateInput) {
-      toDateInput.addEventListener("change", () => this.filterChanged());
+      toDateInput.addEventListener("change", () => {
+        if (fromDateInput && fromDateInput.value > toDateInput.value) {
+          toDateInput.value = fromDateInput.value;
+        }
+        this.filterChanged();
+      });
     }
     if (sortButton) {
       sortButton.addEventListener("click", () => {

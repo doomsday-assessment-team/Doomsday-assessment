@@ -96,7 +96,7 @@ body {
 }
 
 .flicker {
-  animation: pulse 2.5s ease-in-out infinite;
+  animation: pulse 3s ease-in-out infinite;
 }
 
 #app-container {

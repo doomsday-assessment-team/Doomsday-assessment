@@ -57,16 +57,25 @@ export class AssessmentList extends HTMLElement {
       let list = this.querySelector<HTMLUListElement>(".tests-grid");
       if (list) {
         list.replaceChildren();
-        historyItems.forEach((item) => {
-          const card = document.createElement("assessment-card");
-          card.setAttribute("history-id", item.history_id.toString());
-          card.setAttribute("difficulty", item.question_difficulty_name);
-          card.setAttribute("scenario", item.scenario_name);
-          card.setAttribute("timestamp", item.timestamp);
-          card.setAttribute("score", item.total_points);
-          list.appendChild(card);
-        });
+
+        if (historyItems.length === 0) {
+          const noItemMessage = document.createElement("li");
+          noItemMessage.textContent = "No items found.";
+          noItemMessage.classList.add("no-items-message");
+          list.appendChild(noItemMessage);
+        } else {
+          historyItems.forEach((item) => {
+            const card = document.createElement("assessment-card");
+            card.setAttribute("history-id", item.history_id.toString());
+            card.setAttribute("difficulty", item.question_difficulty_name);
+            card.setAttribute("scenario", item.scenario_name);
+            card.setAttribute("timestamp", item.timestamp);
+            card.setAttribute("score", item.total_points);
+            list.appendChild(card);
+          });
+        }
       }
+
     } catch (error) {
       console.error("Failed to fetch assessment history:", error);
     }
