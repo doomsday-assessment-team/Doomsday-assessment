@@ -29,7 +29,7 @@
             --font-scale: clamp(0.85, 0.8 + 1vw, 1);
             --spacing-scale: clamp(0.8, 0.7 + 1vw, 1);
             --container-padding: calc(1.875rem * var(--spacing-scale));
-            --button-padding: calc(0.75rem * var(--spacing-scale)) calc(1.875rem * var(--spacing-scale));
+            --button-padding: calc(1rem * var(--spacing-scale)) calc(2 * var(--spacing-scale));
             --heading-size: calc(2rem * var(--font-scale));
             --subheading-size: calc(1.5rem * var(--font-scale));
             --body-size: calc(1rem * var(--font-scale));
@@ -39,7 +39,7 @@
         .quiz-question {
             background-color: rgba(26, 26, 20, 0.8);
             border-radius: var(--card-border-radius);
-            padding: var(--container-padding);
+            padding: 1rem;
             margin-top: 1.25rem;
             text-align: center;
             border: 0.0625rem solid var(--border-color);
@@ -47,6 +47,8 @@
             box-shadow: 0 0 1.875rem rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(0.3125rem);
             overflow: hidden;
+            display: inline-block;
+            justify-items: center;
         }
 
         .quiz-question::before {
@@ -63,7 +65,7 @@
             background-color: var(--button-color);
             color: var(--primary-color);
             border: 0.0625rem solid var(--primary-color);
-            padding: var(--button-padding);
+            padding: 1rem;
             border-radius: var(--border-radius);
             font-weight: 600;
             cursor: pointer;

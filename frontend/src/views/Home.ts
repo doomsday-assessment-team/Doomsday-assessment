@@ -35,6 +35,12 @@ export class HomeView extends HTMLElement {
   private dustParticles: HTMLElement | null = null
   private scanlines: HTMLElement | null = null
 
+  private scenarioContainer: HTMLElement | null = null
+  private difficultyContainer: HTMLElement | null = null
+  private difficultyDescriptions: HTMLElement | null = null
+  private selectedScenarioCard: HTMLElement | null = null
+  private selectedDifficultyLevel: HTMLElement | null = null
+
   constructor() {
     super()
     this.shadowRootInstance = this.attachShadow({ mode: "open" })
@@ -72,6 +78,11 @@ export class HomeView extends HTMLElement {
     this.radioEffect = this.shadowRootInstance.querySelector(".radio-effect")
     this.dustParticles = this.shadowRootInstance.querySelector(".dust-particles")
     this.scanlines = this.shadowRootInstance.querySelector(".scanlines")
+
+    // Bind new card UI elements
+    this.scenarioContainer = this.shadowRootInstance.querySelector("#scenario-container")
+    this.difficultyContainer = this.shadowRootInstance.querySelector("#difficulty-container")
+    this.difficultyDescriptions = this.shadowRootInstance.querySelector("#difficulty-descriptions")
 
     // Initialize ambient flicker effect
     const flicker = () => {
@@ -201,7 +212,6 @@ export class HomeView extends HTMLElement {
         lineElement.textContent += currentMessage.charAt(currentChar)
         currentChar++
 
-        // Random typing speed
         setTimeout(typeWriter, 30 + Math.random() * 50)
       } else if (!isDeleting && currentChar === currentMessage.length) {
         // Pause at the end of line
@@ -220,22 +230,34 @@ export class HomeView extends HTMLElement {
 
   private async populateScenarios() {
     if (!this.scenarioSelect) {
-      console.error("HomeView: Scenario select element not found.")
       return
     }
 
     try {
+      if (this.scenarioContainer) {
+        this.scenarioContainer.innerHTML = '<div class="loading-container"><div class="loading-spinner"></div></div>'
+      }
+
       const scenarios: Scenario[] = await apiService.get<Scenario[]>("/scenarios")
 
       while (this.scenarioSelect.options.length > 1) {
         this.scenarioSelect.remove(1)
       }
 
+      // Clear the scenario container
+      if (this.scenarioContainer) {
+        this.scenarioContainer.innerHTML = ""
+      }
+
       scenarios.map((scenario, index: number) => {
+        // Add option to the hidden select element
         const optionElement = document.createElement("option")
         optionElement.value = String(scenario.scenario_id)
         optionElement.textContent = scenario.scenario_name
         this.scenarioSelect?.appendChild(optionElement)
+
+        // Create scenario card
+        this.createScenarioCard(scenario)
       })
 
       // Play sound effect when scenarios are loaded
@@ -248,7 +270,90 @@ export class HomeView extends HTMLElement {
       if (this.scenarioError) {
         this.scenarioError.textContent = "COMMUNICATION ERROR: Unable to retrieve scenario data. System compromised."
       }
+
+      // Show error in the scenario container
+      if (this.scenarioContainer) {
+        this.scenarioContainer.innerHTML = '<p class="error-message">Failed to load scenarios. Please try again.</p>'
+      }
     }
+  }
+
+  private createScenarioCard(scenario: Scenario) {
+    if (!this.scenarioContainer) return
+
+    const scenarioId = scenario.scenario_id
+    const scenarioName = scenario.scenario_name
+    const icon = this.getScenarioIcon(scenarioName)
+
+    const card = document.createElement("label")
+    card.className = "scenario-card"
+    card.htmlFor = `scenario-card-${scenarioId}`
+
+    card.innerHTML = `
+      <input type="radio" id="scenario-card-${scenarioId}" name="scenario-card" value="${scenarioId}" required>
+      <span class="scenario-icon">${icon}</span>
+      <span class="scenario-name">${scenarioName}</span>
+    `
+
+    this.scenarioContainer.appendChild(card)
+
+    // Add event listener
+    card.addEventListener("click", () => {
+      // Remove selected class from all cards
+      this.scenarioContainer?.querySelectorAll(".scenario-card").forEach((c) => c.classList.remove("selected"))
+      // Add selected class to clicked card
+      card.classList.add("selected")
+      this.selectedScenarioCard = card
+
+      // Update the actual select element
+      if (this.scenarioSelect) {
+        this.scenarioSelect.value = String(scenarioId)
+        this.clearError(this.scenarioSelect, this.scenarioError)
+      }
+
+      // Play selection sound
+      this.playSelectSound()
+
+      // Update button state
+      this.updateStartButtonState()
+    })
+  }
+
+  private getScenarioIcon(scenarioName: string): string {
+    const scenarioIcons: Record<string, string> = {
+      nuclear: "☢️",
+      fallout: "☢️",
+      pandemic: "🦠",
+      virus: "🦠",
+      zombie: "🧟",
+      undead: "🧟",
+      climate: "🌊",
+      flood: "🌊",
+      asteroid: "☄️",
+      meteor: "☄️",
+      alien: "👽",
+      invasion: "👽",
+      ai: "🤖",
+      robot: "🤖",
+      uprising: "🤖",
+      volcanic: "🌋",
+      volcano: "🌋",
+      economic: "💰",
+      collapse: "💰",
+      war: "💥",
+      conflict: "💥",
+      default: "⚠️",
+    }
+
+    const name = scenarioName.toLowerCase()
+
+    for (const [key, icon] of Object.entries(scenarioIcons)) {
+      if (name.includes(key)) {
+        return icon
+      }
+    }
+
+    return scenarioIcons.default
   }
 
   private async populateDifficulties() {
@@ -257,26 +362,127 @@ export class HomeView extends HTMLElement {
     }
 
     try {
+      // Show loading state in the difficulty container
+      if (this.difficultyContainer) {
+        this.difficultyContainer.innerHTML = '<div class="loading-container"><div class="loading-spinner"></div></div>'
+      }
+
+      // Clear difficulty descriptions
+      if (this.difficultyDescriptions) {
+        this.difficultyDescriptions.innerHTML = ""
+      }
+
       const difficulties: Difficulty[] = await apiService.get<Difficulty[]>("/difficulties")
 
       while (this.difficultyOptionsList.options.length > 1) {
         this.difficultyOptionsList.remove(1)
       }
 
+      // Clear the difficulty container
+      if (this.difficultyContainer) {
+        this.difficultyContainer.innerHTML = ""
+      }
+
       difficulties.map((difficulty, index: number) => {
+        // Add option to the hidden select element
         const optionElement = document.createElement("option")
         optionElement.value = String(difficulty.question_difficulty_id)
         optionElement.textContent = difficulty.question_difficulty_name
         this.difficultyOptionsList?.appendChild(optionElement)
+
+        // Create difficulty level button
+        this.createDifficultyLevel(difficulty)
       })
 
-      console.log("HomeView: Difficulties populated.")
     } catch (error) {
-      console.error("HomeView: Failed to fetch or populate difficulties:", error)
       if (this.difficultyError) {
         this.difficultyError.textContent = "SYSTEM FAILURE: Difficulty parameters corrupted."
       }
+
+      // Show error in the difficulty container
+      if (this.difficultyContainer) {
+        this.difficultyContainer.innerHTML =
+          '<p class="error-message">Failed to load difficulty levels. Please try again.</p>'
+      }
     }
+  }
+
+  private createDifficultyLevel(difficulty: Difficulty) {
+    if (!this.difficultyContainer || !this.difficultyDescriptions) return
+
+    const difficultyId = difficulty.question_difficulty_id
+    const difficultyName = difficulty.question_difficulty_name
+
+    const level = document.createElement("label")
+    level.className = "difficulty-level"
+    level.htmlFor = `difficulty-level-${difficultyId}`
+
+    level.innerHTML = `
+      <input type="radio" id="difficulty-level-${difficultyId}" name="difficulty-level" value="${difficultyId}" required>
+      <span class="difficulty-name">${difficultyName}</span>
+    `
+
+    this.difficultyContainer.appendChild(level)
+
+    // Create description element
+    const description = document.createElement("div")
+    description.id = `difficulty-description-${difficultyId}`
+    description.className = "difficulty-description"
+
+    // Generate a description based on the difficulty name
+    const descriptionText = this.generateDifficultyDescription(difficultyName)
+    description.textContent = descriptionText
+
+    this.difficultyDescriptions.appendChild(description)
+
+    level.addEventListener("click", () => {
+      this.difficultyContainer?.querySelectorAll(".difficulty-level").forEach((l) => l.classList.remove("selected"))
+      level.classList.add("selected")
+      this.selectedDifficultyLevel = level
+
+      if (this.difficultyOptionsList) {
+        this.difficultyOptionsList.value = String(difficultyId)
+        this.clearError(this.difficultyFieldset, this.difficultyError)
+      }
+
+      // Show the corresponding description
+      this.difficultyDescriptions
+        ?.querySelectorAll(".difficulty-description")
+        .forEach((desc) => desc.classList.remove("active"))
+      const descId = `difficulty-description-${difficultyId}`
+      this.shadowRootInstance.getElementById(descId)?.classList.add("active")
+
+      // Play selection sound
+      this.playSelectSound()
+
+      // Update button state
+      this.updateStartButtonState()
+    })
+  }
+
+  private generateDifficultyDescription(difficultyName: string): string {
+    const name = difficultyName.toLowerCase()
+
+    if (name.includes("novice") || name.includes("easy") || name.includes("beginner")) {
+      return "Basic survival challenges. Recommended for beginners learning post-apocalyptic survival skills."
+    } else if (name.includes("survivor") || name.includes("medium") || name.includes("moderate")) {
+      return "Moderate challenges requiring strategic thinking and resource management."
+    } else if (name.includes("veteran") || name.includes("hard") || name.includes("advanced")) {
+      return "Advanced scenarios with limited resources and complex moral dilemmas."
+    } else if (name.includes("legend") || name.includes("expert") || name.includes("impossible")) {
+      return "Ultimate survival test. Only the most prepared and ruthless will survive."
+    } else {
+      return `${difficultyName} difficulty level will test your survival skills appropriately.`
+    }
+  }
+
+  private updateStartButtonState() {
+    if (!this.startButton) return
+
+    const scenarioSelected = this.scenarioSelect?.value !== ""
+    const difficultySelected = this.difficultyOptionsList?.value !== ""
+
+    this.startButton.disabled = !(scenarioSelected && difficultySelected)
   }
 
   async hideAdminLinkButton() {
@@ -289,11 +495,10 @@ export class HomeView extends HTMLElement {
           this.addOptionsButton.classList.remove("hidden")
         }
       } catch (error) {
-        console.error("Error checking admin role:", error)
         this.addOptionsButton.classList.add("hidden")
       }
     } else {
-      console.warn("Admin link not found.")
+    //   console.warn("Admin link not found.")
     }
   }
 
@@ -303,16 +508,17 @@ export class HomeView extends HTMLElement {
     }
 
     this.form.addEventListener("submit", (event) => this.handleSubmit(event))
+
     this.scenarioSelect?.addEventListener("change", () => {
       this.clearError(this.scenarioSelect, this.scenarioError)
-      this.playSelectSound()
-    })
-    this.difficultyFieldset?.addEventListener("change", () => {
-      this.clearError(this.difficultyFieldset, this.difficultyError)
-      this.playSelectSound()
+      this.updateStartButtonState()
     })
 
-    // Add hover effect sound for the start button
+    this.difficultyOptionsList?.addEventListener("change", () => {
+      this.clearError(this.difficultyFieldset, this.difficultyError)
+      this.updateStartButtonState()
+    })
+
     this.startButton?.addEventListener("mouseenter", () => {
       const hoverSound = new Audio("./assets/audio/button-hover.mp3")
       hoverSound.volume = 0.2
@@ -330,19 +536,15 @@ export class HomeView extends HTMLElement {
     event.preventDefault()
 
     if (this.validateForm()) {
-      console.log("Form validation successful.")
       const scenario = this.scenarioSelect?.value
       const selectedDifficultyInput = this.difficultyOptionsList?.value
 
-      // Play alarm sound
       if (this.alarmSound) {
         this.alarmSound.play()
       }
 
-      // Add visual confirmation
       this.shadowRootInstance.querySelector(".test-selection")?.classList.add("submitting")
 
-      // Add a dramatic pause before navigating
       setTimeout(() => {
         if (scenario && selectedDifficultyInput) {
           const navigationPath = `/quiz?scenario=${encodeURIComponent(scenario)}&difficulty=${encodeURIComponent(selectedDifficultyInput)}`
@@ -350,12 +552,10 @@ export class HomeView extends HTMLElement {
         }
       }, 1500)
     } else {
-      // Play error sound
       const errorSound = new Audio("./assets/audio/error.mp3")
       errorSound.volume = 0.3
       errorSound.play()
 
-      // Add error shake animation to the form
       this.form?.classList.add("error-shake")
       setTimeout(() => {
         this.form?.classList.remove("error-shake")
@@ -373,6 +573,11 @@ export class HomeView extends HTMLElement {
         "ERROR: Scenario selection required for survival assessment.",
       )
       isValid = false
+
+      this.scenarioContainer?.classList.add("error-shake")
+      setTimeout(() => {
+        this.scenarioContainer?.classList.remove("error-shake")
+      }, 500)
     } else {
       this.clearError(this.scenarioSelect, this.scenarioError)
     }
@@ -384,6 +589,11 @@ export class HomeView extends HTMLElement {
         "ERROR: Difficulty parameter required for protocol initialization.",
       )
       isValid = false
+
+      this.difficultyContainer?.classList.add("error-shake")
+      setTimeout(() => {
+        this.difficultyContainer?.classList.remove("error-shake")
+      }, 500)
     } else {
       this.clearError(this.difficultyFieldset, this.difficultyError)
     }

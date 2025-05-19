@@ -74,31 +74,40 @@
         .subtitle {
             font-size: clamp(0.9rem, 2vw, 1.3rem);
             word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.3;
+            padding: 0 clamp(0.5rem, 2vw, 2rem);
         }
 
         .test-selection h1 {
-            font-size: clamp(1.8rem, 5vw, 3.5rem);
+            font-size: clamp(1.5rem, 5vw, 3.5rem);
             word-wrap: break-word;
-        }
-
-        h1 {
-            font-size: clamp(1.75rem, 5vw, 3rem);
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            text-shadow: 0 0 0.625rem rgba(213, 201, 166, 0.3);
-            animation: textGlow 4s infinite alternate;
+            hyphens: auto;
+            display: block;
+            width: 100%;
+            line-height: 1.2;
             text-align: center;
+            padding: 0 clamp(0.5rem, 2vw, 2rem);
         }
 
-        h2 {
-            font-size: clamp(1.25rem, 3vw, 2rem);
-            margin-bottom: 0.5em;
-            text-shadow: 0 0 0.5rem rgba(213, 201, 166, 0.3);
-        }
+        
+        @media (min-width: 480px) {
 
-        h3 {
-            font-size: clamp(1rem, 2vw, 1.25rem);
-            margin-bottom: 0.75em;
+            .test-selection h1::before,
+            .test-selection h1::after {
+                display: block;
+            }
+
+            .test-selection h1::before {
+                left: clamp(0.5rem, 3vw, 2.5rem);
+                transform: translateY(-50%);
+            }
+
+            .test-selection h1::after {
+                right: clamp(0.5rem, 3vw, 2.5rem);
+                transform: translateY(-50%);
+            }
         }
 
         body {
@@ -180,12 +189,11 @@
         }
 
         /* Update h2 to ensure it's responsive */
-        .card-title {
+        h2.card-title {
             width: 100%;
             margin: 0;
-            font-size: clamp(0.5rem, 3vw, 1.8rem);
+            font-size: clamp(1rem, 3vw, 1.8rem);
             white-space: normal;
-            text-align: center;
         }
 
         .card-title::before {
@@ -199,19 +207,15 @@
             animation: scanLine 4s linear infinite;
         }
 
-        /* Form */
         .test-selection {
             padding: 5vh 5vw;
             position: relative;
-            background-color: rgba(42, 43, 33, 0.7);
-            border: 0.0625rem solid var(--border-color);
+            justify-content: center;
             border-radius: var(--card-border-radius);
-            box-shadow: 0 0 1.25rem rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(0.3125rem);
             transition: all 0.5s ease;
         }
 
-        /* Improve test selection form responsiveness */
         .test-selection {
             padding: clamp(1rem, 4vw, 5vh) clamp(1rem, 4vw, 5vw);
         }
@@ -228,23 +232,12 @@
             overflow: hidden;
         }
 
-        .test-header::after {
-            content: "";
-            position: absolute;
-            bottom: -1rem;
-            left: 25%;
-            width: 50%;
-            height: 0.0625rem;
-            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
-        }
-
         .test-selection h1 {
             font-size: clamp(1.5rem, 5vw, 3.5rem);
-            text-align: center;
             margin-bottom: 0.75rem;
             color: var(--primary-color);
-            /* position: relative; */
-            display: block;
+            position: relative;
+            display: inline-flex;
             width: 100%;
             word-wrap: break-word;
             overflow-wrap: break-word;
@@ -254,36 +247,40 @@
             padding: 0 clamp(0.5rem, 2vw, 2rem);
         }
 
-        
-        .test-selection h1::before {
-            left: -2.5rem;
-            transform: translateY(-50%);
-        }
+        @media (min-width: 480px) {
 
-        .test-selection h1::after {
-            right: -2.5rem;
-            transform: translateY(-50%);
+            .test-selection h1::before,
+            .test-selection h1::after {
+                display: block;
+            }
+
+            .test-selection h1::before {
+                left: clamp(0.5rem, 3vw, 2.5rem);
+                transform: translateY(-50%);
+            }
+
+            .test-selection h1::after {
+                right: clamp(0.5rem, 3vw, 2.5rem);
+                transform: translateY(-50%);
+            }
         }
 
         .subtitle {
-            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            font-size: clamp(0.9rem, 2vw, 1.3rem);
             color: var(--primary-color);
             opacity: 0.8;
             font-style: italic;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.3;
+            padding: 0 clamp(0.5rem, 2vw, 2rem);
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(18.75rem, 1fr));
-            gap: 2rem;
-            justify-content: center;
-        }
-
-        /* Improve form layout responsiveness */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: clamp(1rem, 4vw, 2rem);
+            gap: clamp(1.5rem, 4vw, 3rem);
             width: 100%;
         }
 
@@ -291,10 +288,6 @@
             border: none;
             padding: 0;
             position: relative;
-        }
-
-        /* Make form sections more responsive */
-        .form-section {
             width: 100%;
         }
 
@@ -310,8 +303,8 @@
 
         .form-section legend {
             text-align: center;
-            font-size: clamp(1.5rem, 3vw, 2rem);
-            margin-bottom: 2rem;
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            margin-bottom: clamp(1rem, 3vw, 2rem);
             width: 100%;
             text-transform: uppercase;
             letter-spacing: 0.125rem;
@@ -319,12 +312,6 @@
             text-shadow: 0 0 0.625rem rgba(78, 255, 78, 0.5);
             position: relative;
             padding: 0 1rem;
-        }
-
-        /* Make form sections more responsive */
-        .form-section legend {
-            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
-            margin-bottom: clamp(1rem, 3vw, 2rem);
             word-wrap: break-word;
         }
 
@@ -346,83 +333,160 @@
             right: 0;
         }
 
-        /* Select Styling */
-        .select-container {
+        /* Scenario Cards */
+        .scenario-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+            gap: clamp(0.5rem, 2vw, 1rem);
+            width: 100%;
+        }
+
+        .scenario-card {
+            background-color: rgba(26, 26, 20, 0.7);
+            border: 0.0625rem solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: clamp(0.75rem, 2vw, 1.25rem);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
             position: relative;
-            width: 100%;
-            display: inline-flex;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 8rem;
         }
 
-        /* Improve select dropdown responsiveness */
-        .select-container {
-            width: 100%;
-            max-width: 100%;
+        .scenario-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0.9375rem var(--primary-glow);
+            transform: translateY(-0.1875rem);
         }
 
-        .select-container::after {
-            content: "";
+        .scenario-card.selected {
+            border-color: var(--terminal-green);
+            box-shadow: 0 0 0.9375rem rgba(78, 255, 78, 0.5);
+            background-color: rgba(58, 76, 46, 0.4);
+        }
+
+        .scenario-card input[type="radio"] {
             position: absolute;
-            right: 1em;
-            top: 50%;
-            transform: translateY(-50%);
+            opacity: 0;
             width: 0;
             height: 0;
-            border-style: solid;
-            border-width: 0.4em 0.4em 0 0.4em;
-            border-color: var(--text-color) transparent transparent transparent;
-            pointer-events: none;
         }
 
-        select {
-            width: 100%;
-            padding: 1rem 1.5rem;
-            background-color: rgba(58, 60, 46, 0.3);
-            color: var(--text-color);
-            border: 0.1em solid var(--border-color);
-            border-radius: var(--border-radius);
-            font-size: 1.1rem;
-            appearance: none;
-            cursor: pointer;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            position: relative;
-            z-index: 1;
+        .scenario-icon {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .scenario-name {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.0625rem;
-            font-family: 'Rajdhani', monospace;
+            word-wrap: break-word;
         }
 
-        /* Improve select dropdown responsiveness */
-        select {
+        /* Loading state for cards */
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 8rem;
             width: 100%;
-            max-width: 100%;
-            padding: clamp(0.5rem, 2vw, 1rem) clamp(0.75rem, 2vw, 1.5rem);
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
-            white-space: normal;
-            text-overflow: ellipsis;
         }
 
-        select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0.625rem var(--primary-glow);
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 0.25rem solid rgba(213, 201, 166, 0.3);
+            border-top: 0.25rem solid var(--terminal-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        select option {
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            padding: 0.5rem;
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
-        .form-footer {
-            grid-column: 1 / -1;
+        /* Difficulty Levels */
+        .difficulty-controls {
+            width: 100%;
+            padding: 0 clamp(0.5rem, 2vw, 1.5rem);
+        }
+
+        .difficulty-levels {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            width: 100%;
+            gap: 0.5rem;
+        }
+
+        .difficulty-level {
+            background-color: rgba(26, 26, 20, 0.7);
+            border: 0.0625rem solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: clamp(0.5rem, 1.5vw, 1rem);
             text-align: center;
-            margin-top: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 5rem;
+            position: relative;
         }
 
-        .configuration-message {
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-            opacity: 0.8;
+        .difficulty-level:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0.9375rem var(--primary-glow);
+        }
+
+        .difficulty-level.selected {
+            border-color: var(--terminal-green);
+            box-shadow: 0 0 0.9375rem rgba(78, 255, 78, 0.5);
+            background-color: rgba(58, 76, 46, 0.4);
+        }
+
+        .difficulty-level input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .difficulty-name {
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.0625rem;
+            word-wrap: break-word;
+        }
+
+        .difficulty-description {
+            display: none;
+            padding: 1rem;
+            background-color: rgba(26, 26, 20, 0.7);
+            border: 0.0625rem solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-top: 1rem;
+            font-size: clamp(0.9rem, 1.5vw, 1rem);
+            line-height: 1.4;
+        }
+
+        .difficulty-description.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
         }
 
         /* Start Button */
@@ -437,20 +501,14 @@
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             width: 100%;
-            max-width: 25rem;
+            max-width: 100%;
             text-transform: uppercase;
             letter-spacing: 0.125rem;
             position: relative;
             overflow: hidden;
             grid-column: 1 / -1;
             justify-self: center;
-            margin-top: 2rem;
-        }
-
-        /* Make buttons more responsive */
-        .start-button {
-            width: 100%;
-            max-width: 100%;
+            margin-top: clamp(1.5rem, 4vw, 2.5rem);
             padding: clamp(0.75rem, 3vw, 1.25rem) clamp(1rem, 4vw, 3rem);
             font-size: clamp(1rem, 2.5vw, 1.35rem);
             white-space: normal;
@@ -480,9 +538,36 @@
             animation: pulseGlow 2s infinite;
         }
 
+        .start-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .start-button:disabled:hover::before {
+            opacity: 0;
+            animation: none;
+        }
+
+        /* Error Messages */
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.875em;
+            margin-top: 0.75em;
+            display: block;
+            min-height: 1em;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .error-flash {
+            animation: errorFlash 0.5s ease;
+        }
+
         /* Info Box */
         .info-box {
-            padding: 2rem;
+            padding: clamp(1rem, 3vw, 2rem);
             background-color: rgba(0, 0, 0, 0.3);
             border-top: 0.1em solid rgba(255, 255, 255, 0.1);
             text-align: center;
@@ -490,11 +575,6 @@
             position: relative;
             border-radius: var(--border-radius);
             border-left: 0.1875rem solid var(--accent-color);
-        }
-
-        /* Improve info box responsiveness */
-        .info-box {
-            padding: clamp(1rem, 3vw, 2rem);
         }
 
         .info-title {
@@ -525,15 +605,10 @@
         }
 
         .info-box p {
-            font-size: 1.1rem;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
             max-width: 50rem;
             margin: 0 auto;
             line-height: 1.5;
-        }
-
-        /* Improve info box responsiveness */
-        .info-box p {
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
         }
 
         /* Quick Links */
@@ -547,21 +622,16 @@
 
         .quick-links ul {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(18.75rem, 1fr));
+            grid-template-columns: 1fr;
             gap: 1.5rem;
             list-style: none;
-        }
-
-        /* Improve quick links responsiveness */
-        .quick-links ul {
-            grid-template-columns: 1fr;
             width: 100%;
         }
 
         .quick-link {
             display: flex;
             align-items: center;
-            padding: 1.25rem;
+            padding: clamp(0.75rem, 2vw, 1.25rem);
             background-color: rgba(42, 43, 33, 0.7);
             border-radius: var(--border-radius);
             color: var(--text-color);
@@ -571,11 +641,6 @@
             height: 100%;
             position: relative;
             overflow: hidden;
-        }
-
-        /* Improve quick links responsiveness */
-        .quick-link {
-            padding: clamp(0.75rem, 2vw, 1.25rem);
             font-size: clamp(0.9rem, 2vw, 1rem);
             word-wrap: break-word;
         }
@@ -615,37 +680,9 @@
         /* Focus Styles for Accessibility */
         a:focus,
         button:focus,
-        select:focus,
         input:focus {
             outline: var(--focus-outline);
             outline-offset: 0.15em;
-        }
-
-        .error-message {
-            color: var(--danger-color);
-            font-size: 0.875em;
-            margin-top: 0.75em;
-            display: block;
-            min-height: 1em;
-            text-align: left;
-            transition: all 0.3s ease;
-        }
-
-        .error-flash {
-            animation: errorFlash 0.5s ease;
-        }
-
-        /* Add style for invalid inputs */
-        select.invalid,
-        fieldset.invalid {
-            border: 0.0625rem solid var(--danger-color);
-            box-shadow: 0 0 0.625rem var(--danger-glow);
-            animation: errorShake 0.5s ease;
-        }
-
-        fieldset.invalid legend {
-            color: var(--danger-color);
-            text-shadow: 0 0 0.625rem var(--danger-glow);
         }
 
         /* Special Effects */
@@ -684,7 +721,7 @@
             background-color: var(--terminal-bg);
             border: 0.0625rem solid var(--terminal-green);
             border-radius: 0.3125rem;
-            padding: 1.5rem;
+            padding: clamp(0.75rem, 2vw, 1.5rem);
             margin-bottom: 2rem;
             font-family: monospace;
             color: var(--terminal-green);
@@ -693,11 +730,6 @@
             overflow: hidden;
             max-height: 12.5rem;
             transition: max-height 0.5s ease;
-        }
-
-        /* Improve terminal container responsiveness */
-        .terminal-container {
-            padding: clamp(0.75rem, 2vw, 1.5rem);
         }
 
         .terminal-container.completed {
@@ -716,10 +748,6 @@
         .terminal-title {
             font-weight: bold;
             text-transform: uppercase;
-        }
-
-        /* Improve terminal container responsiveness */
-        .terminal-title {
             font-size: clamp(0.8rem, 2vw, 1rem);
             word-wrap: break-word;
         }
@@ -741,10 +769,6 @@
             margin-bottom: 0.5rem;
             position: relative;
             padding-left: 1.5rem;
-        }
-
-        /* Improve terminal container responsiveness */
-        .terminal-line {
             font-size: clamp(0.8rem, 1.5vw, 1rem);
             word-wrap: break-word;
         }
@@ -991,6 +1015,16 @@
             }
         }
 
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
         .flicker {
             filter: brightness(0.5);
         }
@@ -999,7 +1033,6 @@
             animation: errorShake 0.5s ease;
         }
 
-        /* Reduced Motion */
         @media (prefers-reduced-motion: reduce) {
 
             *,
@@ -1012,7 +1045,6 @@
             }
         }
 
-        /* Ensure all text is responsive */
         p,
         a,
         button,
@@ -1045,7 +1077,6 @@
                 </div>
             </header>
             <article class="terminal-lines">
-                <!-- Terminal lines will be populated by JavaScript -->
             </article>
         </section>
 
@@ -1063,26 +1094,38 @@
                 <div class="form-grid">
                     <fieldset class="form-section scenario-section">
                         <legend id="scenarios-heading">CHOOSE YOUR APOCALYPSE</legend>
-                        <label class="select-container">
-                            <select id="scenario" name="scenario" aria-labelledby="scenarios-heading" required>
-                                <option value="" disabled selected>SELECT CATASTROPHE TYPE</option>
-                                <!-- Scenarios will be populated by JavaScript -->
-                            </select>
-                        </label>
+                        <div class="scenario-cards" role="radiogroup" aria-labelledby="scenarios-heading"
+                            id="scenario-container">
+                            <div class="loading-container">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
                         <p class="error-message" id="scenario-error"></p>
                     </fieldset>
 
                     <fieldset class="form-section difficulty-section" id="difficulty-fieldset">
                         <legend id="difficulty-heading">SURVIVAL DIFFICULTY</legend>
-                        <label class="select-container">
-                            <select id="difficulty" name="difficulty" aria-labelledby="difficulty-heading" required>
-                                <option value="" disabled selected>SELECT THREAT LEVEL</option>
-                                <!-- Difficulties will be populated by JavaScript -->
-                            </select>
-                        </label>
+                        <div class="difficulty-controls">
+                            <div class="difficulty-levels" role="radiogroup" aria-labelledby="difficulty-heading"
+                                id="difficulty-container">
+                                <div class="loading-container">
+                                    <div class="loading-spinner"></div>
+                                </div>
+                            </div>
+                            <div id="difficulty-descriptions">
+                            </div>
+                        </div>
                         <p class="error-message" id="difficulty-error"></p>
                     </fieldset>
-                    <button type="submit" class="start-button">INITIATE TRIAL</button>
+                    <button type="submit" class="start-button" id="start-button" disabled>INITIATE TRIAL</button>
+                </div>
+                <div class="hidden">
+                    <select id="scenario" name="scenario" required>
+                        <option value="">Select a scenario</option>
+                    </select>
+                    <select id="difficulty" name="difficulty" required>
+                        <option value="">Select difficulty</option>
+                    </select>
                 </div>
             </form>
 
