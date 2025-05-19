@@ -73,7 +73,6 @@
       font-size: 1rem;
     }
 
-    /* Answer Options */
     .answer-options {
       display: grid;
       grid-template-columns: 1fr;
@@ -102,6 +101,7 @@
       border-radius: 50%;
       background-color: var(--secondary-color);
       border: 0.0625rem solid var(--border-color);
+      color: var(--primary-color);
       font-weight: 600;
       font-size: 0.875rem;
     }
@@ -115,7 +115,7 @@
     .option-points {
       font-size: 0.875rem;
       font-weight: 600;
-      color: var(--points-color);
+      color: var(--primary-color);
       padding: 0.25rem 0.5rem;
       border-radius: 0.25rem;
       background-color: rgba(213, 201, 166, 0.1);
@@ -154,94 +154,25 @@
     }
   </style>
   <section class="detail-content" id="detail-content">
-    <h2 class="detail-title">JavaScript Fundamentals Quiz</h2>
+    <h2 class="detail-title" id="scenario">JavaScript Fundamentals Quiz</h2>
     <section class="detail-meta">
       <article class="detail-meta-item">
         <h3 class="detail-meta-label">Difficulty</h3>
-        <p class="detail-meta-value">INTERMEDIATE</p>
+        <p class="detail-meta-value" id="difficulty">INTERMEDIATE</p>
       </article>
       <article class="detail-meta-item">
         <h3 class="detail-meta-label">Date</h3>
-        <time class="detail-meta-value" datetime="2025-05-18">2025-05-18</time>
+        <time class="detail-meta-value" id="date" datetime="2025-05-18">2025-05-18</time>
       </article>
       <article class="detail-meta-item">
         <h3 class="detail-meta-label">Score</h3>
-        <p class="detail-meta-value">85 points</p>
+        <p class="detail-meta-value" id="score">85 points</p>
       </article>
     </section>
 
     <section class="detail-section">
       <h3 class="detail-section-title">Questions & Responses</h3>
       <section class="question-list">
-        <article class="question-item">
-          <header>
-            <h4 class="question-text">
-              1. What is the output of <code>typeof null</code> in JavaScript?
-            </h4>
-          </header>
-          <section class="answer-options">
-            <section class="answer-option" aria-selected="false" tabindex="0">
-              <mark class="option-marker">A</mark>
-              <p class="option-text">"null"</p>
-            </section>
-            <section
-              class="answer-option selected"
-              aria-selected="true"
-              tabindex="0"
-            >
-              <mark class="option-marker">B</mark>
-              <p class="option-text">"object"</p>
-              <strong class="option-points">+5 pts</strong>
-            </section>
-            <section class="answer-option" aria-selected="false" tabindex="0">
-              <mark class="option-marker">C</mark>
-              <p class="option-text">"undefined"</p>
-            </section>
-            <section class="answer-option" aria-selected="false" tabindex="0">
-              <mark class="option-marker">D</mark>
-              <p class="option-text">"number"</p>
-            </section>
-          </section>
-          <aside class="answer-feedback" role="note">
-            This is a long-standing bug in JavaScript.
-            <code>typeof null</code> returns "object".
-          </aside>
-        </article>
-
-        <article class="question-item">
-          <header>
-            <h4 class="question-text">
-              2. Which method is used to parse a JSON string into an object?
-            </h4>
-          </header>
-          <section class="answer-options">
-            <section class="answer-option" aria-selected="false" tabindex="0">
-              <mark class="option-marker">A</mark>
-              <p class="option-text">JSON.stringify()</p>
-            </section>
-            <section
-              class="answer-option selected"
-              aria-selected="true"
-              tabindex="0"
-            >
-              <mark class="option-marker">B</mark>
-              <p class="option-text">JSON.parse()</p>
-              <strong class="option-points">+5 pts</strong>
-            </section>
-            <section class="answer-option" aria-selected="false" tabindex="0">
-              <mark class="option-marker">C</mark>
-              <p class="option-text">JSON.decode()</p>
-            </section>
-            <section class="answer-option" aria-selected="false" tabindex="0">
-              <mark class="option-marker">D</mark>
-              <p class="option-text">JSON.convert()</p>
-            </section>
-          </section>
-          <aside class="answer-feedback" role="note">
-            Correct! <code>JSON.parse()</code> converts a JSON string into a
-            JavaScript object.
-          </aside>
-        </article>
       </section>
     </section>
   </section>

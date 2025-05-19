@@ -102,9 +102,7 @@ export function configureEnvironment(): EnvironmentVariables {
         }
       }
 
-      console.log("Environment variables loaded.");
       const parsedEnv = validateAndTransformEnv();
-      console.log(parsedEnv);
       cachedEnv = parsedEnv;
       return parsedEnv;
 

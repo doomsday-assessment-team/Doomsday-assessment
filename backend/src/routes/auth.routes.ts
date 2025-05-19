@@ -57,8 +57,6 @@ router.get('/google/callback', async (req, res) => {
       googleUser.id
     )
 
-    console.log(user);
-
     const payload = {
       roles: user.roles,
       user_id: user.user_id,

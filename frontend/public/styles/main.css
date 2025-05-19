@@ -19,7 +19,6 @@
   --option-bg: rgba(58, 60, 46, 0.3);
   --option-selected-bg: rgba(213, 201, 166, 0.15);
   --option-selected-border: var(--primary-color);
-  --points-color: var(--primary-color);
 }
 
 * {
@@ -72,6 +71,7 @@ body {
   animation: pulse 8s infinite alternate;
 }
 
+
 @keyframes pulse {
   0% {
     opacity: 0.3;
@@ -83,4 +83,15 @@ body {
 
 .flicker {
   filter: brightness(0.5);
+}
+
+#app-container {
+  width: 100%;
+  max-width: 700px;
+  /* Max width for content */
+  text-align: center;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.1);
+  /* Slightly darker overlay for content area */
+  border-radius: 8px;
 }
