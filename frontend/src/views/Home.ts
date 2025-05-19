@@ -20,20 +20,12 @@ export class HomeView extends HTMLElement {
   private scenarioError: HTMLElement | null = null
   private difficultyError: HTMLElement | null = null
   private difficultyOptionsList: HTMLSelectElement | null = null
-  private scenarios: Scenario[] = []
   private addOptionsButton: HTMLUListElement | null = null
-  private nextButton: HTMLButtonElement | null = null
-  private audioContext: AudioContext | null = null
-  private ambientSound: HTMLAudioElement | null = null
-  private radioStaticSound: HTMLAudioElement | null = null
-  private alarmSound: HTMLAudioElement | null = null
   private terminalLines: HTMLElement | null = null
-  private terminalCursor: HTMLElement | null = null
   private terminalContainer: HTMLElement | null = null
   private startButton: HTMLButtonElement | null = null
   private radioEffect: HTMLElement | null = null
   private dustParticles: HTMLElement | null = null
-  private scanlines: HTMLElement | null = null
 
   private scenarioContainer: HTMLElement | null = null
   private difficultyContainer: HTMLElement | null = null
@@ -55,7 +47,7 @@ export class HomeView extends HTMLElement {
       this.addEventListeners()
       this.populateScenarios()
       this.populateDifficulties()
-      this.initializeAudio()
+    //   this.initializeAudio()
       this.startTerminalAnimation()
       this.initializeVisualEffects()
     } else {
@@ -71,13 +63,11 @@ export class HomeView extends HTMLElement {
     this.difficultyError = this.shadowRootInstance.querySelector("#difficulty-error")
     this.difficultyOptionsList = this.shadowRootInstance.querySelector("#difficulty")
     this.addOptionsButton = this.shadowRootInstance.querySelector("#admin-questions-link-li")
-    this.startButton = this.shadowRootInstance.querySelector(".start-button")
+    this.startButton = this.shadowRootInstance.querySelector("#start-button")
     this.terminalLines = this.shadowRootInstance.querySelector(".terminal-lines")
-    this.terminalCursor = this.shadowRootInstance.querySelector(".terminal-cursor")
     this.terminalContainer = this.shadowRootInstance.querySelector(".terminal-container")
     this.radioEffect = this.shadowRootInstance.querySelector(".radio-effect")
     this.dustParticles = this.shadowRootInstance.querySelector(".dust-particles")
-    this.scanlines = this.shadowRootInstance.querySelector(".scanlines")
 
     // Bind new card UI elements
     this.scenarioContainer = this.shadowRootInstance.querySelector("#scenario-container")
@@ -96,42 +86,6 @@ export class HomeView extends HTMLElement {
     setInterval(flicker, 500)
 
     this.hideAdminLinkButton()
-  }
-
-  private initializeAudio() {
-    // Create audio elements
-    this.ambientSound = new Audio("./assets/audio/ambient-apocalypse.mp3")
-    this.ambientSound.loop = true
-    this.ambientSound.volume = 0.3
-
-    this.radioStaticSound = new Audio("./assets/audio/radio-static.mp3")
-    this.radioStaticSound.loop = true
-    this.radioStaticSound.volume = 0.1
-
-    this.alarmSound = new Audio("./assets/audio/alarm.mp3")
-    this.alarmSound.volume = 0.4
-
-    // Add audio toggle button event
-    const audioToggle = this.shadowRootInstance.querySelector(".audio-toggle")
-    if (audioToggle) {
-      audioToggle.addEventListener("click", () => this.toggleAudio())
-    }
-  }
-
-  private toggleAudio() {
-    const audioToggle = this.shadowRootInstance.querySelector(".audio-toggle") as HTMLElement
-
-    if (this.ambientSound?.paused) {
-      this.ambientSound.play()
-      this.radioStaticSound?.play()
-      audioToggle.textContent = "🔊"
-      audioToggle.setAttribute("title", "Mute Sounds")
-    } else {
-      this.ambientSound?.pause()
-      this.radioStaticSound?.pause()
-      audioToggle.textContent = "🔇"
-      audioToggle.setAttribute("title", "Enable Sounds")
-    }
   }
 
   private initializeVisualEffects() {
@@ -260,12 +214,6 @@ export class HomeView extends HTMLElement {
         this.createScenarioCard(scenario)
       })
 
-      // Play sound effect when scenarios are loaded
-      if (this.radioStaticSound && !this.radioStaticSound.paused) {
-        const blip = new Audio("./assets/audio/data-loaded.mp3")
-        blip.volume = 0.3
-        blip.play()
-      }
     } catch (error) {
       if (this.scenarioError) {
         this.scenarioError.textContent = "COMMUNICATION ERROR: Unable to retrieve scenario data. System compromised."
@@ -299,20 +247,14 @@ export class HomeView extends HTMLElement {
 
     // Add event listener
     card.addEventListener("click", () => {
-      // Remove selected class from all cards
       this.scenarioContainer?.querySelectorAll(".scenario-card").forEach((c) => c.classList.remove("selected"))
-      // Add selected class to clicked card
       card.classList.add("selected")
       this.selectedScenarioCard = card
 
-      // Update the actual select element
       if (this.scenarioSelect) {
         this.scenarioSelect.value = String(scenarioId)
         this.clearError(this.scenarioSelect, this.scenarioError)
       }
-
-      // Play selection sound
-      this.playSelectSound()
 
       // Update button state
       this.updateStartButtonState()
@@ -452,9 +394,6 @@ export class HomeView extends HTMLElement {
       const descId = `difficulty-description-${difficultyId}`
       this.shadowRootInstance.getElementById(descId)?.classList.add("active")
 
-      // Play selection sound
-      this.playSelectSound()
-
       // Update button state
       this.updateStartButtonState()
     })
@@ -506,6 +445,7 @@ export class HomeView extends HTMLElement {
     if (!this.form) {
       return
     }
+    
 
     this.form.addEventListener("submit", (event) => this.handleSubmit(event))
 
@@ -518,30 +458,13 @@ export class HomeView extends HTMLElement {
       this.clearError(this.difficultyFieldset, this.difficultyError)
       this.updateStartButtonState()
     })
-
-    this.startButton?.addEventListener("mouseenter", () => {
-      const hoverSound = new Audio("./assets/audio/button-hover.mp3")
-      hoverSound.volume = 0.2
-      hoverSound.play()
-    })
-  }
-
-  private playSelectSound() {
-    const selectSound = new Audio("./assets/audio/select.mp3")
-    selectSound.volume = 0.2
-    selectSound.play()
   }
 
   private handleSubmit(event: SubmitEvent) {
     event.preventDefault()
-
     if (this.validateForm()) {
       const scenario = this.scenarioSelect?.value
       const selectedDifficultyInput = this.difficultyOptionsList?.value
-
-      if (this.alarmSound) {
-        this.alarmSound.play()
-      }
 
       this.shadowRootInstance.querySelector(".test-selection")?.classList.add("submitting")
 
@@ -552,10 +475,6 @@ export class HomeView extends HTMLElement {
         }
       }, 1500)
     } else {
-      const errorSound = new Audio("./assets/audio/error.mp3")
-      errorSound.volume = 0.3
-      errorSound.play()
-
       this.form?.classList.add("error-shake")
       setTimeout(() => {
         this.form?.classList.remove("error-shake")

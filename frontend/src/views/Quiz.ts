@@ -113,13 +113,10 @@ export class QuizView extends HTMLElement {
                 limit: "10",
             })
 
-            console.log("Fetched questions:", questions)
 
-            // Ensure each question has an options array
             this.allQuestions = questions.map((q) => {
                 if (!q.options) {
                     q.options = []
-                    console.warn("Question had no options, adding empty array:", q)
                 }
                 return q
             })
@@ -131,16 +128,15 @@ export class QuizView extends HTMLElement {
                 this.displayCurrentQuestion()
                 this.updateProgressIndicators()
 
-                // Set difficulty multiplier based on selected difficulty
                 if (this.difficultyId) {
                     switch (this.difficultyId) {
-                        case 3: // Hard
+                        case 3: 
                             this.difficultyMultiplier = 3
                             break
-                        case 2: // Medium
+                        case 2:
                             this.difficultyMultiplier = 2
                             break
-                        default: // Easy or unknown
+                        default:
                             this.difficultyMultiplier = 1
                     }
                 }

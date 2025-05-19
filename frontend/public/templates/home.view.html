@@ -91,7 +91,19 @@
             padding: 0 clamp(0.5rem, 2vw, 2rem);
         }
 
-        
+        /* Make the decorative elements responsive */
+        /* .test-selection h1::before,
+        .test-selection h1::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: clamp(0.5rem, 3vw, 1.875rem);
+            height: 0.125rem;
+            background-color: var(--accent-color);
+            display: none;
+        } */
+
+        /* Only show decorative elements when there's enough space */
         @media (min-width: 480px) {
 
             .test-selection h1::before,
@@ -1070,11 +1082,11 @@
         <section class="terminal-container">
             <header class="terminal-header">
                 <h3 class="terminal-title">SURVIVAL PROTOCOL v2.7.3</h3>
-                <div class="terminal-controls">
+                <aside class="terminal-controls">
                     <span></span>
                     <span></span>
                     <span></span>
-                </div>
+                </aside>
             </header>
             <article class="terminal-lines">
             </article>
@@ -1091,42 +1103,42 @@
                     <p class="subtitle">Your choices determine your fate in the aftermath</p>
                 </header>
 
-                <div class="form-grid">
+                <section class="form-grid">
                     <fieldset class="form-section scenario-section">
                         <legend id="scenarios-heading">CHOOSE YOUR APOCALYPSE</legend>
-                        <div class="scenario-cards" role="radiogroup" aria-labelledby="scenarios-heading"
+                        <ul class="scenario-cards" role="radiogroup" aria-labelledby="scenarios-heading"
                             id="scenario-container">
-                            <div class="loading-container">
-                                <div class="loading-spinner"></div>
-                            </div>
-                        </div>
+                            <li class="loading-container">
+                                <span class="loading-spinner"></span>
+                            </li>
+                        </ul>
                         <p class="error-message" id="scenario-error"></p>
                     </fieldset>
 
                     <fieldset class="form-section difficulty-section" id="difficulty-fieldset">
                         <legend id="difficulty-heading">SURVIVAL DIFFICULTY</legend>
-                        <div class="difficulty-controls">
-                            <div class="difficulty-levels" role="radiogroup" aria-labelledby="difficulty-heading"
+                        <section class="difficulty-controls">
+                            <ul class="difficulty-levels" role="radiogroup" aria-labelledby="difficulty-heading"
                                 id="difficulty-container">
-                                <div class="loading-container">
-                                    <div class="loading-spinner"></div>
-                                </div>
-                            </div>
-                            <div id="difficulty-descriptions">
-                            </div>
-                        </div>
+                                <li class="loading-container">
+                                    <span class="loading-spinner"></span>
+                                </li>
+                            </ul>
+                            <section id="difficulty-descriptions">
+                            </section>
+                        </section>
                         <p class="error-message" id="difficulty-error"></p>
                     </fieldset>
                     <button type="submit" class="start-button" id="start-button" disabled>INITIATE TRIAL</button>
-                </div>
-                <div class="hidden">
+                </section>
+                <section class="hidden">
                     <select id="scenario" name="scenario" required>
                         <option value="">Select a scenario</option>
                     </select>
                     <select id="difficulty" name="difficulty" required>
                         <option value="">Select difficulty</option>
                     </select>
-                </div>
+                </section>
             </form>
 
             <aside class="info-box">
