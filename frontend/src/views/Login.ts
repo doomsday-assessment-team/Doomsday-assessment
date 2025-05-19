@@ -16,13 +16,13 @@ export class LoginView extends HTMLElement {
         App.navigate(redirectPath);
     } else {
       this.loadTemplate();
-      this.setupFormAction();
     }
   }
 
   async loadTemplate() {
     const content = await loadTemplate('./templates/login.view.html');
     this.appendChild(content);
+    this.setupFormAction();
   }
 
 
