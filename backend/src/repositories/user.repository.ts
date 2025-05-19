@@ -46,12 +46,8 @@ export const getUserAssessmentSummaries = async (
   }
 
   if (startDate && endDate) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
-
     whereConditions.push(`h.timestamp BETWEEN $${paramCounter} AND $${paramCounter + 1}`);
-    queryParams.push(start, end);
+    queryParams.push(startDate, endDate);
     paramCounter += 2;
   }
 
