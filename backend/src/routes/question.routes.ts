@@ -1,7 +1,7 @@
 import { Router } from "express";
 import express, { Request, Response, NextFunction } from 'express';
-import { createQuestion, deleteQuestion, getAllQuestions } from "../services/question.service";
-import { updateQuestion } from "../repositories/admin.repository";
+import { createQuestion, deleteQuestion, getAllQuestions,updateQuestion } from "../services/question.service";
+
 
 
 
@@ -26,12 +26,12 @@ router.post('/questions', async (req: Request, res: Response, next: NextFunction
 router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    // Pass id and other required fields to the controller
     await updateQuestion(
       Number(id),
       req.body.question_difficulty_id ? Number(req.body.question_difficulty_id) : undefined,
       req.body.scenario_id ? Number(req.body.scenario_id) : undefined,
-      req.body.question_text as string | undefined
+      req.body.question_text as string | undefined,
+      req.body.some_other_field 
     );
     res.status(200).json({ message: 'Question updated successfully.' });
   } catch (error) {

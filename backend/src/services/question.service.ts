@@ -31,7 +31,7 @@ export const createQuestion = async (req: unknown, res: unknown, next: unknown, 
   return await questionRepository.create(repoInput);
 };
 
-export const updateQuestion = async (id: number, data: QuestionInputService): Promise<Question | null> => {
+export const updateQuestion = async (id: number, p0: number | undefined, p1: number | undefined, p2: string | undefined, data: QuestionInputService): Promise<Question | null> => {
   if (!data.question_text || data.question_text.trim() === "") {
     throw new Error("Question text cannot be empty for update.");
   }

@@ -83,7 +83,6 @@ export class QuestionsAndOptions extends HTMLElement {
     }
     
     if (!container) {
-        console.warn('[FE] Message container not found. Message:', message);
         alert(message); 
         return;
     }
@@ -115,23 +114,19 @@ export class QuestionsAndOptions extends HTMLElement {
 
   private async loadInitialTemplate() {
     try {
-      console.log('[FE] loadInitialTemplate: Attempting to load template...');
       const content = await loadTemplate('./templates/questions-and-options.view.html');
       if (content && this.shadowRoot) {
         this.shadowRoot.appendChild(content.cloneNode(true));
-        console.log('[FE] loadInitialTemplate: Template loaded.');
         this.initializeModalElements(); 
-        await this.loadData(); // Calls render methods, updateStatCards, and setupEventListeners
-      } else { console.error("[FE] Template or Shadow DOM issue during loadInitialTemplate."); }
+        await this.loadData(); 
+      } else { }
     } catch (error) {
       this.showMessage('❌ Failed to load page template.', 'error');
-      console.error('[FE] Template load error:', error);
     }
   }
 
   private initializeModalElements() {
-    if (!this.shadowRoot) { console.error("[FE] initializeModalElements: Shadow DOM not available."); return; }
-    console.log("[FE] initializeModalElements: Initializing...");
+    if (!this.shadowRoot) { return; }
     this.modalElement = this.shadowRoot.getElementById('universal-modal') as HTMLElement;
     this.modalTitleElement = this.shadowRoot.getElementById('modal-title') as HTMLElement;
     this.modalBodyElement = this.shadowRoot.getElementById('modal-body') as HTMLElement;
@@ -146,11 +141,10 @@ export class QuestionsAndOptions extends HTMLElement {
         this.modalElement.addEventListener('click', (event) => { 
             if (event.target === this.modalElement) this.closeModal();
         });
-    } else { console.warn("[FE] initializeModalElements: Main modal element #universal-modal not found."); }
-    console.log("[FE] initializeModalElements: Done.");
+    } else {  }
   }
 
-  private openModal( /* ... (no changes needed here, keep as is) ... */ 
+  private openModal(
     title: string, 
     contentHTML: string, 
     confirmCallback: ModalConfirmCallback,
@@ -159,7 +153,6 @@ export class QuestionsAndOptions extends HTMLElement {
   ) {
     if (!this.modalElement || !this.modalTitleElement || !this.modalBodyElement || !this.modalConfirmButton) {
         this.showMessage("Error: Modal UI components are missing.", "error"); 
-        console.error("[FE] openModal: Modal elements not fully initialized.");
         return;
     }
     this.modalTitleElement.textContent = title;
@@ -176,7 +169,7 @@ export class QuestionsAndOptions extends HTMLElement {
     this.modalElement.classList.add('active');
   }
 
-  private closeModal() { /* ... (no changes needed here, keep as is) ... */ 
+  private closeModal() {  
     this.modalElement?.classList.remove('active');
     if(this.modalBodyElement) this.modalBodyElement.innerHTML = ''; 
     this.currentModalConfirmCallback = null;
@@ -187,7 +180,7 @@ export class QuestionsAndOptions extends HTMLElement {
     }
   }
 
-  private async handleModalConfirm() { /* ... (no changes needed here, keep as is) ... */ 
+  private async handleModalConfirm() { 
     if (this.currentModalConfirmCallback && this.modalBodyElement) {
         const form = this.modalBodyElement.querySelector('form');
         if (form) { 
@@ -204,7 +197,7 @@ export class QuestionsAndOptions extends HTMLElement {
     }
   }
   
-  private validateModalForm(form: HTMLFormElement): boolean { /* ... (no changes needed here, keep as is) ... */ 
+  private validateModalForm(form: HTMLFormElement): boolean { 
     let isValid = true;
     form.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement>('[required]').forEach(input => {
         const parent = input.parentElement;
@@ -245,64 +238,59 @@ export class QuestionsAndOptions extends HTMLElement {
 
   private async loadData() {
     try {
-      console.log('[FE] loadData: Fetching data using /admin prefixed routes...');
-      // **** API PATHS UPDATED TO /admin ****
-      const scenariosPromise = apiService.get<Scenario[]>('/admin/scenarios');
-      const questionsPromise = apiService.get<Question[]>('/admin/questions'); // Assumes this returns questions with options
-      const difficultiesPromise = apiService.get<Difficulty[]>('/admin/difficulties'); // Or /admin/difficulty-levels
+
+      const scenariosPromise = apiService.get<Scenario[]>('/scenarios');
+      const questionsPromise = apiService.get<Question[]>('/questions');
+      const difficultiesPromise = apiService.get<Difficulty[]>('/difficulties');
 
       const [scenariosData, questionsData, difficultiesData] = await Promise.all([
         scenariosPromise, questionsPromise, difficultiesPromise
       ]);
 
-      console.log('[FE] loadData: Scenarios raw data:', JSON.stringify(scenariosData, null, 2));
-      console.log('[FE] loadData: Questions raw data:', JSON.stringify(questionsData, null, 2));
-      console.log('[FE] loadData: Difficulties raw data:', JSON.stringify(difficultiesData, null, 2));
 
       this.scenarios = Array.isArray(scenariosData) ? scenariosData : [];
       this.questions = (Array.isArray(questionsData) ? questionsData : []).map(q => ({
           ...q,
-          // Ensure options array exists and each option has its question_id (if not already provided by backend)
+
           options: Array.isArray(q.options) ? q.options.map(opt => ({...opt, question_id: q.question_id })) : [] 
       }));
       this.difficulties = Array.isArray(difficultiesData) ? difficultiesData : [];
 
       this.scenarioMap = new Map(this.scenarios.map(s => [s.scenario_id, s.scenario_name]));
       this.difficultyMap = new Map(this.difficulties.map(d => [d.question_difficulty_id, d.question_difficulty_name]));
-      
-      console.log('[FE] loadData: Data processed. Calling render and UI update methods.');
+
       this.renderScenariosTable();
       this.renderQuestionsTable();
       this.updateStatCards(); 
       this.setupEventListeners();
 
     } catch (error) {
-      this.showMessage('⚠️ Failed to load initial data. Check console.', 'warning');
-      console.error('[FE] Data load error:', error); 
+      this.showMessage('⚠️ Failed to load initial data.', 'warning');
+
       if (error && typeof error === 'object' && 'response' in error) {
-        console.error('[FE] API Error Response:', (error as any).response);
+       
       }
     }
   }
 
-  private updateStatCards() { /* ... (no changes needed here, keep as is) ... */ 
+  private updateStatCards() { 
     if (!this.shadowRoot) return;
-    console.log('[FE] updateStatCards: Called.');
+
     const scenariosCountEl = this.shadowRoot.getElementById('scenarios-count');
     if (scenariosCountEl) scenariosCountEl.textContent = this.scenarios.length.toString();
     const questionsCountEl = this.shadowRoot.getElementById('questions-count');
     if (questionsCountEl) questionsCountEl.textContent = this.questions.length.toString();
   }
-  private setupEventListeners() { /* ... (no changes needed here, keep as is) ... */ 
-    if (!this.shadowRoot) { console.error("[FE] setupEventListeners: Shadow DOM not available."); return; }
-    console.log("[FE] setupEventListeners: Setting up general event listeners...");
+  private setupEventListeners() {
+    if (!this.shadowRoot) {  return; }
+    
     this.setupTabs();
     this.setupSearchFilters();
     this.shadowRoot.getElementById('create-scenario-btn')?.addEventListener('click', () => this.handleOpenAddScenarioModal());
     this.shadowRoot.getElementById('create-question-btn')?.addEventListener('click', () => this.handleOpenAddQuestionModal());
-    console.log("[FE] setupEventListeners: General event listeners set up.");
+    
   }
-  private setupTabs() { /* ... (no changes needed here, keep as is) ... */ 
+  private setupTabs() {
     if (!this.shadowRoot) return;
     const tabs = this.shadowRoot.querySelectorAll('.tabs button.tab');
     const tabContents = this.shadowRoot.querySelectorAll('.tab-content');
@@ -317,7 +305,7 @@ export class QuestionsAndOptions extends HTMLElement {
       });
     });
   }
-  private setupSearchFilters() { /* ... (no changes needed here, keep as is) ... */ 
+  private setupSearchFilters() {
     if (!this.shadowRoot) return;
     const scenarioSearchInput = this.shadowRoot.getElementById('scenario-search-input') as HTMLInputElement;
     const questionSearchInput = this.shadowRoot.getElementById('question-search-input') as HTMLInputElement;
@@ -328,11 +316,11 @@ export class QuestionsAndOptions extends HTMLElement {
   private getQuestionCountForScenario(scenarioId: number): number { /* ... (no changes needed here, keep as is) ... */ 
     return this.questions.filter(q => q.scenario_id === scenarioId).length;
   }
-  private renderScenariosTable(filter: string = '') { /* ... (no changes needed here, keep as is) ... */ 
-    if (!this.shadowRoot) { console.error("[FE] renderScenariosTable: Shadow DOM not available."); return; }
-    console.log('[FE] renderScenariosTable: Called. Filter:', filter);
+  private renderScenariosTable(filter: string = '') {
+    if (!this.shadowRoot) { return; }
+   
     const table = this.shadowRoot.querySelector('#scenarios-tab .table');
-    if (!table) { console.error('[FE] Scenarios table not found in #scenarios-tab'); return; }
+    if (!table) {  return; }
     let tbody = table.querySelector('tbody');
     if (!tbody) { tbody = document.createElement('tbody'); table.appendChild(tbody); }
     tbody.innerHTML = '';
@@ -364,11 +352,11 @@ export class QuestionsAndOptions extends HTMLElement {
       actionCell.appendChild(deleteBtn);
     });
   }
-  private renderQuestionsTable(filter: string = '') { /* ... (no changes needed here, keep as is) ... */ 
-    if (!this.shadowRoot) { console.error("[FE] renderQuestionsTable: Shadow DOM not available."); return; }
-    console.log('[FE] renderQuestionsTable: Called. Filter:', filter);
+  private renderQuestionsTable(filter: string = '') { 
+    if (!this.shadowRoot) {  return; }
+    
     const table = this.shadowRoot.querySelector('#questions-tab .table');
-    if (!table) { console.error('[FE] Questions table not found in #questions-tab'); return; }
+    if (!table) { return; }
     let tbody = table.querySelector('tbody');
     if (!tbody) { tbody = document.createElement('tbody'); table.appendChild(tbody); }
     tbody.innerHTML = '';
@@ -421,8 +409,7 @@ export class QuestionsAndOptions extends HTMLElement {
     });
   }
 
-  // SCENARIOS
-  private handleOpenAddScenarioModal() { /* ... (no changes needed here, keep as is) ... */ 
+  private handleOpenAddScenarioModal() { 
     const formHTML = `
       <form id="add-scenario-form" novalidate>
         <div class="form-group">
@@ -438,7 +425,7 @@ export class QuestionsAndOptions extends HTMLElement {
       } 
     });
   }
-  private handleOpenEditScenarioModal(scenario: Scenario) { /* ... (no changes needed here, keep as is) ... */ 
+  private handleOpenEditScenarioModal(scenario: Scenario) { 
     const formHTML = `
       <form id="edit-scenario-form" novalidate>
         <div class="form-group">
@@ -454,7 +441,7 @@ export class QuestionsAndOptions extends HTMLElement {
       }
     });
   }
-  private confirmAndDeleteScenario(scenario: Scenario) { /* ... (no changes needed here, keep as is) ... */ 
+  private confirmAndDeleteScenario(scenario: Scenario) { 
     const messageHTML = `<p>Are you sure you want to delete the scenario: <strong>"${this.escapeHTML(scenario.scenario_name)}"</strong>? This action cannot be undone and may affect associated questions.</p>`;
     this.openModal('Confirm Deletion', messageHTML, async () => { 
             await this.deleteScenario(scenario.scenario_id); 
@@ -462,50 +449,43 @@ export class QuestionsAndOptions extends HTMLElement {
   }
   public async addScenario(scenarioData: Pick<Scenario, 'scenario_name'>) { 
     try {
-      console.log("[FE] addScenario: Sending data:", scenarioData);
-      // **** UPDATED API PATH ****
+
       const newScenario = await apiService.post<Scenario>('/admin/scenarios', scenarioData); 
-      console.log("[FE] addScenario: Received response:", newScenario);
+
       if (newScenario && newScenario.scenario_id) {
         this.scenarios.push(newScenario); 
         this.scenarioMap.set(newScenario.scenario_id, newScenario.scenario_name);
         this.renderScenariosTable(); this.updateStatCards();
         this.showMessage('✅ Scenario added successfully!', 'success');
       } else { throw new Error("Invalid response from server after adding scenario."); }
-    } catch (error) { this.showMessage('❌ Failed to add scenario.', 'error'); console.error("[FE] Add Scenario Error:", error); }
+    } catch (error) { this.showMessage('❌ Failed to add scenario.', 'error'); }
   }
   public async updateScenario(id: number, scenarioData: Partial<Scenario>) { 
     try {
-      console.log(`[FE] updateScenario (ID: ${id}): Sending data:`, scenarioData);
-      // **** UPDATED API PATH ****
+
       const updatedScenario = await apiService.put<Scenario>(`/admin/scenarios/${id}`, scenarioData);  
-      console.log(`[FE] updateScenario (ID: ${id}): Received response:`, updatedScenario);
       if (updatedScenario && updatedScenario.scenario_id) {
         const index = this.scenarios.findIndex(s => s.scenario_id === id);
         if (index !== -1) {
           this.scenarios[index] = { ...this.scenarios[index], ...updatedScenario }; 
           this.scenarioMap.set(id, this.scenarios[index].scenario_name);
         } else { 
-            console.warn(`[FE] updateScenario: Scenario with ID ${id} not found in local cache. Reloading data.`);
             await this.loadData(); 
         }
         this.renderScenariosTable();
         this.showMessage('✅ Scenario updated successfully!', 'success');
       } else { throw new Error("Invalid response from server after updating scenario."); }
-    } catch (error) { this.showMessage('❌ Failed to update scenario.', 'error'); console.error(`[FE] Update Scenario Error (ID: ${id}):`, error); }
+    } catch (error) { this.showMessage('❌ Failed to update scenario.', 'error'); }
   }
   public async deleteScenario(id: number) { 
     try {
-      console.log(`[FE] deleteScenario: Attempting to delete scenario ID: ${id}`);
-      // **** UPDATED API PATH ****
       await apiService.delete(`/admin/scenarios/${id}`); 
-      console.log(`[FE] deleteScenario: API call successful for ID: ${id}`);
       this.scenarios = this.scenarios.filter(s => s.scenario_id !== id);
       this.scenarioMap.delete(id);
       this.questions = this.questions.filter(q => q.scenario_id !== id);
       this.renderScenariosTable(); this.renderQuestionsTable(); this.updateStatCards();
       this.showMessage('✅ Scenario deleted successfully.', 'success');
-    } catch (error) { this.showMessage('❌ Failed to delete scenario. It might be in use.', 'error'); console.error(`[FE] Delete Scenario Error (ID: ${id}):`, error); }
+    } catch (error) { this.showMessage('❌ Failed to delete scenario. It might be in use.', 'error'); }
   }
 
   // QUESTIONS
@@ -575,7 +555,6 @@ export class QuestionsAndOptions extends HTMLElement {
                 scenario_id: parseInt(formData.scenario_id, 10),
                 question_difficulty_id: parseInt(formData.question_difficulty_id, 10),
             };
-            // Options are not sent to PUT /admin/questions/:id
             await this.updateQuestion(question.question_id, updatedQuestionShell);
             this.closeModal();
         }
@@ -588,47 +567,38 @@ export class QuestionsAndOptions extends HTMLElement {
 
   public async addQuestion(questionShellData: QuestionShellInput_FE) { 
     try {
-      console.log("[FE] addQuestion: Sending shell data:", questionShellData);
-      // **** UPDATED API PATH ****
-      // admin.repository.addQuestion returns basic Question (id, text, scenario_id, difficulty_id)
+
       const newQuestionBase = await apiService.post<Question>(`/admin/questions`, questionShellData); 
-      console.log("[FE] addQuestion: Received base question response:", newQuestionBase);
 
       if (newQuestionBase && newQuestionBase.question_id) {
-        // Options are added separately. Refresh data to see the new question shell.
         await this.loadData(); 
         this.showMessage('✅ Question created! Add options using the "Add Option" button.', 'success');
       } else {
         throw new Error("Invalid response from server after adding question shell.");
       }
-    } catch (error) { this.showMessage('❌ Failed to add question shell.', 'error'); console.error("[FE] Add Question Shell Error:", error); }
+    } catch (error) { this.showMessage('❌ Failed to add question shell.', 'error'); }
   }
 
   public async updateQuestion(id: number, questionShellData: QuestionShellUpdate_FE) { 
     try {
-      console.log(`[FE] updateQuestion (ID: ${id}): Sending shell data:`, questionShellData);
-      // **** UPDATED API PATH ****
-      // admin.repository.updateQuestion does not handle options.
+
       await apiService.put<void>(`/admin/questions/${id}`, questionShellData); 
-      console.log(`[FE] updateQuestion (ID: ${id}): API call successful for shell.`);
       await this.loadData(); 
       this.showMessage('✅ Question details updated! Manage options separately.', 'success');
-    } catch (error) { this.showMessage('❌ Failed to update question details.', 'error'); console.error(`[FE] Update Question Shell Error (ID: ${id}):`, error); }
+    } catch (error) { this.showMessage('❌ Failed to update question details.', 'error');  }
   }
   public async deleteQuestion(id: number) { 
     try {
-      console.log(`[FE] deleteQuestion: Attempting to delete question ID: ${id}`);
-      // **** UPDATED API PATH ****
-      // This should call adminRepository.deleteQuestionAndOptions via service in admin.routes.ts
+
       await apiService.delete(`/admin/questions/${id}`); 
-      console.log(`[FE] deleteQuestion: API call successful for ID: ${id}`);
+
       this.questions = this.questions.filter(q => q.question_id !== id); 
       this.renderQuestionsTable(); this.updateStatCards();
       this.showMessage('✅ Question and its options deleted.', 'success');
-    } catch (error) { this.showMessage('❌ Failed to delete question. It might be in use.', 'error'); console.error(`[FE] Delete Question Error (ID: ${id}):`, error); }
+    } catch (error) { this.showMessage('❌ Failed to delete question. It might be in use.', 'error');}
   }
 
-  // OPTIONS - Now makes direct calls to /admin/options
+
   private async handleOpenAddOptionModal(questionId: number) {
     const formHTML = `
       <form id="add-option-form" novalidate>
@@ -645,7 +615,7 @@ export class QuestionsAndOptions extends HTMLElement {
     this.openModal('Add New Option', formHTML, async (formData) => {
       if (formData && formData.option_text && formData.points !== undefined) {
         const newOptionPayload: OptionInput & { question_id: number } = { 
-            question_id: questionId, // This is needed for POST /admin/options
+            question_id: questionId, 
             option_text: formData.option_text.trim(),
             points: parseInt(formData.points, 10)
         };
@@ -657,14 +627,11 @@ export class QuestionsAndOptions extends HTMLElement {
 
   private async addOptionDirectly(optionData: OptionInput & { question_id: number }) {
     try {
-        console.log("[FE] addOptionDirectly: Sending data:", optionData);
-        // **** API PATH FOR OPTIONS ****
+
         const newOption = await apiService.post<Option>('/admin/options', optionData);
-        console.log("[FE] addOptionDirectly: Received response:", newOption);
         if (newOption && newOption.option_id) {
             const question = this.questions.find(q => q.question_id === optionData.question_id);
             if (question) {
-                // Ensure the newOption from backend has question_id or add it if Option type requires
                 const optionToAdd: Option = { 
                     ...newOption, 
                     question_id: optionData.question_id 
@@ -676,7 +643,7 @@ export class QuestionsAndOptions extends HTMLElement {
         } else { throw new Error("Invalid response from server after adding option."); }
     } catch (error) {
         this.showMessage('❌ Failed to add option.', 'error');
-        console.error("[FE] Add Option Directly Error:", error);
+        
     }
   }
 
@@ -695,7 +662,7 @@ export class QuestionsAndOptions extends HTMLElement {
     `;
     this.openModal(`Edit Option`, formHTML, async (formData) => { 
         if (formData && formData.option_text && formData.points !== undefined) {
-            const updatedOptionPayload: Partial<OptionInput> = { // Use Partial for update
+            const updatedOptionPayload: Partial<OptionInput> = {
                 option_text: formData.option_text.trim(),
                 points: parseInt(formData.points, 10)
             };
@@ -708,8 +675,6 @@ export class QuestionsAndOptions extends HTMLElement {
   private async updateOptionDirectly(optionId: number, optionData: Partial<OptionInput>, questionIdToUpdateUI: number) {
     try {
         console.log(`[FE] updateOptionDirectly (ID: ${optionId}): Sending data:`, optionData);
-        // **** API PATH FOR OPTIONS ****
-        // admin.repository.updateOption doesn't take question_id, so it's not in payload here
         const updatedOption = await apiService.put<Option>(`/admin/options/${optionId}`, optionData);
         console.log(`[FE] updateOptionDirectly (ID: ${optionId}): Received response:`, updatedOption);
 
@@ -718,10 +683,9 @@ export class QuestionsAndOptions extends HTMLElement {
             if (question) {
                 const optIndex = question.options.findIndex(o => o.option_id === optionId);
                 if (optIndex !== -1) {
-                    // Ensure the updatedOption from backend has question_id or add it
                     question.options[optIndex] = { 
-                        ...question.options[optIndex], // Keep existing fields like question_id
-                        ...updatedOption // Overwrite with updated fields
+                        ...question.options[optIndex], 
+                        ...updatedOption 
                     };
                 } else { await this.loadData(); } 
                 this.renderQuestionsTable();
@@ -730,7 +694,6 @@ export class QuestionsAndOptions extends HTMLElement {
         } else { throw new Error("Invalid response from server after updating option."); }
     } catch (error) {
         this.showMessage('❌ Failed to update option.', 'error');
-        console.error(`[FE] Update Option Directly Error (ID: ${optionId}):`, error);
     }
   }
 
@@ -743,10 +706,8 @@ export class QuestionsAndOptions extends HTMLElement {
 
   private async deleteOptionDirectly(optionId: number, questionIdToUpdateUI: number) {
     try {
-        console.log(`[FE] deleteOptionDirectly: Attempting to delete option ID: ${optionId}`);
-        // **** API PATH FOR OPTIONS ****
+
         await apiService.delete(`/admin/options/${optionId}`);
-        console.log(`[FE] deleteOptionDirectly: API call successful for ID: ${optionId}`);
 
         const question = this.questions.find(q => q.question_id === questionIdToUpdateUI);
         if (question) {
@@ -756,7 +717,6 @@ export class QuestionsAndOptions extends HTMLElement {
         this.showMessage('✅ Option deleted successfully!', 'success');
     } catch (error) {
         this.showMessage('❌ Failed to delete option.', 'error');
-        console.error(`[FE] Delete Option Directly Error (ID: ${optionId}):`, error);
     }
   }
 

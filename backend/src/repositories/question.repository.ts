@@ -30,7 +30,6 @@ export const findAll = async (): Promise<QuestionWithDetails[]> => {
     LEFT JOIN options o ON q.question_id = o.question_id
     ORDER BY q.question_id, o.option_id;
   `);
-  console.log(rows);
 
   const questionMap = new Map<number, QuestionWithDetails>();
   for (const row of rows) {
