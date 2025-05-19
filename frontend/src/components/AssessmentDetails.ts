@@ -1,6 +1,5 @@
 import { loadTemplate } from "../utils/load-template.js";
 import './HistoryQuestion.js';
-import './SelectedOption.js';
 import './HistoryOption.js'
 
 export class AssessmentDetails extends HTMLElement {
