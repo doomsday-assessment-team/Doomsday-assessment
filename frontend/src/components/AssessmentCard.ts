@@ -21,7 +21,6 @@ export class AssessmentCard extends HTMLElement {
         dateMetadata.setAttribute("datetime", this.formatDate(details.timestamp));
       }
 
-      const scoreTag = this.querySelector(".score-value");
       const scoreMetadata = document.querySelector<HTMLUListElement>("#score");
       if (scoreMetadata) {
         scoreMetadata.textContent = details.questions.reduce((sum, q) => {
@@ -38,6 +37,11 @@ export class AssessmentCard extends HTMLElement {
       const scenarioTitle = document.querySelector<HTMLUListElement>("#scenario");
       if (scenarioTitle) {
         scenarioTitle.textContent = details.scenario_name;
+      }
+
+      const feedback = document.querySelector<HTMLUListElement>("#feedback");
+      if (feedback) {
+        feedback.textContent = details.feedback;
       }
 
       const listOfQuestions = document.querySelector<HTMLUListElement>(".question-list");
