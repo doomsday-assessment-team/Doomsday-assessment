@@ -9,6 +9,7 @@ interface QuestionDbRow {
     question_difficulty_name: string;
     difficulty_time: number;
     scenario_id: number;
+    scenario_name: string;
     options: { option_id: number; option_text: string, points: number }[];
 }
 
@@ -22,6 +23,16 @@ interface HistoryRecord {
     timestamp: Date;
     feedback: string;
 }
+
+export const findAllScenarios = async () => {
+  return await db.any(
+    `SELECT scenario_id, scenario_name FROM scenarios ORDER BY scenario_id ASC`
+  );
+};
+
+export const findAllDifficulties = async () => {
+  return await db.any('SELECT question_difficulty_id, question_difficulty_name, time FROM question_difficulties');
+};
 
 export const findQuestionsByCriteria = async ({
     scenario_id,
@@ -40,6 +51,7 @@ export const findQuestionsByCriteria = async ({
       qd.question_difficulty_name,
       qd.time AS difficulty_time,
       q.scenario_id,
+      s.scenario_name,
       COALESCE(
         (
           SELECT json_agg(
@@ -56,6 +68,7 @@ export const findQuestionsByCriteria = async ({
       ) AS options
     FROM questions q
     JOIN question_difficulties qd ON q.question_difficulty_id = qd.question_difficulty_id
+    JOIN scenarios s ON q.scenario_id = s.scenario_id
     WHERE q.scenario_id = $1
   `;
     const queryParams: any[] = [scenario_id];

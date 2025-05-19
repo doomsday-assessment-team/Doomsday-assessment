@@ -17,6 +17,7 @@ export interface Scenario {
     question_difficulty_name?: string;
     difficulty_time?: number;
     scenario_id: number;
+    scenario_name: string;
     options: Options[];
   }
   
