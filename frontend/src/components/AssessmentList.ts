@@ -46,12 +46,7 @@ export class AssessmentList extends HTMLElement {
     if (filters.difficulty) {
       params.append("difficulty", String(filters.difficulty));
     }
-
-    if (filters.sortAscending){
-      params.append("sort_by", String(true))
-    } else {
-      params.append("sort_by", String(false))
-    }
+    params.append("sort_by", String(filters.sortAscending ?? true));
 
     return params;
   }
