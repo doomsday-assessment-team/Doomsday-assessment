@@ -1,5 +1,6 @@
 import { loadTemplate } from '../utils/load-template.js'; 
-import { apiService } from '../main.js'; 
+import { apiService } from '../main.js';
+ 
 
 interface OptionInput { 
   option_text: string;
@@ -464,7 +465,6 @@ export class QuestionsAndOptions extends HTMLElement {
   }
   public async updateScenario(id: number, scenarioData: Partial<Scenario>) { 
     try {
-
       const updatedScenario = await apiService.put<Scenario>(`/scenarios/${id}`, scenarioData);  
       if (updatedScenario && updatedScenario.scenario_id) {
         const index = this.scenarios.findIndex(s => s.scenario_id === id);
@@ -569,7 +569,6 @@ export class QuestionsAndOptions extends HTMLElement {
 
   public async addQuestion(questionShellData: QuestionShellInput_FE) { 
     try {
-
       const newQuestionBase = await apiService.post<Question>(`/questions`, questionShellData); 
 
       if (newQuestionBase && newQuestionBase.question_id) {
@@ -584,7 +583,7 @@ export class QuestionsAndOptions extends HTMLElement {
   public async updateQuestion(id: number, questionShellData: QuestionShellUpdate_FE) { 
     try {
 
-      await apiService.put<void>(`/admin/questions/${id}`, questionShellData); 
+      await apiService.put<void>(`/questions/${id}`, questionShellData); 
       await this.loadData(); 
       this.showMessage('✅ Question details updated! Manage options separately.', 'success');
     } catch (error) { this.showMessage('❌ Failed to update question details.', 'error');  }

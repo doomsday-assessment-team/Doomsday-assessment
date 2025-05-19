@@ -41,7 +41,7 @@ app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/users', userRoutes);
 app.use('/quiz', quizRoutes);
-app.use('', scenarioRoutes);
+app.use('/scenarios', scenarioRoutes);
 app.use('', difficultyRoutes);
 app.use('/questions', questionRoutes);
 

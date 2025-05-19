@@ -1,5 +1,5 @@
 import db from '../config/db';
-import { Scenario } from '../types/global-types'; 
+import { Scenario } from '../types/global-types';
 
 export const findAll = async (): Promise<Scenario[]> => {
   return db.any<Scenario>(`SELECT scenario_id, scenario_name FROM scenarios ORDER BY scenario_id ASC`);
