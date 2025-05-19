@@ -102,6 +102,9 @@ export class AssessmentFilters extends HTMLElement {
       fromDateInput.addEventListener("change", () => {
         if (fromDateInput.value > today) {
           fromDateInput.value = today;
+          if (fromDateInput && toDateInput && fromDateInput.value > toDateInput.value) {
+            toDateInput.value = fromDateInput.value;
+          }
         }
         this.filterChanged();
       });
