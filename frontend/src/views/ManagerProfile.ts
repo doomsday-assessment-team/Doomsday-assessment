@@ -216,6 +216,52 @@ export class ManagerProfileView extends HTMLElement {
     container?.appendChild(errorMsg);
   }
 
+  updateUserRoleChips(
+    userId: number,
+    roleName: string,
+    action: "add" | "remove"
+  ) {
+    const userCard = this.shadowRoot
+      ?.querySelector(
+        `.user-card article:has(form .select-wrapper select#role-select-${userId})`
+      )
+      ?.closest(".user-card");
+
+    if (!userCard) return;
+
+    const rolesContainer = userCard.querySelector(".roles-container");
+    if (!rolesContainer) return;
+
+    if (action === "add") {
+      const noRolesElement = rolesContainer.querySelector(".no-roles");
+      if (noRolesElement) {
+        rolesContainer.removeChild(noRolesElement);
+      }
+
+      const roleChip = document.createElement("li");
+      roleChip.className = "role-chip";
+      roleChip.textContent = roleName;
+      roleChip.setAttribute("data-role", roleName);
+      rolesContainer.appendChild(roleChip);
+    } else if (action === "remove") {
+      const roleChips = rolesContainer.querySelectorAll(".role-chip");
+
+      for (const chip of Array.from(roleChips)) {
+        if (chip.textContent === roleName) {
+          rolesContainer.removeChild(chip);
+          break;
+        }
+      }
+
+      if (rolesContainer.children.length === 0) {
+        const noRoles = document.createElement("li");
+        noRoles.className = "no-roles";
+        noRoles.textContent = "No assigned roles";
+        rolesContainer.appendChild(noRoles);
+      }
+    }
+  }
+
   async loadManageUsersSection() {
     const shadow = this.shadowRoot!;
     const manageContainer = shadow.getElementById("manage-users-section")!;
@@ -325,6 +371,7 @@ export class ManagerProfileView extends HTMLElement {
       for (const user of users as any[]) {
         const userCard = document.createElement("li");
         userCard.className = "user-card";
+        userCard.setAttribute("data-user-id", user.user_id);
 
         const userCardContent = document.createElement("article");
 
@@ -369,6 +416,7 @@ export class ManagerProfileView extends HTMLElement {
             const roleChip = document.createElement("li");
             roleChip.className = "role-chip";
             roleChip.textContent = role;
+            roleChip.setAttribute("data-role", role);
             rolesContainer.appendChild(roleChip);
           }
         } else {
@@ -470,7 +518,13 @@ export class ManagerProfileView extends HTMLElement {
               title: "Role Assigned",
               message: `Successfully assigned ${selectedRoleName} role to ${user.name} ${user.surname}`,
             });
-            this.loadManageUsersSection();
+
+            // Update UI directly instead of refreshing
+            if (selectedRoleName) {
+              this.updateUserRoleChips(user.user_id, selectedRoleName, "add");
+              // Update the user's roles array to maintain state consistency
+              user.roles.push(selectedRoleName);
+            }
           } catch (err) {
             console.error("Failed to assign role", err);
             this.notificationService.showNotification({
@@ -534,7 +588,20 @@ export class ManagerProfileView extends HTMLElement {
               title: "Role Unassigned",
               message: `Successfully removed ${selectedRoleName} role from ${user.name} ${user.surname}`,
             });
-            this.loadManageUsersSection();
+
+            // Update UI directly 
+            if (selectedRoleName) {
+              this.updateUserRoleChips(
+                user.user_id,
+                selectedRoleName,
+                "remove"
+              );
+              // Update the user array
+              const roleIndex = user.roles.indexOf(selectedRoleName);
+              if (roleIndex !== -1) {
+                user.roles.splice(roleIndex, 1);
+              }
+            }
           } catch (err) {
             console.error("Failed to unassign role", err);
             this.notificationService.showNotification({
