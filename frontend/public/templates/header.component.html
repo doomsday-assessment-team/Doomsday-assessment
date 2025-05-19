@@ -15,12 +15,14 @@
       text-transform: uppercase;
       color: var(--text-color);
       text-shadow: 0 0 0.625rem rgba(213, 201, 166, 0.3);
+      margin: 0;
     }
 
     .user-info {
       display: flex;
       align-items: center;
       gap: 0.9375rem;
+      margin: 0;
     }
 
     .user-avatar {
@@ -33,12 +35,21 @@
       justify-content: center;
       font-weight: 600;
       border: 0.0625rem solid var(--border-color);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin: 0;
+    }
+
+    .user-avatar:hover, .user-avatar:focus {
+      transform: scale(1.05);
+      box-shadow: 0 0 0.5rem rgba(213, 201, 166, 0.3);
+      outline: none;
     }
   </style>
   <header>
     <h1 class="logo">DOOMSDAY</h1>
     <figure class="user-info">
-      <figure class="user-avatar">MP</figure>
+      <figure class="user-avatar"></figure>
     </figure>
   </header>
 </template>

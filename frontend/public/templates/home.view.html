@@ -47,6 +47,45 @@
             display: none;
         }
 
+        /* Header with avatar */
+        .page-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0.5rem 0;
+            margin-bottom: 1rem;
+            margin-right: 2.5rem; 
+        }
+        
+        .user-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background-color: var(--theme-color-light, #2a2b21);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 0.1em solid var(--accent-color, #d5c9a6);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            color: var(--text-color, #d5c9a6);
+            font-weight: bold;
+            font-family: "Orbitron", sans-serif;
+            padding: 0; 
+            overflow: hidden;
+        }
+        
+        .user-avatar:hover, .user-avatar:focus {
+            transform: scale(1.05);
+            box-shadow: 0 0 0.5rem rgba(240, 192, 64, 0.5);
+            outline: none; /* Remove default focus outline */
+        }
+        
+        .avatar-initials {
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+
         /* Card */
         .test-card {
             background-color: var(--theme-color-light);
@@ -294,7 +333,6 @@
 
         /* Reduced Motion */
         @media (prefers-reduced-motion: reduce) {
-
             *,
             *::before,
             *::after {
@@ -304,9 +342,33 @@
                 scroll-behavior: auto;
             }
         }
+
+        /* Responsive design */
+        @media (max-width: 48rem) {
+            .user-avatar {
+                width: 2rem;
+                height: 2rem;
+            }
+            
+            .avatar-initials {
+                font-size: 0.875rem;
+            }
+        }
+
+        @media (max-width: 30rem) {
+            .page-header {
+                padding: 0.5rem 0;
+            }
+        }
     </style>
 
     <main>
+        <header class="page-header" role="banner">
+            <button type="button" class="user-avatar" title="View your profile" aria-label="View your profile">
+                <output class="avatar-initials" aria-live="polite"></output>
+            </button>
+        </header>
+        
         <section class="test-card">
             <h2 class="card-title">Begin Your Assessment</h2>
 
@@ -353,14 +415,14 @@
                     </a>
                 </li>
 
-                <li>
-                    <a href="#/user-profile" class="quick-link">
-                        <abbr class="link-icon" title="Your Profile">👤</abbr>
-                        Your Profile
+                <li id="user-management-link-li" class="hidden">
+                    <a href="#/user-management" class="quick-link">
+                        <abbr class="link-icon" title="User Management Console">👥</abbr>
+                        User Management
                     </a>
                 </li>
 
-                <li id="admin-questions-link-li">
+                <li id="admin-questions-link-li" class="hidden">
                     <a href="#/questions-and-options" class="quick-link">
                         <abbr class="link-icon" title="Add Questions, Options and Points">📝</abbr>
                         Add Questions, Options and Points

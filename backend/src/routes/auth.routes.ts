@@ -72,7 +72,7 @@ router.get('/google/callback', async (req, res) => {
     }
 
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '2h' });
     res.redirect(`${FRONTEND_URL}?token=${token}`);
 
   } catch (err) {
