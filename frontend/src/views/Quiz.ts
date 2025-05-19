@@ -1,5 +1,11 @@
 import "../components/QuizQuestion.js"
+import "../components/SurvivalScore.js"
+import "../components/DynamicBackground.js"
+import "../components/RewardAnimation.js"
 import type { QuizQuestion } from "../components/QuizQuestion.js"
+import type { SurvivalScore } from "../components/SurvivalScore.js"
+import type { DynamicBackground } from "../components/DynamicBackground.js"
+import type { RewardAnimation } from "../components/RewardAnimation.js"
 import { apiService, App } from "../main.js"
 import { loadTemplate } from "../utils/load-template.js"
 
@@ -66,16 +72,22 @@ export class QuizView extends HTMLElement {
 
     private scenarioId: number | null = null
     private difficultyId: number | null = null
-    private scenarioInfoElement: HTMLElement | null = null;
-
+    private scenarioInfoElement: HTMLElement | null = null
 
     private isQuizSubmitted = false
     private isLoading = false
 
-    constructor() {
-        super();
-        this.shadowRootInstance = this.attachShadow({ mode: 'open' });
+    // Game elements
+    private survivalScore: SurvivalScore | null = null
+    private dynamicBackground: DynamicBackground | null = null
+    private rewardAnimation: RewardAnimation | null = null
+    private correctAnswerStreak = 0
+    private questionStartTime = 0
+    private difficultyMultiplier = 1
 
+    constructor() {
+        super()
+        this.shadowRootInstance = this.attachShadow({ mode: "open" })
     }
 
     connectedCallback() {
@@ -85,11 +97,10 @@ export class QuizView extends HTMLElement {
         this.scenarioId = scenarioIdAttr ? Number.parseInt(scenarioIdAttr, 10) : null
         this.difficultyId = difficultyIdAttr ? Number.parseInt(difficultyIdAttr, 10) : null
 
-        if (isNaN(this.scenarioId as number)) this.scenarioId = null;
-        if (isNaN(this.difficultyId as number)) this.difficultyId = null;
+        if (isNaN(this.scenarioId as number)) this.scenarioId = null
+        if (isNaN(this.difficultyId as number)) this.difficultyId = null
 
-
-        this.initializeQuiz();
+        this.initializeQuiz()
     }
 
     async fetchQuiz() {
@@ -102,21 +113,45 @@ export class QuizView extends HTMLElement {
                 limit: "10",
             })
 
+            console.log("Fetched questions:", questions)
 
-            this.allQuestions = questions
+            // Ensure each question has an options array
+            this.allQuestions = questions.map((q) => {
+                if (!q.options) {
+                    q.options = []
+                    console.warn("Question had no options, adding empty array:", q)
+                }
+                return q
+            })
+
             this.collectedAnswers = []
 
             if (this.allQuestions.length > 0) {
-                this.currentQuestionIndex = 0;
-                this.displayCurrentQuestion();
-                this.updateProgressIndicators();
+                this.currentQuestionIndex = 0
+                this.displayCurrentQuestion()
+                this.updateProgressIndicators()
+
+                // Set difficulty multiplier based on selected difficulty
+                if (this.difficultyId) {
+                    switch (this.difficultyId) {
+                        case 3: // Hard
+                            this.difficultyMultiplier = 3
+                            break
+                        case 2: // Medium
+                            this.difficultyMultiplier = 2
+                            break
+                        default: // Easy or unknown
+                            this.difficultyMultiplier = 1
+                    }
+                }
             } else {
-                this.showNoQuestionsMessage();
+                this.showNoQuestionsMessage()
             }
         } catch (error) {
+            console.error("Error fetching quiz questions:", error)
             this.showErrorMessage("Failed to load quiz questions. Please try again later.")
         } finally {
-            this.setLoading(false);
+            this.setLoading(false)
         }
     }
 
@@ -138,52 +173,55 @@ export class QuizView extends HTMLElement {
     }
 
     private async initializeQuiz() {
-        await this.loadViewTemplate();
-        this.updateScenarioInfoDisplay();
-        this.fetchQuiz();
+        await this.loadViewTemplate()
+        this.createDustParticles()
+        this.updateScenarioInfoDisplay()
+        this.setupFlickerEffect()
+        this.initializeGameElements()
+        this.handleResponsiveLayout() // Add this line
+        this.fetchQuiz()
+
+        // Add event listener for window resize
+        window.addEventListener("resize", () => {
+            this.handleResponsiveLayout()
+        })
+    }
+
+    private initializeGameElements() {
+        // Create survival score component
+        this.survivalScore = document.createElement("survival-score") as SurvivalScore
+        this.shadowRootInstance
+            .querySelector("article")
+            ?.insertBefore(this.survivalScore, this.shadowRootInstance.querySelector(".progress-container"))
+
+        // Create dynamic background
+        this.dynamicBackground = document.createElement("dynamic-background") as DynamicBackground
+        this.shadowRootInstance.appendChild(this.dynamicBackground)
+
+        // Create reward animation
+        this.rewardAnimation = document.createElement("reward-animation") as RewardAnimation
+        this.shadowRootInstance.appendChild(this.rewardAnimation)
     }
 
     private async loadViewTemplate() {
         try {
-            const content = await loadTemplate('./templates/quiz.view.html');
+            const content = await loadTemplate("./templates/quiz.view.html")
             if (content) {
-                this.shadowRootInstance.appendChild(content);
+                this.shadowRootInstance.appendChild(content)
 
-                this.questionContainer = this.shadowRootInstance.querySelector("#quiz-container");
-                this.nextButton = this.shadowRootInstance.querySelector("#next-question-btn");
-                this.progressBar = this.shadowRootInstance.querySelector(".progress-bar");
-                this.progressText = this.shadowRootInstance.querySelector(".progress-text");
-                this.scenarioInfoElement = this.shadowRootInstance.querySelector('#scenario-info');
+                this.questionContainer = this.shadowRootInstance.querySelector("#quiz-container")
+                this.nextButton = this.shadowRootInstance.querySelector("#next-question-btn")
+                this.progressBar = this.shadowRootInstance.querySelector(".progress-bar")
+                this.progressText = this.shadowRootInstance.querySelector(".progress-text")
+                this.scenarioInfoElement = this.shadowRootInstance.querySelector("#scenario-info")
 
                 if (!this.shadowRootInstance.querySelector(".loading-indicator")) {
                     const loadingIndicator = document.createElement("div")
-                    loadingIndicator.className = "loading-indicator hidden"
-                    loadingIndicator.textContent = "Loading quiz..."
+                    loadingIndicator.className = "loading-indicator"
+                    loadingIndicator.textContent = "Loading survival assessment"
                     this.shadowRootInstance
                         .querySelector("main")
                         ?.insertBefore(loadingIndicator, this.shadowRootInstance.querySelector("article"))
-                }
-
-                if (!this.progressBar && !this.progressText) {
-                    const progressContainer = document.createElement("div")
-                    progressContainer.className = "progress-container"
-
-                    this.progressText = document.createElement("div")
-                    this.progressText.className = "progress-text"
-
-                    this.progressBar = document.createElement("div")
-                    this.progressBar.className = "progress-bar-container"
-                    const progressBarInner = document.createElement("div")
-                    progressBarInner.className = "progress-bar"
-                    this.progressBar.appendChild(progressBarInner)
-
-                    progressContainer.appendChild(this.progressText)
-                    progressContainer.appendChild(this.progressBar)
-
-                    const article = this.shadowRootInstance.querySelector("article")
-                    if (article) {
-                        article.insertBefore(progressContainer, article.firstChild)
-                    }
                 }
 
                 if (this.nextButton) {
@@ -195,15 +233,44 @@ export class QuizView extends HTMLElement {
                     if (e.key === "Enter" && this.nextButton && !this.nextButton.disabled) {
                         this.validateAndProceed()
                     }
-                });
-
-                // this.setupFlickerEffect();
-
+                })
             } else {
                 this.shadowRootInstance.innerHTML = "<p>Error: Quiz interface could not be loaded interface.</p>"
             }
         } catch (error) {
             this.shadowRootInstance.innerHTML = "<p>Error: Quiz interface could not be loaded.</p>"
+        }
+    }
+
+    private createDustParticles() {
+        const dustContainer = this.shadowRootInstance.querySelector(".dust-particles")
+        if (!dustContainer) return
+
+        // Clear existing particles
+        dustContainer.innerHTML = ""
+
+        // Create new particles
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement("div")
+            particle.className = "dust-particle"
+
+            // Random position
+            const x = Math.random() * 100
+            const y = Math.random() * 100
+
+            // Random size
+            const size = 1 + Math.random() * 2
+
+            // Random animation duration
+            const duration = 20 + Math.random() * 40
+
+            particle.style.left = `${x}%`
+            particle.style.top = `${y}%`
+            particle.style.width = `${size}px`
+            particle.style.height = `${size}px`
+            particle.style.animationDuration = `${duration}s`
+
+            dustContainer.appendChild(particle)
         }
     }
 
@@ -253,6 +320,12 @@ export class QuizView extends HTMLElement {
         if (timerDisplay) {
             timerDisplay.classList.add("emergency-text-effect")
         }
+
+        // Change background theme
+        if (this.dynamicBackground) {
+            this.dynamicBackground.setTheme("danger")
+            this.dynamicBackground.pulse(2000)
+        }
     }
 
     private toggleEmergencyMode() {
@@ -277,32 +350,49 @@ export class QuizView extends HTMLElement {
     }
 
     private handleTimerExpired(event: CustomEvent) {
-
         this.showNotification("Time's up! Moving to the next question.", "warning")
 
+        // Reset streak
+        this.correctAnswerStreak = 0
+        if (this.survivalScore) {
+            this.survivalScore.resetStreak()
+        }
+
+        // Change background theme
+        if (this.dynamicBackground) {
+            this.dynamicBackground.setTheme("danger")
+            this.dynamicBackground.pulse(2000)
+        }
+
         setTimeout(() => {
-            this.proceedToNextOrSubmit(true)
-        }, 1500)
+            this.proceedToNextOrSubmit()
+        }, 0)
     }
 
     private updateScenarioInfoDisplay() {
-        if (!this.scenarioInfoElement) return;
+        if (!this.scenarioInfoElement) return
 
-        let scenarioText = '';
-        let difficultyText = '';
+        let scenarioText = ""
+        let difficultyText = ""
 
         if (this.allQuestions.length > 0) {
-            const firstQuestion = this.allQuestions[0];
+            const firstQuestion = this.allQuestions[0]
 
-            scenarioText = `Scenario ID: ${firstQuestion.scenario_id}`;
+            scenarioText = firstQuestion.scenario_name
+                ? `SCENARIO: ${firstQuestion.scenario_name}`
+                : `SCENARIO ID: ${firstQuestion.scenario_id}`
+
             difficultyText = firstQuestion.question_difficulty_name
-                ? `Difficulty: ${firstQuestion.question_difficulty_name}`
-                : (this.difficultyId ? `Difficulty ID: ${this.difficultyId}` : 'Difficulty: N/A');
+                ? `THREAT LEVEL: ${firstQuestion.question_difficulty_name}`
+                : this.difficultyId
+                    ? `THREAT LEVEL: ${this.difficultyId}`
+                    : "THREAT LEVEL: UNKNOWN"
         } else if (this.scenarioId !== null) {
-            scenarioText = `Scenario ID: ${this.scenarioId}`;
-            difficultyText = this.difficultyId ? `Difficulty ID: ${this.difficultyId}` : 'Difficulty: N/A';
+            scenarioText = `SCENARIO ID: ${this.scenarioId}`
+            difficultyText = this.difficultyId ? `THREAT LEVEL: ${this.difficultyId}` : "THREAT LEVEL: UNKNOWN"
         }
-        this.scenarioInfoElement.textContent = `${scenarioText} | ${difficultyText}`;
+
+        this.scenarioInfoElement.textContent = `${scenarioText} | ${difficultyText}`
     }
 
     private showNotification(message: string, type: "info" | "warning" | "error" = "info") {
@@ -335,15 +425,13 @@ export class QuizView extends HTMLElement {
         }
 
         if (this.progressBar) {
-            const bar = this.progressBar.querySelector(".progress-bar")
-            if (bar) {
-                bar.setAttribute("style", `width: ${percentage}%`)
-            }
+            this.progressBar.style.width = `${percentage}%`
         }
     }
 
     private displayCurrentQuestion() {
         if (!this.questionContainer) {
+            console.error("Question container not found")
             return
         }
 
@@ -353,6 +441,10 @@ export class QuizView extends HTMLElement {
         }
 
         const questionData = this.allQuestions[this.currentQuestionIndex]
+        console.log("Displaying question:", questionData)
+
+        // Store question start time for timing calculations
+        this.questionStartTime = performance.now()
 
         // Clean up previous question
         if (this.currentQuestionElement) {
@@ -369,6 +461,14 @@ export class QuizView extends HTMLElement {
 
         // Create new question element
         this.currentQuestionElement = document.createElement("quiz-question") as QuizQuestion
+
+        // Make sure the data is properly set
+        if (!questionData.options) {
+            questionData.options = []
+            console.error("Question has no options:", questionData)
+        }
+
+        // Set the data on the element
         this.currentQuestionElement.data = questionData
 
         // Add event listeners
@@ -392,25 +492,98 @@ export class QuizView extends HTMLElement {
         // Update scenario info
         const scenarioInfo = this.shadowRootInstance.querySelector(".scenario-info")
         if (scenarioInfo) {
-            scenarioInfo.textContent = `Scenario: ${questionData.scenario_name || "General Preparedness"} | Difficulty: ${questionData.question_difficulty_name || "Easy"}`
+            scenarioInfo.textContent = `SCENARIO: ${questionData.scenario_name || "UNKNOWN"} | THREAT LEVEL: ${questionData.question_difficulty_name || "STANDARD"}`
         }
 
         // Update button text
         if (this.nextButton) {
             if (this.currentQuestionIndex === this.allQuestions.length - 1) {
-                this.nextButton.textContent = "Submit Quiz"
+                this.nextButton.textContent = "SUBMIT ASSESSMENT"
             } else {
-                this.nextButton.textContent = "Next Question"
+                this.nextButton.textContent = "NEXT QUESTION"
             }
         }
 
         // Update progress indicators
         this.updateProgressIndicators()
+
+        // Reset background to default theme for new question
+        if (this.dynamicBackground) {
+            this.dynamicBackground.setTheme("default")
+        }
     }
 
     private handleAnswerSelectedForValidation(event: CustomEvent) {
         this.handleAnswerSelected(event)
         this.updateNextButtonState()
+
+        // Calculate response time
+        const responseTime = performance.now() - this.questionStartTime
+
+        // Get the selected option and check if it's the best answer
+        const detail = event.detail
+        const currentQuestion = this.allQuestions[this.currentQuestionIndex]
+        const selectedOption = currentQuestion.options.find((opt) => opt.option_id === detail.selectedOptionId)
+
+        if (selectedOption) {
+            // Find the highest point option (best answer)
+            const bestOption = currentQuestion.options.reduce((prev, current) =>
+                prev.points > current.points ? prev : current,
+            )
+
+            const isCorrect = selectedOption.points > 0
+            const isPerfect = selectedOption.option_id === bestOption.option_id
+
+            // Award points based on answer quality and timing
+            let pointsToAward = selectedOption.points
+
+            // Apply difficulty multiplier
+            pointsToAward *= this.difficultyMultiplier
+
+            // Add time bonus for quick answers (if correct)
+            if (isCorrect) {
+                const maxTime = currentQuestion.difficulty_time || 60
+                const timeBonus = Math.floor(((maxTime - responseTime / 1000) / maxTime) * 10)
+
+                // Only add time bonus if positive
+                if (timeBonus > 0) {
+                    pointsToAward += timeBonus
+                }
+
+                // Update streak for correct answers
+                this.correctAnswerStreak++
+
+                // Show streak animation at milestones
+                if (this.correctAnswerStreak === 3 || this.correctAnswerStreak === 5) {
+                    this.rewardAnimation?.showStreak(this.correctAnswerStreak)
+                }
+
+                // Show perfect answer animation
+                if (isPerfect) {
+                    this.rewardAnimation?.showPerfectAnswer()
+                }
+            } else {
+                // Reset streak on wrong answers
+                this.correctAnswerStreak = 0
+
+                // Change background to danger theme
+                if (this.dynamicBackground) {
+                    this.dynamicBackground.setTheme("danger")
+                    this.dynamicBackground.pulse(1000)
+                }
+            }
+
+            // Update survival score
+            if (this.survivalScore) {
+                this.survivalScore.addPoints(pointsToAward, isCorrect)
+            }
+
+            // Change background to success theme for correct answers
+            if (isCorrect && this.dynamicBackground) {
+                this.dynamicBackground.setTheme("success")
+                this.dynamicBackground.pulse(1000)
+            }
+        }
     }
 
     private updateNextButtonState() {
@@ -438,10 +611,11 @@ export class QuizView extends HTMLElement {
         if (this.currentQuestionElement) {
             const selection = this.currentQuestionElement.getSelectedAnswer()
             if (selection.optionId === null && this.currentQuestionIndex < this.allQuestions.length) {
-                this.showNotification("Please select an answer before continuing.", "warning")
+                this.showNotification("SELECT AN OPTION BEFORE PROCEEDING", "warning")
                 return
             }
         }
+
         this.proceedToNextOrSubmit()
     }
 
@@ -461,7 +635,6 @@ export class QuizView extends HTMLElement {
             const selectedOption = currentQuestionData.options.find((opt) => opt.option_id === detail.selectedOptionId)
             if (selectedOption) {
                 option_text = selectedOption.option_text
-            } else {
             }
         }
 
@@ -495,7 +668,7 @@ export class QuizView extends HTMLElement {
                 const question_text = currentQuestionData.question_text
                 let option_text = ""
 
-                const selectedOptionObj = currentQuestionData.options.find((opt) => opt.option_id === currentSelection.optionId)
+                const selectedOptionObj = currentQuestionData.options.find((opt: { option_id: any }) => opt.option_id === currentSelection.optionId)
                 if (selectedOptionObj) {
                     option_text = selectedOptionObj.option_text
                 }
@@ -554,20 +727,21 @@ export class QuizView extends HTMLElement {
         // Show submitting state
         if (this.questionContainer) {
             this.questionContainer.innerHTML = `
-                <div class="submitting-container">
-                    <h2>Submitting Quiz...</h2>
-                    <p>Calculating your results.</p>
-                    <div class="spinner"></div>
-                </div>
-            `
+        <div class="submitting-container">
+          <h2>CALCULATING SURVIVAL SCORE...</h2>
+          <p>Analyzing your decisions and survival potential.</p>
+          <div class="spinner"></div>
+        </div>
+      `
         }
 
         try {
             const result = await apiService.post<QuizAttemptResult>("/quiz/attempts", attempt)
-
             this.displayQuizResults(result)
         } catch (error) {
-            this.showErrorMessage("Failed to submit your quiz. Please try again later.")
+            this.showErrorMessage(
+                "COMMUNICATION FAILURE: Unable to submit your assessment. Try again when conditions improve.",
+            )
             this.isQuizSubmitted = false
         } finally {
             this.setLoading(false)
@@ -581,37 +755,36 @@ export class QuizView extends HTMLElement {
         this.questionContainer.innerHTML = ""
 
         // Create results elements
-        const resultsContainer = document.createElement("div")
+        const resultsContainer = document.createElement("article")
         resultsContainer.className = "quiz-results"
 
         // Add heading
         const heading = document.createElement("h2")
-        heading.textContent = "Quiz Complete!"
+        heading.textContent = "ASSESSMENT COMPLETE"
         heading.className = "results-heading"
 
         // Add title
-        const titleParagraph = document.createElement("p")
+        const titleParagraph = document.createElement("h3")
         titleParagraph.className = "results-title"
-        const titleStrong = document.createElement("strong")
-        titleStrong.textContent = result.result_title || "Your Results"
-        titleParagraph.appendChild(titleStrong)
+        titleParagraph.textContent = result.result_title || "SURVIVAL ANALYSIS"
 
         // Add score
-        const scoreParagraph = document.createElement("p")
+        const scoreParagraph = document.createElement("output")
         scoreParagraph.className = "results-score"
-        scoreParagraph.textContent = `Total Score: ${result.total_score} points`
+        scoreParagraph.textContent = `SURVIVAL SCORE: ${result.total_score} POINTS`
 
         // Add feedback
         const feedbackParagraph = document.createElement("p")
         feedbackParagraph.className = "results-feedback"
-        feedbackParagraph.textContent = result.result_feedback || "Thank you for completing the quiz."
+        feedbackParagraph.textContent =
+            result.result_feedback || "Your survival assessment has been recorded in the system."
 
         // Add answers review section
-        const answersReview = document.createElement("div")
+        const answersReview = document.createElement("section")
         answersReview.className = "answers-review"
 
         const reviewHeading = document.createElement("h3")
-        reviewHeading.textContent = "Your Answers"
+        reviewHeading.textContent = "DECISION ANALYSIS"
         reviewHeading.className = "review-heading"
         answersReview.appendChild(reviewHeading)
 
@@ -625,24 +798,34 @@ export class QuizView extends HTMLElement {
 
             const isCorrect = answer.selected_option_id === correctOption.option_id
 
-            const answerItem = document.createElement("div")
+            const answerItem = document.createElement("article")
             answerItem.className = `answer-review-item ${isCorrect ? "correct" : "incorrect"}`
 
-            const questionNumber = document.createElement("div")
+            const questionNumber = document.createElement("header")
             questionNumber.className = "question-number"
-            questionNumber.textContent = `Question ${index + 1}`
+            questionNumber.textContent = `SCENARIO ${index + 1}`
 
-            const questionText = document.createElement("div")
+            const questionText = document.createElement("h4")
             questionText.className = "question-text-review"
             questionText.textContent = question.question_text
 
-            const yourAnswer = document.createElement("div")
+            const yourAnswer = document.createElement("p")
             yourAnswer.className = "your-answer"
-            yourAnswer.innerHTML = `<strong>Your answer:</strong> ${answer.option_text || "Not answered"}`
 
-            const correctAnswer = document.createElement("div")
+            const yourAnswerLabel = document.createElement("strong")
+            yourAnswerLabel.textContent = "YOUR DECISION: "
+
+            yourAnswer.appendChild(yourAnswerLabel)
+            yourAnswer.appendChild(document.createTextNode(answer.option_text || "NO RESPONSE"))
+
+            const correctAnswer = document.createElement("p")
             correctAnswer.className = "correct-answer"
-            correctAnswer.innerHTML = `<strong>Correct answer:</strong> ${correctOption.option_text}`
+
+            const correctAnswerLabel = document.createElement("strong")
+            correctAnswerLabel.textContent = "OPTIMAL DECISION: "
+
+            correctAnswer.appendChild(correctAnswerLabel)
+            correctAnswer.appendChild(document.createTextNode(correctOption.option_text))
 
             answerItem.appendChild(questionNumber)
             answerItem.appendChild(questionText)
@@ -656,7 +839,7 @@ export class QuizView extends HTMLElement {
         const closeButton = document.createElement("button")
         closeButton.id = "quiz-view-close-btn"
         closeButton.className = "continue-btn"
-        closeButton.textContent = "Close"
+        closeButton.textContent = "RETURN TO BASE"
 
         closeButton.addEventListener("click", () => {
             App.navigate("/")
@@ -673,14 +856,14 @@ export class QuizView extends HTMLElement {
         const restartButton = document.createElement("button")
         restartButton.id = "quiz-view-restart-btn"
         restartButton.className = "restart-btn"
-        restartButton.textContent = "Take Another Quiz"
+        restartButton.textContent = "TRY ANOTHER SCENARIO"
 
         restartButton.addEventListener("click", () => {
             this.resetQuiz()
         })
 
         // Add buttons container
-        const buttonsContainer = document.createElement("div")
+        const buttonsContainer = document.createElement("footer")
         buttonsContainer.className = "results-buttons"
         buttonsContainer.appendChild(restartButton)
         buttonsContainer.appendChild(closeButton)
@@ -706,6 +889,22 @@ export class QuizView extends HTMLElement {
         if (scenarioInfo) {
             scenarioInfo.style.display = "none"
         }
+
+        // Show achievement animation
+        if (this.rewardAnimation) {
+            this.rewardAnimation.showReward(
+                "ASSESSMENT COMPLETE",
+                result.result_title || "Survival Analysis",
+                result.total_score,
+                "🏆",
+            )
+        }
+
+        // Set background to success theme
+        if (this.dynamicBackground) {
+            this.dynamicBackground.setTheme("success")
+            this.dynamicBackground.setIntensity(0.8)
+        }
     }
 
     private resetQuiz() {
@@ -713,6 +912,7 @@ export class QuizView extends HTMLElement {
         this.currentQuestionIndex = 0
         this.collectedAnswers = []
         this.isQuizSubmitted = false
+        this.correctAnswerStreak = 0
 
         // Show next button
         if (this.nextButton) {
@@ -726,6 +926,12 @@ export class QuizView extends HTMLElement {
             scenarioInfo.style.display = ""
         }
 
+        // Reset background
+        if (this.dynamicBackground) {
+            this.dynamicBackground.setTheme("default")
+            this.dynamicBackground.setIntensity(0.5)
+        }
+
         // Display first question
         this.displayCurrentQuestion()
     }
@@ -733,12 +939,12 @@ export class QuizView extends HTMLElement {
     private showNoQuestionsMessage() {
         if (this.questionContainer) {
             this.questionContainer.innerHTML = `
-                <div class="no-questions-message">
-                    <h2>No Questions Available</h2>
-                    <p>There are no quiz questions available for this scenario and difficulty level.</p>
-                    <button class="continue-btn" id="back-button">Back to Home</button>
-                </div>
-            `
+        <article class="no-questions-message">
+          <h2>NO SCENARIOS AVAILABLE</h2>
+          <p>There are no survival scenarios available for this combination of parameters.</p>
+          <button class="continue-btn" id="back-button">RETURN TO BASE</button>
+        </article>
+      `
 
             const backButton = this.questionContainer.querySelector("#back-button")
             if (backButton) {
@@ -752,13 +958,15 @@ export class QuizView extends HTMLElement {
     private showErrorMessage(message: string) {
         if (this.questionContainer) {
             this.questionContainer.innerHTML = `
-                <div class="error-message">
-                    <h2>Error</h2>
-                    <p>${message}</p>
-                    <button class="continue-btn" id="retry-button">Retry</button>
-                    <button class="secondary-btn" id="back-button">Back to Home</button>
-                </div>
-            `
+        <article class="error-message">
+          <h2>SYSTEM FAILURE</h2>
+          <p>${message}</p>
+          <footer>
+            <button class="continue-btn" id="retry-button">RETRY CONNECTION</button>
+            <button class="secondary-btn" id="back-button">RETURN TO BASE</button>
+          </footer>
+        </article>
+      `
 
             const retryButton = this.questionContainer.querySelector("#retry-button")
             if (retryButton) {
@@ -778,6 +986,25 @@ export class QuizView extends HTMLElement {
 
     private showQuizCompletion() {
         // This is handled by submitQuiz now
+    }
+
+    private handleResponsiveLayout() {
+        // Set CSS variables based on viewport size
+        const root = this.shadowRootInstance.host as HTMLElement;
+
+        // Calculate font scale based on viewport width
+        const viewportWidth = window.innerWidth;
+        const fontScale = Math.max(0.8, Math.min(1, viewportWidth / 1200));
+
+        // Set CSS variables
+        root.style.setProperty('--font-scale', fontScale.toString());
+        root.style.setProperty('--spacing-scale', Math.max(0.8, Math.min(1, viewportWidth / 1000)).toString());
+
+        // Adjust emergency toggle button size through CSS variables
+        const toggleButton = this.shadowRootInstance.querySelector(".emergency-toggle") as HTMLElement;
+        if (toggleButton) {
+            toggleButton.style.setProperty('--button-scale', Math.max(0.7, Math.min(1, viewportWidth / 768)).toString());
+        }
     }
 }
 
