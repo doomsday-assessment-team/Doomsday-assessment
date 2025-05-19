@@ -1,5 +1,5 @@
-import * as difficultyModel from '../models/difficulty.model';
+import { findAllDifficulties } from "../repositories/quiz.repository";
 
 export const getAllDifficulties = async () => {
-  return await difficultyModel.findAllDifficulties();
+  return await findAllDifficulties();
 };

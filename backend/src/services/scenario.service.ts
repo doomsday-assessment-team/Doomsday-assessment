@@ -1,5 +1,5 @@
-import * as scenarioModel from '../models/scenario.model';
+import { findAllScenarios } from "../repositories/quiz.repository";
 
 export const getAllScenarios = async () => {
-  return await scenarioModel.findAllScenarios();
+  return await findAllScenarios();
 };

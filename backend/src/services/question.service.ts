@@ -1,8 +1,8 @@
-import * as questionModel from '../models/question.model';
+import { addQuestion, findAllQuestions } from "../repositories/question.repository";
 
 
 export const getAllQuestions = async () => {
-  return await questionModel.findAllQuestions();
+  return await findAllQuestions();
 };
 
 export const createQuestion = async (data: {
@@ -11,5 +11,5 @@ export const createQuestion = async (data: {
   question_difficulty_id: number;
   options: { option_text: string; points: number }[];
 }) => {
-  return await questionModel.addQuestion(data);
+  return await addQuestion(data);
 };
