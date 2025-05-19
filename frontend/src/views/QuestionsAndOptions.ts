@@ -582,7 +582,7 @@ export class QuestionsAndOptions extends HTMLElement {
 
   public async updateQuestion(id: number, questionShellData: QuestionShellUpdate_FE) { 
     try {
-      console.log(questionShellData);
+
       await apiService.put<void>(`/questions/${id}`, questionShellData); 
       await this.loadData(); 
       this.showMessage('✅ Question details updated! Manage options separately.', 'success');
