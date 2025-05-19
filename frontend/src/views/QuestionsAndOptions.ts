@@ -242,9 +242,6 @@ export class QuestionsAndOptions extends HTMLElement {
       const scenariosPromise = apiService.get<Scenario[]>('/scenarios');
       const questionsPromise = apiService.get<Question[]>('/questions');
       const difficultiesPromise = apiService.get<Difficulty[]>('/difficulties');
-      console.log(difficultiesPromise);
-      console.log(scenariosPromise);
-      console.log(questionsPromise);
 
       const [scenariosData, questionsData, difficultiesData] = await Promise.all([
         scenariosPromise, questionsPromise, difficultiesPromise
@@ -675,9 +672,7 @@ export class QuestionsAndOptions extends HTMLElement {
 
   private async updateOptionDirectly(optionId: number, optionData: Partial<OptionInput>, questionIdToUpdateUI: number) {
     try {
-        console.log(`[FE] updateOptionDirectly (ID: ${optionId}): Sending data:`, optionData);
         const updatedOption = await apiService.put<Option>(`/options/${optionId}`, optionData);
-        console.log(`[FE] updateOptionDirectly (ID: ${optionId}): Received response:`, updatedOption);
 
         if (updatedOption && updatedOption.option_id) {
             const question = this.questions.find(q => q.question_id === questionIdToUpdateUI);
