@@ -1,26 +1,15 @@
 import '../components/AssessmentFilters.js';
 import '../components/AssessmentList.js';
-import { AssessmentList } from '../components/AssessmentList.js';
+import '../components/HeaderComponent.js'
+import '../components/AssessmentDetailsModal.js'
 import { loadTemplate } from '../utils/load-template.js';
 export class AssessmentHistory extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
+  connectedCallback() {
     this.loadTemplate();
   }
   async loadTemplate() {
     const content = await loadTemplate('./templates/assessment-history.view.html');
-    if (content) {
-      this.shadowRoot?.appendChild(content);
-      const filtersComponent = this.shadowRoot?.querySelector("assessment-filters");
-      filtersComponent?.addEventListener("filters-changed", (event: Event) => {
-        const customEvent = event as CustomEvent;
-        const assessmentHistoryLists = this.shadowRoot?.querySelector("assessment-list") as AssessmentList;
-        assessmentHistoryLists?.fetchHistory(customEvent.detail);
-      });
-    } else {
-      // content is null
-    }
+    this.appendChild(content);
   }
 }
 customElements.define('assessment-history', AssessmentHistory);

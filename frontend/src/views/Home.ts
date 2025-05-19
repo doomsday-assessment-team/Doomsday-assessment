@@ -1,6 +1,6 @@
 import { apiService, App } from "../main.js"
 import type { Difficulty, Scenario } from "../types/global-types.js"
-import { checkAdminRole } from "../utils/check-admin.js"
+import { checkAdminRole, checkManagerRole } from "../utils/check-admin.js"
 import { loadTemplate } from "../utils/load-template.js"
 
 export interface Question {
@@ -47,9 +47,12 @@ export class HomeView extends HTMLElement {
       this.addEventListeners()
       this.populateScenarios()
       this.populateDifficulties()
-    //   this.initializeAudio()
       this.startTerminalAnimation()
-      this.initializeVisualEffects()
+            this.initializeVisualEffects()
+      await this.setupUserAvatar();
+      await this.setupUserManagementLink();
+    //   this.initializeAudio()
+
     } else {
       this.shadowRootInstance.innerHTML = "<p>Error loading home view template.</p>"
     }
@@ -68,7 +71,15 @@ export class HomeView extends HTMLElement {
     this.terminalContainer = this.shadowRootInstance.querySelector(".terminal-container")
     this.radioEffect = this.shadowRootInstance.querySelector(".radio-effect")
     this.dustParticles = this.shadowRootInstance.querySelector(".dust-particles")
-
+this.addOptionsButton = this.shadowRootInstance?.querySelector(
+      "#admin-questions-link-li"
+    );
+    this.userManagementLink = this.shadowRootInstance?.querySelector(
+      "#user-management-link-li"
+    );
+this.userAvatar = this.shadowRootInstance?.querySelector(".user-avatar");
+    this.avatarInitials =
+      this.shadowRootInstance?.querySelector(".avatar-initials");
     // Bind new card UI elements
     this.scenarioContainer = this.shadowRootInstance.querySelector("#scenario-container")
     this.difficultyContainer = this.shadowRootInstance.querySelector("#difficulty-container")
@@ -130,6 +141,37 @@ export class HomeView extends HTMLElement {
       setInterval(createInterference, 2000)
     }
   }
+
+  private async setupUserAvatar() {
+      if (!this.userAvatar || !this.avatarInitials) {
+        console.error("User avatar elements not found");
+        return;
+      }
+
+      try {
+        // Fetch the current user
+        const userData: UserResponse = await apiService.get("/users/me");
+        const user = userData.user;
+
+        if (!user) {
+          console.error("Failed to fetch user data");
+          return;
+        }
+
+        // Set the avatar initials
+        const initials = `${user.given_name.charAt(0)}${user.family_name
+          .charAt(0)
+          .toUpperCase()}`;
+        this.avatarInitials.textContent = initials;
+
+        // Add click event to navigate to user profile
+        this.userAvatar.addEventListener("click", () => {
+          App.navigate("/user-profile");
+        });
+      } catch (error) {
+        console.error("Error setting up user avatar:", error);
+      }
+    }
 
   private startTerminalAnimation() {
     if (!this.terminalLines || !this.terminalContainer) return
@@ -314,7 +356,8 @@ export class HomeView extends HTMLElement {
         this.difficultyDescriptions.innerHTML = ""
       }
 
-      const difficulties: Difficulty[] = await apiService.get<Difficulty[]>("/difficulties")
+      const difficulties: Difficulty[] = await apiService.get<Difficulty[]>("/difficulties"
+      )
 
       while (this.difficultyOptionsList.options.length > 1) {
         this.difficultyOptionsList.remove(1)
@@ -428,10 +471,10 @@ export class HomeView extends HTMLElement {
     if (this.addOptionsButton) {
       try {
         const isAdmin = await checkAdminRole()
-        if (!isAdmin) {
-          this.addOptionsButton.classList.add("hidden")
-        } else {
+        if (isAdmin) {
           this.addOptionsButton.classList.remove("hidden")
+        } else {
+          this.addOptionsButton.classList.add("hidden")
         }
       } catch (error) {
         this.addOptionsButton.classList.add("hidden")
@@ -439,13 +482,31 @@ export class HomeView extends HTMLElement {
     } else {
     //   console.warn("Admin link not found.")
     }
+  }private async setupUserManagementLink() {
+    if (this.userManagementLink) {
+      try {
+        // Use the checkManagerRole function directly
+        const hasManagerRole = await checkManagerRole();
+
+        if (hasManagerRole) {
+          this.userManagementLink.classList.remove("hidden");
+        } else {
+          this.userManagementLink.classList.add("hidden");
+        }
+      } catch (error) {
+        console.error("Error checking manager role:", error);
+        this.userManagementLink.classList.add("hidden");
+      }
+    } else {
+      console.warn("User management link not found.");
+    }
   }
 
   private addEventListeners() {
     if (!this.form) {
       return
     }
-    
+
 
     this.form.addEventListener("submit", (event) => this.handleSubmit(event))
 

@@ -26,7 +26,7 @@
 
     fieldset {
       margin-bottom: 1rem;
-      border: 0.0625rem solid #ccc;
+      border: 1pt solid #ccc;
       padding: 1rem;
     }
 
@@ -54,7 +54,7 @@
       font-size: clamp(0.9rem, 3.5vw, 1rem);
       background-color: var(--select-color);
       color: var(--text-color);
-      border: 0.0625rem solid #aaa;
+      border: 1pt solid #aaa;
       border-radius: var(--border-radius);
       box-sizing: border-box;
       margin-bottom: 0.5rem;
@@ -93,7 +93,7 @@
     }
 
     article {
-      border: 0.0625rem solid #ccc;
+      border: 1pt solid #ccc;
       padding: 1rem;
       margin-bottom: 1.5rem;
     }
@@ -108,7 +108,7 @@
       font-size: clamp(0.9rem, 3.5vw, 1rem);
       background-color: var(--select-color);
       color: var(--text-color);
-      border: 0.0625rem solid #aaa;
+      border: 1pt solid #aaa;
       border-radius: var(--border-radius);
       box-sizing: border-box;
       margin-top: 0.25rem;
@@ -128,7 +128,9 @@
       gap: 0.5rem;
     }
 
-    @media (min-width: 37.5em) {
+
+    @media (min-width: 600rem) {
+
       .option-item {
         flex-direction: row;
         align-items: center;
@@ -140,7 +142,7 @@
 
       .option-item input[type="number"] {
         flex: 1;
-        max-width: 7.5rem;
+        max-width: 120rem;
       }
     }
   </style>
@@ -148,7 +150,7 @@
   <header>
     <h1>Questions and Options</h1>
   </header>
-
+  
   <main>
     <section>
       <h2>Filter Questions</h2>

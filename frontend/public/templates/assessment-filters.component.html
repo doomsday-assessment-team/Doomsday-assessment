@@ -1,149 +1,186 @@
 <template id="assessment-filters">
   <style>
-    ul.filter-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      align-items: flex-end;
-      padding: 1rem;
-      margin: 0 0 2rem 0;
-      background-color: #1e2126;
-      list-style: none;
+    .filter-bar {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.9375rem;
+      background-color: rgba(42, 43, 33, 0.5);
+      padding: 0.9375rem;
+      border-radius: 0.625rem;
+      border: 0.0625rem solid var(--border-color);
+      margin-top: 2rem;
     }
 
-    li.filter-item {
+    .filter-header {
       display: flex;
-      flex-direction: column;
+      align-items: center;
       gap: 0.5rem;
+      color: var(--primary-color);
+      font-size: 0.875rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 0.0625rem solid rgba(213, 201, 166, 0.1);
     }
 
-    label {
+    .filter-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+      gap: 0.9375rem;
+    }
+
+    .filter-dropdown {
+      position: relative;
+    }
+
+    .filter-select {
+      appearance: none;
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+      border: 0.0625rem solid var(--border-color);
+      padding: 0.5rem 1.875rem 0.5rem 0.75rem;
+      border-radius: 0.3125rem;
+      cursor: pointer;
       font-size: 0.875rem;
-      color: #d4af37;
+      width: 100%;
+      text-overflow: ellipsis;
       white-space: nowrap;
+      overflow: hidden;
     }
 
-    .filter-input {
-      padding: 0.5rem;
-      background-color: #2a2e35;
-      color: #ffffff;
-      border: 0.05rem solid #3a3f48;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      min-width: 12rem;
-      cursor: pointer;
-    }
-
-    .filter-input[type="date"],
-    .filter-input[type="text"] {
-      cursor: text;
-    }
-
-    .filter-input:focus {
+    .filter-select:focus {
       outline: none;
-      border-color: #d4af37;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0.3125rem var(--primary-glow);
     }
 
-    .clear-filters {
-      padding: 0.5rem 1rem;
-      background-color: #a02a2a;
-      color: #ffffff;
-      border: none;
-      font-weight: normal;
-      font-size: 0.875rem;
-      cursor: pointer;
-      text-decoration: none;
-      border-radius: 0.5rem;
-      align-self: flex-end;
-    }
-
-    .clear-filters:hover {
-      background-color: #c13030;
-    }
-
-    .filters {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      gap: 1rem;
-      position: relative;
-    }
-
-    .filter-item {
-      position: relative;
-    }
-
-    .dropdown-toggle {
-      padding: 0.5em 1em;
-      cursor: pointer;
-      border-radius: 0.1rem;
-      border: solid 0.1rem var(--select-color);
-      background-color: #2a2e35;
-      color: #ffffff;
-      border: 0.05rem solid #3a3f48;
-    }
-
-    .dropdown-menu {
-      display: none;
+    .filter-dropdown::after {
+      content: "▼";
       position: absolute;
-      background-color: #2a2e35;
-      top: 100%;
-      left: 0;
-      margin-top: 0.25em;
-      border-radius: 4px;
-      list-style: none;
-      border: solid 0.1rem var(--select-color);
-      padding: 0.5em;
-      min-width: 180px;
-      z-index: 1;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 0.625rem;
+      color: var(--primary-color);
     }
 
-    .dropdown-menu li {
-      margin-bottom: 0.3em;
+    .sort-button {
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+      border: 0.0625rem solid var(--border-color);
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.3125rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3125rem;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+      justify-content: center;
     }
 
-    .dropdown.open .dropdown-menu {
-      display: block;
+    .sort-button:hover {
+      background-color: var(--button-hover);
+      border-color: var(--primary-color);
+    }
+
+    .date-input {
+      appearance: none;
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+      border: 0.0625rem solid var(--border-color);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.3125rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      width: 100%;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      color-scheme: dark;
+    }
+
+    .sort-button svg {
+      transition: transform 0.1s ease;
+      transform: rotate(0deg);
+    }
+
+    .sort-button.asc svg {
+      transform: rotate(0deg);
+    }
+
+    .sort-button.desc svg {
+      transform: rotate(180deg);
     }
   </style>
-
-  <ul class="filter-list">
-    <li class="filter-item">
-      <label for="from-date">From:</label>
-      <input type="date" id="from-date" class="filter-input" />
-    </li>
-
-    <li class="filter-item">
-      <label for="to-date">To:</label>
-      <input type="date" id="to-date" class="filter-input" />
-    </li>
-
-    <ul class="filters">
-      <li class="filter-item dropdown">
-        <button type="button" class="dropdown-toggle">Scenario ▾</button>
-        <ul class="dropdown-menu" id="scenarios-list"></ul>
-      </li>
-
-      <li class="filter-item dropdown">
-        <button type="button" class="dropdown-toggle">Difficulty ▾</button>
-        <ul class="dropdown-menu" id="difficulties-list"></ul>
-      </li>
-    </ul>
-
-    <li class="filter-item" id="admin-filter">
-      <label for="user-filter">User:</label>
+  <section class="filter-bar">
+    <h2 class="filter-header">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+      </svg>
+      Filters:
+    </h2>
+    <section class="filter-controls">
       <input
-        type="text"
-        id="user-filter"
-        class="filter-input"
-        placeholder="Search by user"
+        type="date"
+        id="from-date"
+        name="from-date"
+        class="date-input"
+        title="Filter from this date"
+        aria-describedby="date-description"
       />
-    </li>
-
-    <li class="filter-item" style="margin-left: auto">
-      <button class="clear-filters">Clear Filters</button>
-    </li>
-  </ul>
+      <input
+        type="date"
+        id="to-date"
+        name="to-date"
+        class="date-input"
+        title="Filter until this date"
+        aria-describedby="date-description"
+      />
+      <section class="filter-dropdown">
+        <select class="filter-select" id="difficulty-filter">
+          <option value="all">All Difficulties</option>
+        </select>
+      </section>
+      <section class="filter-dropdown">
+        <select class="filter-select" id="scenario-filter">
+          <option value="all">All Scenarios</option>
+        </select>
+      </section>
+      <button
+        class="sort-button asc"
+        id="sort-button"
+        aria-label="Sort by date"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M11 5h10"></path>
+          <path d="M11 9h7"></path>
+          <path d="M11 13h4"></path>
+          <path d="M3 17l3 3 3-3"></path>
+          <path d="M6 18V4"></path>
+        </svg>
+        Sort
+      </button>
+    </section>
+  </section>
 </template>
