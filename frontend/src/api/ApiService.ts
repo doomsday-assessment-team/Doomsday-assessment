@@ -184,7 +184,6 @@ export class ApiService {
         const currentHeaders: Record<string, string> = { ...this.defaultHeaders } as Record<string, string>;
     if (token) {
       currentHeaders['Authorization'] = `Bearer ${token}`;
-      console.info("Authorization header set");
     } else {
       delete currentHeaders['Authorization'];
     }
