@@ -74,7 +74,8 @@ router.get(
             scenario,
             difficulty,
             startDate,
-            endDate
+            endDate,
+            orderBy
           );
           res.json(result);
         }
