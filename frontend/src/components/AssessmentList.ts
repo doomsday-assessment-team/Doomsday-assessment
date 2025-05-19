@@ -23,12 +23,20 @@ export class AssessmentList extends HTMLElement {
   private toQueryParams(filters: Filters): URLSearchParams {
     const params = new URLSearchParams();
 
+    const today = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+
     if (filters.dateFrom) {
       params.append("start_date", filters.dateFrom.toISOString().split("T")[0]);
+    } else {
+      params.append("start_date", oneMonthAgo.toISOString().split("T")[0]);
     }
 
     if (filters.dateTo) {
       params.append("end_date", filters.dateTo.toISOString().split("T")[0]);
+    } else {
+      params.append("end_date", today.toISOString().split("T")[0]);
     }
 
     if (filters.scenario) {
