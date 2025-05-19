@@ -44,7 +44,6 @@ export class AuthService {
       // Navigate to the redirect path if we're on the login page
       if (window.location.pathname.includes("/login")) {
         const redirectPath = sessionStorage.getItem("redirectAfterLogin") || "/"
-        console.log(`Redirecting after login to: ${redirectPath}`)
         setTimeout(() => {
           App.navigate(redirectPath)
           // Only remove after successfully navigating
@@ -78,12 +77,10 @@ export class AuthService {
     const currentToken = this.getToken();
 
     if (!this.token) {
-      console.log("AuthService.isLoggedIn: No valid token or decoded token found. Returning false.");
       return false;
+    } else {
+      return true;
     }
-
-    console.log("AuthService.isLoggedIn: Token valid (or no exp claim). Returning true.");
-    return true;
   }
 
   public logout(): void {
@@ -93,7 +90,6 @@ export class AuthService {
 
   public handleApiError(error: any): void {
     if (error && (error.status === 401 || error.message?.includes("Unauthorized"))) {
-      console.log("API error due to unauthorized access, likely expired token")
 
       this.logout()
 

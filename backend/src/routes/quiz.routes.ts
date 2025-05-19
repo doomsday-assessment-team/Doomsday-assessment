@@ -135,13 +135,9 @@ export const getgeminiFeedback = async (quizAttempt: QuizAttemptInput) => {
         overallPrompt += "Do not list each question and answer again in your feedback; summarize the patterns.\n";
         overallPrompt += "The total number of characters on your feedback shouldn't be greater than 255.\n";
 
-
-        console.log("Sending OVERALL prompt to Gemini:", overallPrompt);
         const result = await model.generateContent(overallPrompt);
         const response = await result.response;
         const summaryFeedbackText = response.text();
-
-        console.log(summaryFeedbackText);
 
         return summaryFeedbackText;
 

@@ -56,7 +56,6 @@ export class QuestionsAndOptions extends HTMLElement {
   private async fetchAndRenderQuestions(): Promise<void> {
     try {
       this.questions = await apiService.get<Question[]>('/questions');
-      console.log('Fetched questions:', this.questions);
       this.renderQuestionBank(this.questions);
     } catch (error) {
       console.error('Error fetching questions:', error);
@@ -234,11 +233,9 @@ export class QuestionsAndOptions extends HTMLElement {
  private renderQuestionBank(questions: Question[]): void {
     const container = this.shadowRoot!.getElementById('question-bank')!;
     container.textContent = '';
-    console.log('Rendering questions:', questions);
 
     questions.forEach(q => {
         const article = document.createElement('article');
-        console.log('Article:', article);
 
         const header = document.createElement('header');
         const h4 = document.createElement('h4');
@@ -277,7 +274,6 @@ export class QuestionsAndOptions extends HTMLElement {
             li.appendChild(pointInput);
             optionList.appendChild(li);
         });
-        console.log('Option List:', optionList);
 
         header.addEventListener('click', () => {
             section.hidden = !section.hidden;
