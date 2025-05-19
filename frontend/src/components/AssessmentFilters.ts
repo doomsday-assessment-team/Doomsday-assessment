@@ -8,7 +8,6 @@ export class AssessmentFilters extends HTMLElement {
   private selectedDifficulties: number[] = [];
   connectedCallback() {
     this.loadTemplate();
-    this.populateFilters();
   }
   async loadTemplate() {
     const content = await loadTemplate(
@@ -16,6 +15,7 @@ export class AssessmentFilters extends HTMLElement {
     );
     this.appendChild(content);
     this.setDefaultDates();
+    this.populateFilters();
   }
 
   async populateFilters() {
@@ -25,31 +25,23 @@ export class AssessmentFilters extends HTMLElement {
     ) as HTMLSelectElement;
     if (difficultySelect) {
       difficultySelect.options.length = 1;
-      document.addEventListener("DOMContentLoaded", () => {
-      const difficultySelect = document.getElementById("difficulty-filter") as HTMLSelectElement;
-      if (!difficultySelect) return;
-
       difficulties.forEach((difficulty) => {
         const option = document.createElement("option");
         option.value = difficulty.question_difficulty_id.toString();
         option.textContent = difficulty.question_difficulty_name;
         difficultySelect.appendChild(option);
       });
-    });
     }
 
     const scenarios = await apiService.get<Scenario[]>("/scenarios");
-    document.addEventListener("DOMContentLoaded", () => {
-      const scenarioSelect = document.getElementById("scenario-filter") as HTMLSelectElement;
-      difficultySelect.options.length = 1;
-      scenarios.forEach((scenario) => {
-        const option = document.createElement("option");
-        option.value = scenario.scenario_id.toString();
-        option.textContent = scenario.scenario_name;
-        scenarioSelect.appendChild(option);
-      });
+    const scenarioSelect = document.getElementById("scenario-filter") as HTMLSelectElement;
+    scenarioSelect.options.length = 1;
+    scenarios.forEach((scenario) => {
+      const option = document.createElement("option");
+      option.value = scenario.scenario_id.toString();
+      option.textContent = scenario.scenario_name;
+      scenarioSelect.appendChild(option);
     });
-
 
     this.addEventListeners();
   }
