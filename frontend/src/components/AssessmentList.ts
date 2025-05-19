@@ -10,7 +10,6 @@ export class AssessmentList extends HTMLElement {
       const customEvent = event as CustomEvent;
       this.fetchHistory(customEvent.detail);
     });
-    this.fetchHistory();
   }
 
   async loadTemplate() {
@@ -18,18 +17,25 @@ export class AssessmentList extends HTMLElement {
       "./templates/assessment-list.component.html"
     );
     this.appendChild(content);
+    this.fetchHistory();
   }
 
   private toQueryParams(filters: Filters): URLSearchParams {
     const params = new URLSearchParams();
 
-    if (filters.dateFrom) {
-      params.append("start_date", filters.dateFrom.toISOString().split("T")[0]);
-    }
+    const today = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(today.getMonth() - 1);
 
-    if (filters.dateTo) {
-      params.append("end_date", filters.dateTo.toISOString().split("T")[0]);
-    }
+    const fromDate = filters.dateFrom
+      ? new Date(filters.dateFrom)
+      : oneMonthAgo;
+    fromDate.setHours(0, 0, 0, 0);
+    params.append("start_date", fromDate.toISOString());
+
+    const toDate = filters.dateTo ? new Date(filters.dateTo) : today;
+    toDate.setHours(23, 59, 59, 999);
+    params.append("end_date", toDate.toISOString());
 
     if (filters.scenario) {
       params.append("scenario", String(filters.scenario));
@@ -38,12 +44,7 @@ export class AssessmentList extends HTMLElement {
     if (filters.difficulty) {
       params.append("difficulty", String(filters.difficulty));
     }
-
-    if (filters.sortAscending){
-      params.append("sort_by", String(true))
-    } else {
-      params.append("sort_by", String(false))
-    }
+    params.append("sort_by", String(filters.sortAscending ?? true));
 
     return params;
   }
@@ -57,15 +58,22 @@ export class AssessmentList extends HTMLElement {
       let list = this.querySelector<HTMLUListElement>(".tests-grid");
       if (list) {
         list.replaceChildren();
-        historyItems.forEach((item) => {
-          const card = document.createElement("assessment-card");
-          card.setAttribute("history-id", item.history_id.toString());
-          card.setAttribute("difficulty", item.question_difficulty_name);
-          card.setAttribute("scenario", item.scenario_name);
-          card.setAttribute("timestamp", item.timestamp);
-          card.setAttribute("score", item.total_points);
-          list.appendChild(card);
-        });
+        if (historyItems.length === 0) {
+          const noItemMessage = document.createElement("li");
+          noItemMessage.textContent = "No assessment found.";
+          noItemMessage.classList.add("no-assessment-message");
+          list.appendChild(noItemMessage);
+        } else {
+          historyItems.forEach((item) => {
+            const card = document.createElement("assessment-card");
+            card.setAttribute("history-id", item.history_id.toString());
+            card.setAttribute("difficulty", item.question_difficulty_name);
+            card.setAttribute("scenario", item.scenario_name);
+            card.setAttribute("timestamp", item.timestamp);
+            card.setAttribute("score", item.total_points);
+            list.appendChild(card);
+          });
+        }
       }
     } catch (error) {
       console.error("Failed to fetch assessment history:", error);

@@ -19,6 +19,7 @@ export interface Question {
 
 export interface Option {
   option_id: number;
+  question_id: number;
   option_text: string;
   points: number;
 }

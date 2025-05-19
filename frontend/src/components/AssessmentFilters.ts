@@ -8,7 +8,6 @@ export class AssessmentFilters extends HTMLElement {
   private selectedDifficulties: number[] = [];
   connectedCallback() {
     this.loadTemplate();
-    this.populateFilters();
   }
   async loadTemplate() {
     const content = await loadTemplate(
@@ -16,6 +15,7 @@ export class AssessmentFilters extends HTMLElement {
     );
     this.appendChild(content);
     this.setDefaultDates();
+    this.populateFilters();
   }
 
   async populateFilters() {
@@ -34,9 +34,8 @@ export class AssessmentFilters extends HTMLElement {
     }
 
     const scenarios = await apiService.get<Scenario[]>("/scenarios");
-    const scenarioSelect = document.getElementById(
-      "scenario-filter"
-    ) as HTMLSelectElement;
+    const scenarioSelect = document.getElementById("scenario-filter") as HTMLSelectElement;
+    scenarioSelect.options.length = 1;
     scenarios.forEach((scenario) => {
       const option = document.createElement("option");
       option.value = scenario.scenario_id.toString();
@@ -98,11 +97,26 @@ export class AssessmentFilters extends HTMLElement {
     if (scenarioSelect) {
       scenarioSelect.addEventListener("change", () => this.filterChanged());
     }
+    const today = new Date().toISOString().split('T')[0];
     if (fromDateInput) {
-      fromDateInput.addEventListener("change", () => this.filterChanged());
+      fromDateInput.addEventListener("change", () => {
+        if (fromDateInput.value > today) {
+          fromDateInput.value = today;
+          if (fromDateInput && toDateInput && fromDateInput.value > toDateInput.value) {
+            toDateInput.value = fromDateInput.value;
+          }
+        }
+        this.filterChanged();
+      });
     }
+
     if (toDateInput) {
-      toDateInput.addEventListener("change", () => this.filterChanged());
+      toDateInput.addEventListener("change", () => {
+        if (fromDateInput && fromDateInput.value > toDateInput.value) {
+          toDateInput.value = fromDateInput.value;
+        }
+        this.filterChanged();
+      });
     }
     if (sortButton) {
       sortButton.addEventListener("click", () => {

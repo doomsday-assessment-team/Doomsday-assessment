@@ -1,306 +1,731 @@
-import { loadTemplate } from '../utils/load-template.js';
+import { loadTemplate } from '../utils/load-template.js'; 
 import { apiService } from '../main.js';
+ 
 
-interface Option {
-  option_id: number;
-  question_id : number;
+interface OptionInput { 
   option_text: string;
   points: number;
+  question_id?: number; 
 }
 
-interface Question {
+interface Option extends OptionInput { 
+  option_id: number;
+  question_id: number;
+}
+
+
+interface QuestionShellInput_FE { 
+  question_text: string;
+  scenario_id: number;
+  question_difficulty_id: number;
+}
+
+
+interface QuestionShellUpdate_FE {
+  question_text?: string;
+  scenario_id?: number;
+  question_difficulty_id?: number;
+}
+
+
+interface Question { 
   question_id: number;
   question_text: string;
   scenario_id: number;
   question_difficulty_id: number;
-  options: { option_text: string; points: number }[];
+  question_difficulty_name?: string; 
+  options: Option[]; 
 }
 
 interface Scenario {
   scenario_id: number;
   scenario_name: string;
+  status?: string; 
 }
 
 interface Difficulty {
   question_difficulty_id: number;
   question_difficulty_name: string;
+  time?: number; 
 }
 
+type ModalConfirmCallback = (formData?: any) => Promise<void> | void;
+
 export class QuestionsAndOptions extends HTMLElement {
-  private scenarioMap: Map<number, string> = new Map();
-  private difficultyMap: Map<number, string> = new Map();
+  private scenarios: Scenario[] = [];
   private questions: Question[] = [];
-  
+  private difficulties: Difficulty[] = [];
+
+  private scenarioMap = new Map<number, string>();
+  private difficultyMap = new Map<number, string>();
+
+  private modalElement: HTMLElement | null = null;
+  private modalTitleElement: HTMLElement | null = null;
+  private modalBodyElement: HTMLElement | null = null;
+  private modalConfirmButton: HTMLButtonElement | null = null;
+  private modalCancelButton: HTMLButtonElement | null = null;
+  private modalCloseButton: HTMLButtonElement | null = null;
+  private currentModalConfirmCallback: ModalConfirmCallback | null = null;
 
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this.loadTemplate();
+    this.loadInitialTemplate();
   }
 
-  private async loadTemplate() {
+  private showMessage(message: string, type: 'success' | 'error' | 'warning' = 'success'): void {
+    let container = this.shadowRoot?.getElementById('message-container');
+    if (!container && this.shadowRoot) {
+        const messageDiv = document.createElement('div');
+        messageDiv.id = 'message-container';
+        this.shadowRoot.appendChild(messageDiv);
+        container = messageDiv; 
+    }
+    
+    if (!container) {
+        alert(message); 
+        return;
+    }
+    
+    container.textContent = message;
+    if (!container.classList.contains('message-toast')) {
+        container.classList.add('message-toast');
+    }
+    
+    container.classList.remove('success', 'error', 'warning', 'active');
+
+    if (type === 'success') container.classList.add('success');
+    else if (type === 'error') container.classList.add('error');
+    else if (type === 'warning') container.classList.add('warning');
+
+    container.style.opacity = '1';
+    container.style.display = 'block'; 
+    container.classList.add('active');
+
+    setTimeout(() => {
+      container.style.opacity = '0';
+      container.classList.remove('active');
+      setTimeout(() => {
+        container.style.display = 'none';
+        container.classList.remove('success', 'error', 'warning'); 
+      }, 300); 
+    }, 3000); 
+  }
+
+  private async loadInitialTemplate() {
     try {
       const content = await loadTemplate('./templates/questions-and-options.view.html');
-      if (content) {
-        this.shadowRoot?.appendChild(content);
-        await this.populateFilters();
-        await this.fetchAndRenderQuestions();
-        this.setupEventListeners();
-        this.addDefaultOption();
-      }
+      if (content && this.shadowRoot) {
+        this.shadowRoot.appendChild(content.cloneNode(true));
+        this.initializeModalElements(); 
+        await this.loadData(); 
+      } else { }
     } catch (error) {
-      console.error('Failed to load template:', error);
+      this.showMessage('❌ Failed to load page template.', 'error');
     }
   }
 
-  private async fetchAndRenderQuestions(): Promise<void> {
-    try {
-      this.questions = await apiService.get<Question[]>('/questions');
-      this.renderQuestionBank(this.questions);
-    } catch (error) {
-      console.error('Error fetching questions:', error);
+  private initializeModalElements() {
+    if (!this.shadowRoot) { return; }
+    this.modalElement = this.shadowRoot.getElementById('universal-modal') as HTMLElement;
+    this.modalTitleElement = this.shadowRoot.getElementById('modal-title') as HTMLElement;
+    this.modalBodyElement = this.shadowRoot.getElementById('modal-body') as HTMLElement;
+    this.modalConfirmButton = this.shadowRoot.getElementById('modal-confirm-btn') as HTMLButtonElement;
+    this.modalCancelButton = this.shadowRoot.getElementById('modal-cancel-btn') as HTMLButtonElement;
+    this.modalCloseButton = this.shadowRoot.getElementById('modal-close-btn') as HTMLButtonElement;
+
+    if(this.modalConfirmButton) this.modalConfirmButton.addEventListener('click', this.handleModalConfirm.bind(this));
+    if(this.modalCancelButton) this.modalCancelButton.addEventListener('click', this.closeModal.bind(this));
+    if(this.modalCloseButton) this.modalCloseButton.addEventListener('click', this.closeModal.bind(this));
+    if(this.modalElement) {
+        this.modalElement.addEventListener('click', (event) => { 
+            if (event.target === this.modalElement) this.closeModal();
+        });
+    } else {  }
+  }
+
+  private openModal(
+    title: string, 
+    contentHTML: string, 
+    confirmCallback: ModalConfirmCallback,
+    confirmButtonText: string = "Confirm",
+    isDeleteOperation: boolean = false 
+  ) {
+    if (!this.modalElement || !this.modalTitleElement || !this.modalBodyElement || !this.modalConfirmButton) {
+        this.showMessage("Error: Modal UI components are missing.", "error"); 
+        return;
+    }
+    this.modalTitleElement.textContent = title;
+    this.modalBodyElement.innerHTML = contentHTML; 
+    this.currentModalConfirmCallback = confirmCallback;
+    
+    this.modalConfirmButton.textContent = confirmButtonText;
+    this.modalConfirmButton.classList.remove('btn-primary', 'btn-danger');
+    if (isDeleteOperation) {
+        this.modalConfirmButton.classList.add('btn-danger'); 
+    } else {
+        this.modalConfirmButton.classList.add('btn-primary');
+    }
+    this.modalElement.classList.add('active');
+  }
+
+  private closeModal() {  
+    this.modalElement?.classList.remove('active');
+    if(this.modalBodyElement) this.modalBodyElement.innerHTML = ''; 
+    this.currentModalConfirmCallback = null;
+    if (this.modalConfirmButton) {
+        this.modalConfirmButton.classList.remove('btn-danger');
+        this.modalConfirmButton.classList.add('btn-primary');
+        this.modalConfirmButton.textContent = 'Confirm';
     }
   }
 
-  private async populateFilters(): Promise<void> {
+  private async handleModalConfirm() { 
+    if (this.currentModalConfirmCallback && this.modalBodyElement) {
+        const form = this.modalBodyElement.querySelector('form');
+        if (form) { 
+            const formData = new FormData(form);
+            const data: Record<string, any> = {};
+            formData.forEach((value, key) => { data[key] = value; });
+            if (this.validateModalForm(form)) {
+                await this.currentModalConfirmCallback(data);
+            }
+        } else { 
+             await this.currentModalConfirmCallback();
+             this.closeModal(); 
+        }
+    }
+  }
+  
+  private validateModalForm(form: HTMLFormElement): boolean { 
+    let isValid = true;
+    form.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement>('[required]').forEach(input => {
+        const parent = input.parentElement;
+        parent?.querySelector('.error-message')?.remove(); 
+        input.style.borderColor = 'var(--border-color)';
+
+        if (!input.value || (typeof input.value === 'string' && input.value.trim() === "")) {
+            isValid = false;
+            input.style.borderColor = 'var(--danger-color)'; 
+            const errorSpan = document.createElement('span');
+            errorSpan.className = 'error-message';
+            errorSpan.style.color = 'var(--danger-color)';
+            errorSpan.style.fontSize = 'var(--font-size-small)';
+            errorSpan.style.display = 'block';
+            errorSpan.style.marginTop = 'var(--spacing-xs)';
+            const labelElement = parent?.querySelector('label[for="' + input.id + '"]');
+            const fieldName = labelElement?.textContent?.replace(':','') || input.name || 'This field';
+            errorSpan.textContent = `${fieldName} is required.`;
+            parent?.appendChild(errorSpan);
+        } else if (input.type === 'number' && isNaN(parseFloat(input.value))) {
+            isValid = false;
+            input.style.borderColor = 'var(--danger-color)';
+            const errorSpan = document.createElement('span'); 
+            errorSpan.className = 'error-message'; 
+            errorSpan.style.color = 'var(--danger-color)';
+            errorSpan.style.fontSize = 'var(--font-size-small)';
+            errorSpan.style.display = 'block';
+            errorSpan.style.marginTop = 'var(--spacing-xs)';
+            const labelElement = parent?.querySelector('label[for="' + input.id + '"]');
+            const fieldName = labelElement?.textContent?.replace(':','') || input.name || 'Field';
+            errorSpan.textContent = `${fieldName} must be a valid number.`;
+            parent?.appendChild(errorSpan);
+        }
+    });
+    if (!isValid) this.showMessage("Please correct the errors in the form.", "warning");
+    return isValid;
+  }
+
+  private async loadData() {
     try {
-      const [scenarios, difficulties] = await Promise.all([
-        apiService.get<Scenario[]>('/scenarios'),
-        apiService.get<Difficulty[]>('/difficulties'),
+
+      const scenariosPromise = apiService.get<Scenario[]>('/scenarios');
+      const questionsPromise = apiService.get<Question[]>('/questions');
+      const difficultiesPromise = apiService.get<Difficulty[]>('/difficulties');
+      console.log(difficultiesPromise);
+      console.log(scenariosPromise);
+      console.log(questionsPromise);
+
+      const [scenariosData, questionsData, difficultiesData] = await Promise.all([
+        scenariosPromise, questionsPromise, difficultiesPromise
       ]);
 
-      const shadow = this.shadowRoot!;
-      const scenarioSelects = shadow.querySelectorAll('select[data-type="scenario"]') as NodeListOf<HTMLSelectElement>;
-      const difficultySelects = shadow.querySelectorAll('select[data-type="difficulty"]') as NodeListOf<HTMLSelectElement>;
 
-      this.scenarioMap = new Map(scenarios.map(s => [s.scenario_id, s.scenario_name]));
-      this.difficultyMap = new Map(difficulties.map(d => [d.question_difficulty_id, d.question_difficulty_name]));
+      this.scenarios = Array.isArray(scenariosData) ? scenariosData : [];
+      this.questions = (Array.isArray(questionsData) ? questionsData : []).map(q => ({
+          ...q,
 
-      scenarioSelects.forEach(select => {
-        this.populateSelect(select, scenarios, 'scenario_id', 'scenario_name', '-- Select Scenario --');
-      });
+          options: Array.isArray(q.options) ? q.options.map(opt => ({...opt, question_id: q.question_id })) : [] 
+      }));
+      this.difficulties = Array.isArray(difficultiesData) ? difficultiesData : [];
 
-      difficultySelects.forEach(select => {
-        this.populateSelect(select, difficulties, 'question_difficulty_id', 'question_difficulty_name', '-- Select Difficulty --');
-      });
+      this.scenarioMap = new Map(this.scenarios.map(s => [s.scenario_id, s.scenario_name]));
+      this.difficultyMap = new Map(this.difficulties.map(d => [d.question_difficulty_id, d.question_difficulty_name]));
+
+      this.renderScenariosTable();
+      this.renderQuestionsTable();
+      this.updateStatCards(); 
+      this.setupEventListeners();
+
     } catch (error) {
-      console.error('Error loading filter data:', error);
+      this.showMessage('⚠️ Failed to load initial data.', 'warning');
+
+      if (error && typeof error === 'object' && 'response' in error) {
+       
+      }
     }
   }
 
-  private populateSelect<T>(
-    select: HTMLSelectElement,
-    items: T[],
-    valueKey: keyof T,
-    textKey: keyof T,
-    defaultLabel: string
-  ) {
-    select.innerHTML = '';
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = defaultLabel;
-    select.appendChild(defaultOption);
+  private updateStatCards() { 
+    if (!this.shadowRoot) return;
 
-    items.forEach(item => {
-      const option = document.createElement('option');
-      option.value = String(item[valueKey]);
-      option.textContent = String(item[textKey]);
-      select.appendChild(option);
+    const scenariosCountEl = this.shadowRoot.getElementById('scenarios-count');
+    if (scenariosCountEl) scenariosCountEl.textContent = this.scenarios.length.toString();
+    const questionsCountEl = this.shadowRoot.getElementById('questions-count');
+    if (questionsCountEl) questionsCountEl.textContent = this.questions.length.toString();
+  }
+  private setupEventListeners() {
+    if (!this.shadowRoot) {  return; }
+    
+    this.setupTabs();
+    this.setupSearchFilters();
+    this.shadowRoot.getElementById('create-scenario-btn')?.addEventListener('click', () => this.handleOpenAddScenarioModal());
+    this.shadowRoot.getElementById('create-question-btn')?.addEventListener('click', () => this.handleOpenAddQuestionModal());
+    
+  }
+  private setupTabs() {
+    if (!this.shadowRoot) return;
+    const tabs = this.shadowRoot.querySelectorAll('.tabs button.tab');
+    const tabContents = this.shadowRoot.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const tabName = tab.getAttribute('data-tab');
+        tabContents.forEach(content => {
+          content.id === `${tabName}-tab` ? content.classList.add('active') : content.classList.remove('active');
+        });
+      });
+    });
+  }
+  private setupSearchFilters() {
+    if (!this.shadowRoot) return;
+    const scenarioSearchInput = this.shadowRoot.getElementById('scenario-search-input') as HTMLInputElement;
+    const questionSearchInput = this.shadowRoot.getElementById('question-search-input') as HTMLInputElement;
+    
+    scenarioSearchInput?.addEventListener('input', () => this.renderScenariosTable(scenarioSearchInput.value));
+    questionSearchInput?.addEventListener('input', () => this.renderQuestionsTable(questionSearchInput.value));
+  }
+  private getQuestionCountForScenario(scenarioId: number): number { /* ... (no changes needed here, keep as is) ... */ 
+    return this.questions.filter(q => q.scenario_id === scenarioId).length;
+  }
+  private renderScenariosTable(filter: string = '') {
+    if (!this.shadowRoot) { return; }
+   
+    const table = this.shadowRoot.querySelector('#scenarios-tab .table');
+    if (!table) {  return; }
+    let tbody = table.querySelector('tbody');
+    if (!tbody) { tbody = document.createElement('tbody'); table.appendChild(tbody); }
+    tbody.innerHTML = '';
+    const filteredScenarios = this.scenarios.filter(s => s.scenario_name && s.scenario_name.toLowerCase().includes(filter.toLowerCase()));
+    
+    if (filteredScenarios.length === 0) {
+      const r = tbody.insertRow(); r.insertCell().colSpan = 4; r.cells[0].textContent = 'No scenarios found.'; r.cells[0].style.textAlign = 'center'; return;
+    }
+    filteredScenarios.forEach(scenario => {
+      const row = tbody!.insertRow();
+      row.insertCell().textContent = scenario.scenario_name;
+      const statusCell = row.insertCell();
+      const statusBadge = document.createElement('span');
+      statusBadge.className = 'badge';
+      statusBadge.textContent = scenario.status || 'Active'; 
+      statusBadge.style.backgroundColor = `var(--${(scenario.status || 'Active').toLowerCase()}-badge, var(--success-color))`;
+      statusBadge.style.color = 'var(--dark-bg)';
+      statusBadge.style.padding = 'var(--spacing-xs) var(--spacing-sm)';
+      statusBadge.style.borderRadius = 'var(--border-radius-sm)';
+      statusCell.appendChild(statusBadge);
+      row.insertCell().textContent = this.getQuestionCountForScenario(scenario.scenario_id).toString();
+      const actionCell = row.insertCell(); actionCell.className = 'table-actions';
+      const editBtn = document.createElement('button'); editBtn.className = 'action-btn edit'; editBtn.innerHTML = '<i class="icon-edit"></i>';
+      editBtn.setAttribute('aria-label', `Edit scenario ${scenario.scenario_name}`);
+      editBtn.addEventListener('click', () => this.handleOpenEditScenarioModal(scenario)); actionCell.appendChild(editBtn);
+      const deleteBtn = document.createElement('button'); deleteBtn.className = 'action-btn delete'; deleteBtn.innerHTML = '<i class="icon-delete"></i>';
+      deleteBtn.setAttribute('aria-label', `Delete scenario ${scenario.scenario_name}`);
+      deleteBtn.addEventListener('click', () => this.confirmAndDeleteScenario(scenario)); 
+      actionCell.appendChild(deleteBtn);
+    });
+  }
+  private renderQuestionsTable(filter: string = '') { 
+    if (!this.shadowRoot) {  return; }
+    
+    const table = this.shadowRoot.querySelector('#questions-tab .table');
+    if (!table) { return; }
+    let tbody = table.querySelector('tbody');
+    if (!tbody) { tbody = document.createElement('tbody'); table.appendChild(tbody); }
+    tbody.innerHTML = '';
+    const filteredQuestions = this.questions.filter(q =>
+      (q.question_text && q.question_text.toLowerCase().includes(filter.toLowerCase())) ||
+      (this.scenarioMap.get(q.scenario_id) || '').toLowerCase().includes(filter.toLowerCase()) ||
+      (this.difficultyMap.get(q.question_difficulty_id) || '').toLowerCase().includes(filter.toLowerCase())
+    );
+    if (filteredQuestions.length === 0) {
+      const r = tbody.insertRow(); r.insertCell().colSpan = 5; r.cells[0].textContent = 'No questions found.'; r.cells[0].style.textAlign = 'center'; return;
+    }
+    filteredQuestions.forEach(question => {
+      const row = tbody!.insertRow();
+      const questionCell = row.insertCell(); const details = document.createElement('details'); details.className = 'question-details';
+      const summary = document.createElement('summary'); summary.textContent = question.question_text;
+      const chevron = document.createElement('i'); chevron.className = 'summary-icon icon-chevron-down'; summary.appendChild(chevron); details.appendChild(summary);
+      const detailsContent = document.createElement('section'); detailsContent.className = 'details-content';
+      const optionsTitle = document.createElement('h4'); optionsTitle.textContent = 'Options:'; detailsContent.appendChild(optionsTitle);
+      const optionsList = document.createElement('ul'); optionsList.className = 'question-options-list';
+      (question.options || []).forEach(opt => { 
+        const li = document.createElement('li'); li.className = 'question-option';
+        li.innerHTML = `<section class="option-content">${this.escapeHTML(opt.option_text)}</section><section class="option-points">${opt.points} points</section>
+                        <section class="option-actions">
+                          <button class="action-btn edit" aria-label="Edit option"><i class="icon-edit"></i></button>
+                          <button class="action-btn delete" aria-label="Delete option"><i class="icon-delete"></i></button>
+                        </section>`;
+        li.querySelector('.action-btn.edit')?.addEventListener('click', () => this.handleOpenEditOptionModal(opt, question.question_id));
+        li.querySelector('.action-btn.delete')?.addEventListener('click', () => this.confirmAndDeleteOption(opt, question.question_id));
+        optionsList.appendChild(li);
+      });
+      detailsContent.appendChild(optionsList);
+      const addOptionBtn = document.createElement('button'); addOptionBtn.className = 'add-option-btn'; addOptionBtn.innerHTML = '<i class="icon-plus"></i> Add Option';
+      addOptionBtn.addEventListener('click', () => this.handleOpenAddOptionModal(question.question_id)); detailsContent.appendChild(addOptionBtn);
+      details.appendChild(detailsContent); questionCell.appendChild(details);
+      row.insertCell().textContent = this.scenarioMap.get(question.scenario_id) || 'Unknown';
+      const difficultyCell = row.insertCell(); const difficultyName = this.difficultyMap.get(question.question_difficulty_id) || 'Unknown';
+      const difficultyBadge = document.createElement('span'); difficultyBadge.className = 'badge'; difficultyBadge.textContent = difficultyName;
+      let badgeColorVar = '--medium-badge'; if (difficultyName.toLowerCase() === 'easy') badgeColorVar = '--easy-badge'; else if (difficultyName.toLowerCase() === 'hard') badgeColorVar = '--hard-badge';
+      difficultyBadge.style.backgroundColor = `var(${badgeColorVar})`; difficultyBadge.style.color = 'var(--dark-bg)'; difficultyBadge.style.padding = 'var(--spacing-xs) var(--spacing-sm)'; difficultyBadge.style.borderRadius = 'var(--border-radius-sm)';
+      difficultyCell.appendChild(difficultyBadge);
+      row.insertCell().textContent = (question.options || []).length.toString(); 
+      const actionCell = row.insertCell(); actionCell.className = 'table-actions';
+      const editBtn = document.createElement('button'); editBtn.className = 'action-btn edit'; editBtn.innerHTML = '<i class="icon-edit"></i>';
+      editBtn.setAttribute('aria-label', `Edit question ${question.question_text}`);
+      editBtn.addEventListener('click', () => this.handleOpenEditQuestionModal(question)); actionCell.appendChild(editBtn);
+      const deleteBtn = document.createElement('button'); deleteBtn.className = 'action-btn delete'; deleteBtn.innerHTML = '<i class="icon-delete"></i>';
+      deleteBtn.setAttribute('aria-label', `Delete question ${question.question_text}`);
+      deleteBtn.addEventListener('click', () => this.confirmAndDeleteQuestion(question)); 
+      actionCell.appendChild(deleteBtn);
     });
   }
 
-  private setupEventListeners(): void {
-    const shadow = this.shadowRoot!;
-    const scenarioFilter = shadow.getElementById('scenario-filter') as HTMLSelectElement;
-    const difficultyFilter = shadow.getElementById('difficulty-filter') as HTMLSelectElement;
-    const clearBtn = shadow.querySelector('button[type="reset"]')!;
-    const showAddBtn = shadow.getElementById('show-add-question') as HTMLButtonElement;
-    const addSection = shadow.getElementById('add-question-section')!;
-
-    scenarioFilter.addEventListener('change', () => this.filterQuestions());
-    difficultyFilter.addEventListener('change', () => this.filterQuestions());
-
-    clearBtn.addEventListener('click', e => {
-      e.preventDefault();
-      scenarioFilter.value = '';
-      difficultyFilter.value = '';
-      this.renderQuestionBank(this.questions);
-    });
-
-    showAddBtn.addEventListener('click', () => {
-      addSection.classList.toggle('hidden');
-    });
-
-    const addOptionBtn = shadow.getElementById('add-option-button') as HTMLButtonElement;
-    addOptionBtn.addEventListener('click', () => this.addOption());
-
-    const submitBtn = shadow.querySelector('#add-question-section button[type="submit"]')!;
-    submitBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await this.handleNewQuestionSubmit();
+  private handleOpenAddScenarioModal() { 
+    const formHTML = `
+      <form id="add-scenario-form" novalidate>
+        <div class="form-group">
+          <label for="scenario-name-input" class="form-label">Scenario Name:</label>
+          <input type="text" id="scenario-name-input" name="scenario_name" class="form-input" required>
+        </div>
+      </form>
+    `;
+    this.openModal('Add New Scenario', formHTML, async (formData) => {
+      if (formData && formData.scenario_name) { 
+        await this.addScenario({ scenario_name: formData.scenario_name.trim() });
+        this.closeModal(); 
+      } 
     });
   }
-
-  private addOption(): void {
-    const shadow = this.shadowRoot!;
-    const optionList = shadow.getElementById('dynamic-option-list') as HTMLUListElement;
-    const index = optionList.children.length + 1;
-
-    const li = document.createElement('li');
-
-    const label = document.createElement('label');
-    label.textContent = `Option ${index}:`;
-
-    const inputText = document.createElement('input');
-    inputText.type = 'text';
-    inputText.placeholder = `Enter option ${index}`;
-
-    const inputPoints = document.createElement('input');
-    inputPoints.type = 'number';
-    inputPoints.placeholder = 'Points';
-    inputPoints.min = '0';
-
-    li.appendChild(label);
-    li.appendChild(inputText);
-    li.appendChild(inputPoints);
-
-    optionList.appendChild(li);
-  }
-
-  private addDefaultOption(): void {
-    const shadow = this.shadowRoot!;
-    const optionList = shadow.getElementById('dynamic-option-list') as HTMLUListElement;
-    optionList.innerHTML = ''; // clear
-    this.addOption(); // add first
-  }
-
-  private async handleNewQuestionSubmit(): Promise<void> {
-    const shadow = this.shadowRoot!;
-    const textInput = shadow.getElementById('new-question') as HTMLInputElement;
-    const scenarioSelect = shadow.getElementById('new-scenario') as HTMLSelectElement;
-    const difficultySelect = shadow.getElementById('new-difficulty') as HTMLSelectElement;
-    const optionList = shadow.getElementById('dynamic-option-list') as HTMLUListElement;
-
-    const questionText = textInput.value.trim();
-    const scenario = scenarioSelect.value;
-    const difficulty = difficultySelect.value;
-
-    const options: { option_text: string; points: number }[] = [];
-    optionList.querySelectorAll('li').forEach(li => {
-      const inputs = li.querySelectorAll('input');
-      const optionText = (inputs[0] as HTMLInputElement)?.value.trim();
-      const pointsValue = parseInt((inputs[1] as HTMLInputElement)?.value.trim(), 10);
-      if (optionText && !isNaN(pointsValue)) {
-        options.push({ option_text: optionText, points: pointsValue });
+  private handleOpenEditScenarioModal(scenario: Scenario) { 
+    const formHTML = `
+      <form id="edit-scenario-form" novalidate>
+        <div class="form-group">
+          <label for="scenario-name-input" class="form-label">Scenario Name:</label>
+          <input type="text" id="scenario-name-input" name="scenario_name" class="form-input" value="${this.escapeHTML(scenario.scenario_name)}" required>
+        </div>
+      </form>
+    `;
+    this.openModal(`Edit Scenario: ${this.escapeHTML(scenario.scenario_name)}`, formHTML, async (formData) => {
+      if (formData && formData.scenario_name) {
+        await this.updateScenario(scenario.scenario_id, { scenario_name: formData.scenario_name.trim() });
+        this.closeModal(); 
       }
     });
-
-    if (!questionText || !scenario || !difficulty || options.length === 0) {
-      alert('Please fill all fields and add at least one valid option.');
-      return;
-    }
-
+  }
+  private confirmAndDeleteScenario(scenario: Scenario) { 
+    const messageHTML = `<p>Are you sure you want to delete the scenario: <strong>"${this.escapeHTML(scenario.scenario_name)}"</strong>? This action cannot be undone and may affect associated questions.</p>`;
+    this.openModal('Confirm Deletion', messageHTML, async () => { 
+            await this.deleteScenario(scenario.scenario_id); 
+        }, "Delete", true);
+  }
+  public async addScenario(scenarioData: Pick<Scenario, 'scenario_name'>) { 
     try {
-      await apiService.post('/questions', {
-        question_text: questionText,
-        scenario_id: Number(scenario),
-        question_difficulty_id: Number(difficulty),
-        options
-      });
 
-      await this.fetchAndRenderQuestions();
+      const newScenario = await apiService.post<Scenario>('/scenarios', scenarioData); 
 
-      textInput.value = '';
-      scenarioSelect.value = '';
-      difficultySelect.value = '';
-      this.addDefaultOption();
-    } catch (error) {
-      console.error('Failed to submit new question:', error);
-    }
+      if (newScenario && newScenario.scenario_id) {
+        this.scenarios.push(newScenario); 
+        this.scenarioMap.set(newScenario.scenario_id, newScenario.scenario_name);
+        this.renderScenariosTable(); this.updateStatCards();
+        this.showMessage('✅ Scenario added successfully!', 'success');
+      } else { throw new Error("Invalid response from server after adding scenario."); }
+    } catch (error) { this.showMessage('❌ Failed to add scenario.', 'error'); }
   }
-
-  private async deleteQuestion(id: number): Promise<void> {
+  public async updateScenario(id: number, scenarioData: Partial<Scenario>) { 
     try {
-      await apiService.delete(`/questions/${id}`);
-      this.questions = this.questions.filter(q => q.question_id !== id);
-      
-      this.renderQuestionBank(this.questions);
+      const updatedScenario = await apiService.put<Scenario>(`/scenarios/${id}`, scenarioData);  
+      if (updatedScenario && updatedScenario.scenario_id) {
+        const index = this.scenarios.findIndex(s => s.scenario_id === id);
+        if (index !== -1) {
+          this.scenarios[index] = { ...this.scenarios[index], ...updatedScenario }; 
+          this.scenarioMap.set(id, this.scenarios[index].scenario_name);
+        } else { 
+            await this.loadData(); 
+        }
+        this.renderScenariosTable();
+        this.showMessage('✅ Scenario updated successfully!', 'success');
+      } else { throw new Error("Invalid response from server after updating scenario."); }
+    } catch (error) { this.showMessage('❌ Failed to update scenario.', 'error'); }
+  }
+  public async deleteScenario(id: number) { 
+    try {
+      await apiService.delete(`/admin/scenarios/${id}`); 
+      this.scenarios = this.scenarios.filter(s => s.scenario_id !== id);
+      this.scenarioMap.delete(id);
+      this.questions = this.questions.filter(q => q.scenario_id !== id);
+      this.renderScenariosTable(); this.renderQuestionsTable(); this.updateStatCards();
+      this.showMessage('✅ Scenario deleted successfully.', 'success');
+    } catch (error) { this.showMessage('❌ Failed to delete scenario. It might be in use.', 'error'); }
+  }
+
+  // QUESTIONS
+  private handleOpenAddQuestionModal() { 
+    const scenarioOptions = this.scenarios.map(s => `<option value="${s.scenario_id}">${this.escapeHTML(s.scenario_name)}</option>`).join('');
+    const difficultyOptions = this.difficulties.map(d => `<option value="${d.question_difficulty_id}">${this.escapeHTML(d.question_difficulty_name)}</option>`).join('');
+    const formHTML = `
+      <form id="add-question-form" novalidate>
+        <div class="form-group">
+          <label for="question-text-input" class="form-label">Question Text:</label>
+          <textarea id="question-text-input" name="question_text" class="form-textarea" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="question-scenario-select" class="form-label">Scenario:</label>
+          <select id="question-scenario-select" name="scenario_id" class="form-select" required>
+            <option value="">-- Select Scenario --</option> ${scenarioOptions}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="question-difficulty-select" class="form-label">Difficulty:</label>
+          <select id="question-difficulty-select" name="question_difficulty_id" class="form-select" required>
+            <option value="">-- Select Difficulty --</option> ${difficultyOptions}
+          </select>
+        </div>
+      </form> 
+    `;
+    this.openModal('Add New Question', formHTML, async (formData) => {
+      if (formData && formData.question_text && formData.scenario_id && formData.question_difficulty_id) {
+        const questionShellPayload: QuestionShellInput_FE = { // Use new interface
+          question_text: formData.question_text.trim(), 
+          scenario_id: parseInt(formData.scenario_id, 10), 
+          question_difficulty_id: parseInt(formData.question_difficulty_id, 10),
+        };
+        await this.addQuestion(questionShellPayload); 
+        this.closeModal();
+      }
+    });
+  }
+
+  private handleOpenEditQuestionModal(question: Question) {
+    const scenarioOptions = this.scenarios.map(s => `<option value="${s.scenario_id}" ${s.scenario_id === question.scenario_id ? 'selected' : ''}>${this.escapeHTML(s.scenario_name)}</option>`).join('');
+    const difficultyOptions = this.difficulties.map(d => `<option value="${d.question_difficulty_id}" ${d.question_difficulty_id === question.question_difficulty_id ? 'selected' : ''}>${this.escapeHTML(d.question_difficulty_name)}</option>`).join('');
+    
+    let optionsHTML = '<p>Options are managed via "Add Option" or by editing them in the table details below the question.</p>';
+    
+    const formHTML = `
+      <form id="edit-question-form" novalidate>
+        <div class="form-group">
+          <label for="question-text-input" class="form-label">Question Text:</label>
+          <textarea id="question-text-input" name="question_text" class="form-textarea" rows="3" required>${this.escapeHTML(question.question_text)}</textarea>
+        </div>
+        <div class="form-group">
+          <label for="question-scenario-select" class="form-label">Scenario:</label>
+          <select id="question-scenario-select" name="scenario_id" class="form-select" required>${scenarioOptions}</select>
+        </div>
+        <div class="form-group">
+          <label for="question-difficulty-select" class="form-label">Difficulty:</label>
+          <select id="question-difficulty-select" name="question_difficulty_id" class="form-select" required>${difficultyOptions}</select>
+        </div>
+        <div class="form-group"> ${optionsHTML} </div>
+      </form>
+    `;
+    this.openModal(`Edit Question`, formHTML, async (formData) => { 
+        if (formData && formData.question_text && formData.scenario_id && formData.question_difficulty_id) {
+            const updatedQuestionShell: QuestionShellUpdate_FE = { 
+                question_text: formData.question_text.trim(),
+                scenario_id: parseInt(formData.scenario_id, 10),
+                question_difficulty_id: parseInt(formData.question_difficulty_id, 10),
+            };
+            await this.updateQuestion(question.question_id, updatedQuestionShell);
+            this.closeModal();
+        }
+    });
+  }
+   private confirmAndDeleteQuestion(question: Question) { 
+    const messageHTML = `<p>Are you sure you want to delete the question: <strong>"${this.escapeHTML(question.question_text)}"</strong>?</p>`;
+    this.openModal('Confirm Deletion', messageHTML, async () => { await this.deleteQuestion(question.question_id); }, "Delete", true );
+  }
+
+  public async addQuestion(questionShellData: QuestionShellInput_FE) { 
+    try {
+      const newQuestionBase = await apiService.post<Question>(`/questions`, questionShellData); 
+
+      if (newQuestionBase && newQuestionBase.question_id) {
+        await this.loadData(); 
+        this.showMessage('✅ Question created! Add options using the "Add Option" button.', 'success');
+      } else {
+        throw new Error("Invalid response from server after adding question shell.");
+      }
+    } catch (error) { this.showMessage('❌ Failed to add question shell.', 'error'); }
+  }
+
+  public async updateQuestion(id: number, questionShellData: QuestionShellUpdate_FE) { 
+    try {
+
+      await apiService.put<void>(`/questions/${id}`, questionShellData); 
+      await this.loadData(); 
+      this.showMessage('✅ Question details updated! Manage options separately.', 'success');
+    } catch (error) { this.showMessage('❌ Failed to update question details.', 'error');  }
+  }
+  public async deleteQuestion(id: number) { 
+    try {
+
+      await apiService.delete(`/admin/questions/${id}`); 
+
+      this.questions = this.questions.filter(q => q.question_id !== id); 
+      this.renderQuestionsTable(); this.updateStatCards();
+      this.showMessage('✅ Question and its options deleted.', 'success');
+    } catch (error) { this.showMessage('❌ Failed to delete question. It might be in use.', 'error');}
+  }
+
+
+  private async handleOpenAddOptionModal(questionId: number) {
+    const formHTML = `
+      <form id="add-option-form" novalidate>
+        <div class="form-group">
+          <label for="option-text-input" class="form-label">Option Text:</label>
+          <input type="text" id="option-text-input" name="option_text" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="option-points-input" class="form-label">Points:</label>
+          <input type="number" id="option-points-input" name="points" class="form-input" required value="0">
+        </div>
+      </form>
+    `;
+    this.openModal('Add New Option', formHTML, async (formData) => {
+      if (formData && formData.option_text && formData.points !== undefined) {
+        const newOptionPayload: OptionInput & { question_id: number } = { 
+            question_id: questionId, 
+            option_text: formData.option_text.trim(),
+            points: parseInt(formData.points, 10)
+        };
+        await this.addOptionDirectly(newOptionPayload); 
+        this.closeModal();
+      }
+    });
+  }
+
+  private async addOptionDirectly(optionData: OptionInput & { question_id: number }) {
+    try {
+
+        const newOption = await apiService.post<Option>('/options', optionData);
+        if (newOption && newOption.option_id) {
+            const question = this.questions.find(q => q.question_id === optionData.question_id);
+            if (question) {
+                const optionToAdd: Option = { 
+                    ...newOption, 
+                    question_id: optionData.question_id 
+                };
+                question.options.push(optionToAdd); 
+                this.renderQuestionsTable(); 
+            } else { await this.loadData(); }
+            this.showMessage('✅ Option added successfully!', 'success');
+        } else { throw new Error("Invalid response from server after adding option."); }
     } catch (error) {
-      console.error(`Failed to delete question ${id}:`, error);
+        this.showMessage('❌ Failed to add option.', 'error');
+        
     }
   }
 
- private renderQuestionBank(questions: Question[]): void {
-    const container = this.shadowRoot!.getElementById('question-bank')!;
-    container.textContent = '';
-
-    questions.forEach(q => {
-        const article = document.createElement('article');
-
-        const header = document.createElement('header');
-        const h4 = document.createElement('h4');
-        h4.textContent = q.question_text;
-
-        const p = document.createElement('p');
-        const scenarioName = this.scenarioMap.get(q.scenario_id) ?? `Scenario ${q.scenario_id}`;
-        const difficultyName = this.difficultyMap.get(q.question_difficulty_id) ?? `Difficulty ${q.question_difficulty_id}`;
-        p.textContent = `Scenario: ${scenarioName} | Difficulty: ${difficultyName}`;
-        header.appendChild(h4);
-        header.appendChild(p);
-        header.style.cursor = 'pointer';
-
-        const section = document.createElement('section');
-        section.hidden = true;
-
-        const questionInput = document.createElement('input');
-        questionInput.value = q.question_text;
-        questionInput.hidden = true;
-
-        const optionList = document.createElement('ul');
-        q.options.forEach(opt => {
-            const li = document.createElement('li');
-
-            const textInput = document.createElement('input');
-            textInput.type = 'text';
-            textInput.value = opt.option_text;
-            textInput.disabled = true;
-
-            const pointInput = document.createElement('input');
-            pointInput.type = 'number';
-            pointInput.value = String(opt.points);
-            pointInput.disabled = true;
-
-            li.appendChild(textInput);
-            li.appendChild(pointInput);
-            optionList.appendChild(li);
-        });
-
-        header.addEventListener('click', () => {
-            section.hidden = !section.hidden;
-        });
-
-        section.appendChild(questionInput);
-        section.appendChild(optionList);
-
-        article.appendChild(header);
-        article.appendChild(section);
-        container.appendChild(article);
+  private async handleOpenEditOptionModal(optionToEdit: Option, questionId: number) {
+    const formHTML = `
+      <form id="edit-option-form" novalidate>
+        <div class="form-group">
+          <label for="option-text-input" class="form-label">Option Text:</label>
+          <input type="text" id="option-text-input" name="option_text" class="form-input" value="${this.escapeHTML(optionToEdit.option_text)}" required>
+        </div>
+        <div class="form-group">
+          <label for="option-points-input" class="form-label">Points:</label>
+          <input type="number" id="option-points-input" name="points" class="form-input" value="${optionToEdit.points}" required>
+        </div>
+      </form>
+    `;
+    this.openModal(`Edit Option`, formHTML, async (formData) => { 
+        if (formData && formData.option_text && formData.points !== undefined) {
+            const updatedOptionPayload: Partial<OptionInput> = {
+                option_text: formData.option_text.trim(),
+                points: parseInt(formData.points, 10)
+            };
+            await this.updateOptionDirectly(optionToEdit.option_id, updatedOptionPayload, questionId);
+            this.closeModal();
+        }
     });
-}
-
-private filterQuestions(): void {
-    const shadow = this.shadowRoot!;
-    const scenarioVal = (shadow.getElementById('scenario-filter') as HTMLSelectElement).value;
-    const difficultyVal = (shadow.getElementById('difficulty-filter') as HTMLSelectElement).value;
-
-    const filtered = this.questions.filter(q => {
-        const matchScenario = !scenarioVal || q.scenario_id.toString() === scenarioVal;
-        const matchDifficulty = !difficultyVal || q.question_difficulty_id.toString() === difficultyVal;
-        return matchScenario && matchDifficulty;
-    });
-
-    this.renderQuestionBank(filtered);
-}
   }
 
+  private async updateOptionDirectly(optionId: number, optionData: Partial<OptionInput>, questionIdToUpdateUI: number) {
+    try {
+        console.log(`[FE] updateOptionDirectly (ID: ${optionId}): Sending data:`, optionData);
+        const updatedOption = await apiService.put<Option>(`/options/${optionId}`, optionData);
+        console.log(`[FE] updateOptionDirectly (ID: ${optionId}): Received response:`, updatedOption);
+
+        if (updatedOption && updatedOption.option_id) {
+            const question = this.questions.find(q => q.question_id === questionIdToUpdateUI);
+            if (question) {
+                const optIndex = question.options.findIndex(o => o.option_id === optionId);
+                if (optIndex !== -1) {
+                    question.options[optIndex] = { 
+                        ...question.options[optIndex], 
+                        ...updatedOption 
+                    };
+                } else { await this.loadData(); } 
+                this.renderQuestionsTable();
+            } else { await this.loadData(); } 
+            this.showMessage('✅ Option updated successfully!', 'success');
+        } else { throw new Error("Invalid response from server after updating option."); }
+    } catch (error) {
+        this.showMessage('❌ Failed to update option.', 'error');
+    }
+  }
+
+  private confirmAndDeleteOption(optionToDelete: Option, questionId: number) {
+    const messageHTML = `<p>Are you sure you want to delete the option: <strong>"${this.escapeHTML(optionToDelete.option_text)}"</strong>?</p>`;
+    this.openModal('Confirm Deletion', messageHTML, async () => {
+        await this.deleteOptionDirectly(optionToDelete.option_id, questionId);
+    }, "Delete", true);
+  }
+
+  private async deleteOptionDirectly(optionId: number, questionIdToUpdateUI: number) {
+    try {
+
+        await apiService.delete(`/options/${optionId}`);
+
+        const question = this.questions.find(q => q.question_id === questionIdToUpdateUI);
+        if (question) {
+            question.options = question.options.filter(opt => opt.option_id !== optionId);
+            this.renderQuestionsTable();
+        } else { await this.loadData(); }
+        this.showMessage('✅ Option deleted successfully!', 'success');
+    } catch (error) {
+        this.showMessage('❌ Failed to delete option.', 'error');
+    }
+  }
+
+  private escapeHTML(str: string): string {
+    if (typeof str !== 'string') return '';
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+}
 customElements.define('questions-and-options', QuestionsAndOptions);

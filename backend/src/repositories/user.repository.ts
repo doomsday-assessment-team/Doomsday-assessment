@@ -45,16 +45,10 @@ export const getUserAssessmentSummaries = async (
     queryParams.push(difficulty);
   }
 
-  if (startDate) {
-    whereConditions.push(`h.timestamp >= $${paramCounter++}`);
-    queryParams.push(new Date(startDate));
-  }
-
-  if (endDate) {
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
-    whereConditions.push(`h.timestamp <= $${paramCounter++}`);
-    queryParams.push(end);
+  if (startDate && endDate) {
+    whereConditions.push(`h.timestamp BETWEEN $${paramCounter} AND $${paramCounter + 1}`);
+    queryParams.push(startDate, endDate);
+    paramCounter += 2;
   }
 
   const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
