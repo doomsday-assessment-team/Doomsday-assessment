@@ -77,4 +77,8 @@ router.get('/user-question-history', async (req: Request, res: Response, next: N
   }
 });
 
+router.get('/get-ip', async (req, res) => {
+  res.send({ ip: req.ip });
+});
+
 export default router;
