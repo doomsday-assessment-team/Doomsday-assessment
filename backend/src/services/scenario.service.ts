@@ -9,9 +9,9 @@ export const getAllScenarios = async (): Promise<Scenario[]> => {
 export const getScenarioById = async (id: number): Promise<Scenario | null> => {
   const scenario = await scenarioRepository.findById(id); 
   if (!scenario) {
-    console.log(`[Service] getScenarioById: Scenario with ID ${id} not found.`);
+    return null;
   } else {
-    console.log(`[Service] getScenarioById: Found scenario:`, scenario);
+    return scenario;
   }
   return scenario; 
 };
@@ -30,18 +30,18 @@ export const updateScenario = async (id: number, name: string): Promise<Scenario
   }
   const updatedScenario = await scenarioRepository.update(id, name.trim()); 
   if (!updatedScenario) {
+    return null; 
 
   } else {
+    return updatedScenario;
   }
   return updatedScenario;
 };
 
 export const deleteScenario = async (id: number): Promise<boolean> => {
 
-  const deletedCount = await scenarioRepository.remove(id); // Assuming remove is the method
+  const deletedCount = await scenarioRepository.remove(id);
   if (deletedCount === 0) {
-
-
     return false; 
   }
   return true;

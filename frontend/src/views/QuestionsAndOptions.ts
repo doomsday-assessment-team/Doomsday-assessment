@@ -1,7 +1,6 @@
-import { loadTemplate } from '../utils/load-template.js'; // Assuming this path is correct
-import { apiService } from '../main.js'; // Assuming this path is correct
+import { loadTemplate } from '../utils/load-template.js'; 
+import { apiService } from '../main.js'; 
 
-// Interfaces
 interface OptionInput { 
   option_text: string;
   points: number;
@@ -242,6 +241,9 @@ export class QuestionsAndOptions extends HTMLElement {
       const scenariosPromise = apiService.get<Scenario[]>('/scenarios');
       const questionsPromise = apiService.get<Question[]>('/questions');
       const difficultiesPromise = apiService.get<Difficulty[]>('/difficulties');
+      console.log(difficultiesPromise);
+      console.log(scenariosPromise);
+      console.log(questionsPromise);
 
       const [scenariosData, questionsData, difficultiesData] = await Promise.all([
         scenariosPromise, questionsPromise, difficultiesPromise
@@ -450,7 +452,7 @@ export class QuestionsAndOptions extends HTMLElement {
   public async addScenario(scenarioData: Pick<Scenario, 'scenario_name'>) { 
     try {
 
-      const newScenario = await apiService.post<Scenario>('/admin/scenarios', scenarioData); 
+      const newScenario = await apiService.post<Scenario>('/scenarios', scenarioData); 
 
       if (newScenario && newScenario.scenario_id) {
         this.scenarios.push(newScenario); 
@@ -463,7 +465,7 @@ export class QuestionsAndOptions extends HTMLElement {
   public async updateScenario(id: number, scenarioData: Partial<Scenario>) { 
     try {
 
-      const updatedScenario = await apiService.put<Scenario>(`/admin/scenarios/${id}`, scenarioData);  
+      const updatedScenario = await apiService.put<Scenario>(`/scenarios/${id}`, scenarioData);  
       if (updatedScenario && updatedScenario.scenario_id) {
         const index = this.scenarios.findIndex(s => s.scenario_id === id);
         if (index !== -1) {
@@ -550,7 +552,7 @@ export class QuestionsAndOptions extends HTMLElement {
     `;
     this.openModal(`Edit Question`, formHTML, async (formData) => { 
         if (formData && formData.question_text && formData.scenario_id && formData.question_difficulty_id) {
-            const updatedQuestionShell: QuestionShellUpdate_FE = { // Use new interface
+            const updatedQuestionShell: QuestionShellUpdate_FE = { 
                 question_text: formData.question_text.trim(),
                 scenario_id: parseInt(formData.scenario_id, 10),
                 question_difficulty_id: parseInt(formData.question_difficulty_id, 10),
@@ -568,7 +570,7 @@ export class QuestionsAndOptions extends HTMLElement {
   public async addQuestion(questionShellData: QuestionShellInput_FE) { 
     try {
 
-      const newQuestionBase = await apiService.post<Question>(`/admin/questions`, questionShellData); 
+      const newQuestionBase = await apiService.post<Question>(`/questions`, questionShellData); 
 
       if (newQuestionBase && newQuestionBase.question_id) {
         await this.loadData(); 
@@ -628,7 +630,7 @@ export class QuestionsAndOptions extends HTMLElement {
   private async addOptionDirectly(optionData: OptionInput & { question_id: number }) {
     try {
 
-        const newOption = await apiService.post<Option>('/admin/options', optionData);
+        const newOption = await apiService.post<Option>('/options', optionData);
         if (newOption && newOption.option_id) {
             const question = this.questions.find(q => q.question_id === optionData.question_id);
             if (question) {
@@ -675,7 +677,7 @@ export class QuestionsAndOptions extends HTMLElement {
   private async updateOptionDirectly(optionId: number, optionData: Partial<OptionInput>, questionIdToUpdateUI: number) {
     try {
         console.log(`[FE] updateOptionDirectly (ID: ${optionId}): Sending data:`, optionData);
-        const updatedOption = await apiService.put<Option>(`/admin/options/${optionId}`, optionData);
+        const updatedOption = await apiService.put<Option>(`/options/${optionId}`, optionData);
         console.log(`[FE] updateOptionDirectly (ID: ${optionId}): Received response:`, updatedOption);
 
         if (updatedOption && updatedOption.option_id) {
@@ -707,7 +709,7 @@ export class QuestionsAndOptions extends HTMLElement {
   private async deleteOptionDirectly(optionId: number, questionIdToUpdateUI: number) {
     try {
 
-        await apiService.delete(`/admin/options/${optionId}`);
+        await apiService.delete(`/options/${optionId}`);
 
         const question = this.questions.find(q => q.question_id === questionIdToUpdateUI);
         if (question) {

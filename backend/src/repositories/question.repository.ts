@@ -1,10 +1,9 @@
-import db from '../config/db';
-import { Question, Option } from '../types/global-types';
-
+import db from '../config/db'; // Adjust path as needed
+import { Question, Option as GlobalOption } from '../types/global-types'; // Adjust path as needed
 
 export interface QuestionWithDetails extends Question {
   question_difficulty_name: string;
-  options: Option[]; 
+  options: GlobalOption[]; 
 }
 
 export interface QuestionInputRepository {
@@ -43,7 +42,7 @@ export const findAll = async (): Promise<QuestionWithDetails[]> => {
         options: [], 
       });
     }
-    if (row.option_id) {
+    if (row.option_id) { 
       const questionEntry = questionMap.get(row.question_id);
       if (questionEntry) { 
         questionEntry.options.push({
@@ -51,11 +50,10 @@ export const findAll = async (): Promise<QuestionWithDetails[]> => {
           question_id: row.question_id, 
           option_text: row.option_text,
           points: row.points,
-        });
+        } as GlobalOption); 
       }
     }
   }
-
   return Array.from(questionMap.values());
 };
 
@@ -97,7 +95,7 @@ export const findById = async (questionId: number): Promise<QuestionWithDetails 
         question_id: row.question_id,
         option_text: row.option_text,
         points: row.points,
-      });
+      } as GlobalOption);
     }
   }
   return question;
@@ -105,34 +103,38 @@ export const findById = async (questionId: number): Promise<QuestionWithDetails 
 
 export const create = async (data: QuestionInputRepository): Promise<Question> => {
   return db.tx(async t => {
-    const questionResult = await t.one<Question>(`
+    const questionResult = await t.one<Omit<Question, 'options'>>(`
       INSERT INTO questions (question_text, scenario_id, question_difficulty_id)
       VALUES ($1, $2, $3)
       RETURNING question_id, question_text, scenario_id, question_difficulty_id;
     `, [data.question_text, data.scenario_id, data.question_difficulty_id]);
 
     const questionId = questionResult.question_id;
-    const createdOptions: Option[] = [];
+    const createdOptions: GlobalOption[] = [];
 
     if (data.options && data.options.length > 0) {
       const optionQueries = data.options.map(opt => {
-        return t.one<Option>(`
+        return t.one<GlobalOption>(`
           INSERT INTO options (question_id, option_text, points)
           VALUES ($1, $2, $3)
-          RETURNING option_id, question_id, option_text, points;
+          RETURNING option_id, question_id, option_text, points; 
         `, [questionId, opt.option_text.trim(), opt.points]);
       });
       const insertedOptions = await t.batch(optionQueries);
-      createdOptions.push(...insertedOptions);
+      if (insertedOptions) { 
+        createdOptions.push(...insertedOptions.filter(opt => opt != null) as GlobalOption[]);
+      }
     }
-
-    return { ...questionResult, options: createdOptions }; 
+    return { 
+        ...questionResult, 
+        options: createdOptions 
+    } as Question; 
   });
 };
 
 export const update = async (questionId: number, data: QuestionInputRepository): Promise<Question | null> => {
   return db.tx(async t => {
-    const updatedQuestion = await t.oneOrNone<Question>(`
+    const updatedQuestionResult = await t.oneOrNone<Omit<Question, 'options'>>(`
       UPDATE questions
       SET question_text = $1,
           scenario_id = $2,
@@ -141,35 +143,37 @@ export const update = async (questionId: number, data: QuestionInputRepository):
       RETURNING question_id, question_text, scenario_id, question_difficulty_id;
     `, [data.question_text, data.scenario_id, data.question_difficulty_id, questionId]);
 
-    if (!updatedQuestion) {
-      return null; 
+    if (!updatedQuestionResult) {
+      return null;
     }
 
     await t.none(`DELETE FROM options WHERE question_id = $1;`, [questionId]);
 
-    const updatedWithOptions: Option[] = [];
-
+    const updatedWithOptions: GlobalOption[] = [];
     if (data.options && data.options.length > 0) {
       const insertOptionsQueries = data.options.map(opt =>
-        t.one<Option>(`
+        t.one<GlobalOption>(`
           INSERT INTO options (question_id, option_text, points)
           VALUES ($1, $2, $3)
           RETURNING option_id, question_id, option_text, points;
         `, [questionId, opt.option_text.trim(), opt.points])
       );
       const insertedOptions = await t.batch(insertOptionsQueries);
-      updatedWithOptions.push(...insertedOptions);
+      if (insertedOptions) {
+         updatedWithOptions.push(...insertedOptions.filter(opt => opt != null) as GlobalOption[]);
+      }
     }
-    return { ...updatedQuestion, options: updatedWithOptions };
+    return { 
+        ...updatedQuestionResult, 
+        options: updatedWithOptions 
+    } as Question; 
   });
 };
 
 export const remove = async (questionId: number): Promise<number> => {
   return db.tx(async t => {
-
     await t.none('DELETE FROM options WHERE question_id = $1', [questionId]);
-
     const result = await t.result('DELETE FROM questions WHERE question_id = $1', [questionId]);
-    return result.rowCount;
+    return result.rowCount; 
   });
 };

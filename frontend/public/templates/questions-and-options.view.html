@@ -5,13 +5,12 @@
     :host {
       font-family: 'Rajdhani', sans-serif;
       display: block;
-      /* Cyber Defense Archives Theme Variables */
       --primary-color: #d5c9a6;
       --primary-glow: rgba(213, 201, 166, 0.3);
-      --secondary-color: #3a3c2e; /* Used for some component backgrounds like forms */
+      --secondary-color: #3a3c2e;
       --text-color: #d5c9a6;
-      --dark-bg: #1a1a14;         /* Main background color */
-      --card-bg: #2a2b21;         /* Card and some element backgrounds */
+      --dark-bg: #1a1a14;
+      --card-bg: #2a2b21;
       --border-color: #4a4c3e;
       --danger-color: #a65c52;
       --danger-glow: rgba(166, 92, 82, 0.3);
@@ -19,15 +18,13 @@
       --success-glow: rgba(138, 154, 91, 0.3);
       --warning-color: #c7a758;
       --warning-glow: rgba(199, 167, 88, 0.3);
-      --button-color: #3a3c2e;      /* Base button background */
-      --button-hover: #4a4c3e;     /* Base button hover background */
+      --button-color: #3a3c2e;
+      --button-hover: #4a4c3e;
       
-      /* Badge colors */
       --easy-badge: #8a9a5b;
       --medium-badge: #c7a758;
       --hard-badge: #a65c52;
 
-      /* Responsive sizing variables */
       --font-size-base: clamp(0.75rem, 1vw, 1rem);
       --font-size-small: clamp(0.625rem, 0.8vw, 0.875rem);
       --font-size-large: clamp(1rem, 1.5vw, 1.5rem);
@@ -146,11 +143,10 @@
       margin-bottom: var(--spacing-base);
     }
 
-    /* Styles for labels and inputs inside and outside modal */
     label, .form-label {
       display: block;
       margin-bottom: var(--spacing-sm);
-      font-size: var(--font-size-small); /* Adjusted for consistency */
+      font-size: var(--font-size-small);
       font-weight: 600;
       color: var(--text-color);
     }
@@ -158,13 +154,13 @@
     select,
     input[type="text"],
     input[type="number"],
-    textarea, /* Added textarea */
-    .form-input, /* For modal consistency */
+    textarea,
+    .form-input,
     .form-select,
     .form-textarea {
       width: 100%;
       background-color: var(--secondary-color);
-      border: 0.0625rem solid var(--border-color); /* Unified border */
+      border: 0.0625rem solid var(--border-color);
       color: var(--text-color);
       padding: var(--spacing-sm) var(--spacing-base);
       border-radius: var(--border-radius-md);
@@ -177,7 +173,7 @@
     
     textarea, .form-textarea {
         height: auto;
-        min-height: 80px; /* Default min-height for textareas */
+        min-height: 80px;
         resize: vertical;
     }
     
@@ -310,14 +306,12 @@
       display: flex;
       gap: var(--spacing-sm);
     }
-    /* Search input in card header */
     .header-actions .form-input {
-        height: calc(var(--button-height) - 0.25rem); /* Align with buttons */
-        margin-bottom: 0; /* Remove bottom margin if it's the only element */
-        width: auto; /* Allow it to shrink or grow */
-        min-width: 150px; /* Minimum width */
+        height: calc(var(--button-height) - 0.25rem);
+        margin-bottom: 0;
+        width: auto;
+        min-width: 150px;
     }
-
 
     button.action-btn, .table-actions .action-btn {
       background: none;
@@ -478,7 +472,7 @@
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(clamp(8rem, 18vw, 12.5rem), 1fr)); /* Adjusted minmax */
+      grid-template-columns: repeat(auto-fit, minmax(clamp(8rem, 18vw, 12.5rem), 1fr));
       gap: var(--spacing-lg);
       margin-bottom: var(--spacing-xl);
     }
@@ -524,7 +518,6 @@
     .icon-stat-scenarios::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23d5c9a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z'%3E%3C/path%3E%3C/svg%3E"); }
     .icon-stat-questions::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d5c9a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'%3E%3C/path%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'%3E%3C/line%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3C/svg%3E"); }
     .icon-stat-active::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d5c9a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='9' cy='7' r='4'%3E%3C/circle%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'%3E%3C/path%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'%3E%3C/path%3E%3C/svg%3E"); }
-
 
     .tabs {
       display: flex;
@@ -611,14 +604,13 @@
         padding: var(--spacing-sm) 0;
     }
 
-    /* Universal Modal Styles */
     .modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.75); /* Darker overlay */
+      background-color: rgba(0, 0, 0, 0.75);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -637,13 +629,13 @@
       color: var(--text-color);
       border-radius: var(--border-radius-lg);
       border: 1px solid var(--border-color);
-      padding: 0; /* Remove padding to use header/body/footer for spacing */
+      padding: 0; 
       width: 90%;
-      max-width: 550px; /* Slightly smaller max-width */
-      box-shadow: 0 8px 25px rgba(0,0,0,0.4); /* Enhanced shadow */
-      transform: translateY(-20px) scale(0.95); /* Start slightly up and smaller */
-      transition: transform 0.3s ease-out, opacity 0.3s ease-out; /* Smoother transition */
-      opacity: 0; /* Start hidden for transition */
+      max-width: 550px; 
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4); 
+      transform: translateY(-20px) scale(0.95); 
+      transition: transform 0.3s ease-out, opacity 0.3s ease-out; 
+      opacity: 0; 
     }
     .modal-overlay.active .modal-content {
       transform: translateY(0) scale(1);
@@ -656,17 +648,17 @@
       padding: var(--spacing-base) var(--spacing-lg);
       border-bottom: 1px solid var(--border-color);
     }
-    .modal-title-text { /* This ID will be targeted by JS */
+    .modal-title-text { 
       font-size: var(--font-size-large);
-      font-weight: 700; /* Bolder title */
+      font-weight: 700; 
       color: var(--primary-color);
       margin: 0;
     }
-    .modal-close-button { /* This ID will be targeted by JS */
+    .modal-close-button { 
       background: none;
       border: none;
       color: var(--text-color);
-      font-size: calc(var(--icon-size-lg) * 1.1); /* Slightly larger close icon */
+      font-size: calc(var(--icon-size-lg) * 1.1); 
       font-weight: bold;
       cursor: pointer;
       padding: var(--spacing-xs);
@@ -677,17 +669,15 @@
       color: var(--primary-color);
       transform: rotate(90deg);
     }
-    .modal-body-content { /* This ID will be targeted by JS */
+    .modal-body-content { 
       padding: var(--spacing-lg);
-      margin-bottom: 0; /* Removed default margin */
-      max-height: 65vh; /* Increased max height */
+      margin-bottom: 0; 
+      max-height: 65vh; 
       overflow-y: auto;
     }
-    /* Styling for form elements within the modal, using specific classes for clarity */
     .modal-body-content .form-group {
       margin-bottom: var(--spacing-base);
     }
-    /* .form-label, .form-input, .form-select, .form-textarea are already defined globally */
 
     .modal-footer-actions {
       display: flex;
@@ -695,25 +685,23 @@
       gap: var(--spacing-md);
       padding: var(--spacing-base) var(--spacing-lg);
       border-top: 1px solid var(--border-color);
-      background-color: var(--secondary-color); /* Footer background */
-      border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg); /* Rounded bottom corners */
+      background-color: var(--secondary-color); 
+      border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg); 
     }
-    .modal-footer-actions .btn { /* Ensure buttons in footer use general .btn styling */
-        min-width: 100px; /* Give buttons a decent min-width */
+    .modal-footer-actions .btn { 
+        min-width: 100px; 
     }
-    .modal-footer-actions .btn-danger-outline { /* Example of an outline danger button for cancel */
+    .modal-footer-actions .btn-danger-outline { 
         background-color: transparent;
         border-color: var(--danger-color);
         color: var(--danger-color);
     }
     .modal-footer-actions .btn-danger-outline:hover {
         background-color: var(--danger-color);
-        color: var(--card-bg); /* Or var(--dark-bg) */
+        color: var(--card-bg); 
         box-shadow: 0 0 0.375rem var(--danger-glow);
     }
 
-
-    /* Message Toast Styles (if not already globally defined and preferred here) */
     #message-container {
         position: fixed;
         bottom: 20px;
@@ -721,25 +709,24 @@
         transform: translateX(-50%);
         padding: var(--spacing-base) var(--spacing-lg);
         border-radius: var(--border-radius-md);
-        color: var(--dark-bg); /* Default text color for messages */
+        color: var(--dark-bg); 
         font-size: var(--font-size-base);
         opacity: 0;
         display: none;
         transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-        z-index: 10000; /* Ensure it's above modals */
+        z-index: 10000; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         min-width: 250px;
         text-align: center;
     }
     #message-container.success { background-color: var(--success-color); }
-    #message-container.error { background-color: var(--danger-color); color: var(--text-color); } /* Error text often lighter on dark bg */
+    #message-container.error { background-color: var(--danger-color); color: var(--text-color); } 
     #message-container.warning { background-color: var(--warning-color); }
-    #message-container.active { /* Class to trigger visibility if needed by JS */
+    #message-container.active { 
         opacity: 1;
         display: block;
         transform: translateX(-50%) translateY(0);
     }
-
 
     @media (min-width: 768px) { 
       main.container {
@@ -783,19 +770,22 @@
           <h3 class="stat-label">Total Scenarios</h3>
           <p class="stat-value">
             <button class="stat-icon" aria-label="Scenarios icon"><i class="icon-stat-scenarios"></i></button> 
-            <span id="scenarios-count">0</span> </p>
+            <span id="scenarios-count">0</span> 
+          </p>
         </article>
         <article class="stat-card">
             <h3 class="stat-label">Total Questions</h3>
             <p class="stat-value">
                 <button class="stat-icon" aria-label="Questions icon"><i class="icon-stat-questions"></i></button> 
-                <span id="questions-count">0</span> </p>
+                <span id="questions-count">0</span> 
+            </p>
         </article>
         <article class="stat-card">
             <h3 class="stat-label">Active Users</h3>
             <p class="stat-value">
                 <button class="stat-icon" aria-label="Active users icon"><i class="icon-stat-active"></i></button> 
-                <span id="active-users-count">0</span> </p>
+                <span id="active-users-count">0</span> 
+            </p>
         </article>
       </section>
 
@@ -878,5 +868,4 @@
       </footer>
     </div>
   </div>
-
-  </template>
+</template>
