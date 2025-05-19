@@ -32,7 +32,7 @@ export class AssessmentList extends HTMLElement {
       : oneMonthAgo;
     fromDate.setHours(0, 0, 0, 0);
     params.append("start_date", fromDate.toISOString());
-    
+
     const toDate = filters.dateTo ? new Date(filters.dateTo) : today;
     toDate.setHours(23, 59, 59, 999);
     params.append("end_date", toDate.toISOString());
@@ -60,8 +60,8 @@ export class AssessmentList extends HTMLElement {
         list.replaceChildren();
         if (historyItems.length === 0) {
           const noItemMessage = document.createElement("li");
-          noItemMessage.textContent = "No items found.";
-          noItemMessage.classList.add("no-items-message");
+          noItemMessage.textContent = "No assessment found.";
+          noItemMessage.classList.add("no-assessment-message");
           list.appendChild(noItemMessage);
         } else {
           historyItems.forEach((item) => {
