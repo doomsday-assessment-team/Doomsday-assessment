@@ -10,7 +10,6 @@ export class AssessmentList extends HTMLElement {
       const customEvent = event as CustomEvent;
       this.fetchHistory(customEvent.detail);
     });
-    this.fetchHistory();
   }
 
   async loadTemplate() {
@@ -18,6 +17,7 @@ export class AssessmentList extends HTMLElement {
       "./templates/assessment-list.component.html"
     );
     this.appendChild(content);
+    this.fetchHistory();
   }
 
   private toQueryParams(filters: Filters): URLSearchParams {
@@ -27,17 +27,15 @@ export class AssessmentList extends HTMLElement {
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(today.getMonth() - 1);
 
-    if (filters.dateFrom) {
-      params.append("start_date", filters.dateFrom.toISOString().split("T")[0]);
-    } else {
-      params.append("start_date", oneMonthAgo.toISOString().split("T")[0]);
-    }
-
-    if (filters.dateTo) {
-      params.append("end_date", filters.dateTo.toISOString().split("T")[0]);
-    } else {
-      params.append("end_date", today.toISOString().split("T")[0]);
-    }
+    const fromDate = filters.dateFrom
+      ? new Date(filters.dateFrom)
+      : oneMonthAgo;
+    fromDate.setHours(0, 0, 0, 0);
+    params.append("start_date", fromDate.toISOString());
+    
+    const toDate = filters.dateTo ? new Date(filters.dateTo) : today;
+    toDate.setHours(23, 59, 59, 999);
+    params.append("end_date", toDate.toISOString());
 
     if (filters.scenario) {
       params.append("scenario", String(filters.scenario));
@@ -77,7 +75,6 @@ export class AssessmentList extends HTMLElement {
           });
         }
       }
-
     } catch (error) {
       console.error("Failed to fetch assessment history:", error);
     }
