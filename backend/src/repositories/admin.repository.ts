@@ -6,7 +6,6 @@ import {
   Option,
   Role
 } from '../types/global-types';
-import { RawUserQuestionRow } from '../types/raw-user-question-row';
 
 export const addScenario = async (scenarioName: string): Promise<Scenario> => {
   return db.one<Scenario>(
@@ -232,100 +231,6 @@ export const deleteQuestion = async (questionId: number): Promise<void> => {
     'DELETE FROM questions WHERE question_id = $1',
     [questionId]
   );
-};
-
-export const getUserQuestionHistory = async (
-  userName?: string,
-  userId?: number,
-  scenarios?: string,
-  difficulties?: string,
-  startDate?: string,
-  endDate?: string,
-  offset: number = 0,
-  itemsPerPage: number = 100
-): Promise<RawUserQuestionRow[]> => {
-  const whereConditions = [];
-  const queryParams: any[] = [];
-  let paramCounter = 1;
-  let whereUserCondition = '';
-
-  if (userName !== undefined) {
-    whereUserCondition = `
-      WHERE CONCAT(surname, name) ILIKE '%' || $${paramCounter} || '%' OR 
-      CONCAT(name, surname) ILIKE '%' || $${paramCounter++} || '%'
-    `;
-    queryParams.push(userName);
-  }
-
-  if (userId !== undefined) {
-    whereConditions.push(`u.user_id = $${paramCounter++}`);
-    queryParams.push(userId);
-  }
-
-  if (scenarios !== undefined) {
-    whereConditions.push(`q.scenario_id = ANY(string_to_array($${paramCounter++}, ',')::int[])`);
-    queryParams.push(scenarios);
-  }
-
-  if (difficulties !== undefined) {
-    whereConditions.push(`q.question_difficulty_id = ANY(string_to_array($${paramCounter++}, ',')::int[])`);
-    queryParams.push(difficulties);
-  }
-
-  if (startDate) {
-    whereConditions.push(`h.timestamp >= $${paramCounter++}`);
-    queryParams.push(new Date(startDate));
-  }
-
-  if (endDate) {
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
-    whereConditions.push(`h.timestamp <= $${paramCounter++}`);
-    queryParams.push(end);
-  }
-
-  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
-
-  const query = `
-    WITH limited_histories AS (
-      SELECT history_id, timestamp, user_id, feedback
-      FROM history
-      ORDER BY history_id
-      LIMIT $${paramCounter++}
-      OFFSET $${paramCounter++}
-    ), filtered_users AS (
-      SELECT user_id, surname, name FROM users
-      ${whereUserCondition}
-    ) 
-    SELECT
-      u.user_id,
-      u.name,
-      u.surname,
-      s.scenario_name,
-      qd.question_difficulty_id AS difficulty_id,
-      qd.question_difficulty_name AS difficulty_name,
-      q.question_id,
-      q.scenario_id,
-      q.question_text,
-      so.option_id AS selected_option_id,
-      o.points,
-      o.option_id,
-      o.option_text,
-      h.timestamp,
-      h.history_id,
-      h.feedback
-    FROM history_questions hq
-    INNER JOIN limited_histories h ON hq.history_id = h.history_id
-    INNER JOIN filtered_users u ON h.user_id = u.user_id
-    INNER JOIN options so ON hq.option_id = so.option_id
-    INNER JOIN questions q ON hq.question_id = q.question_id
-    LEFT JOIN options o ON q.question_id = o.question_id
-    INNER JOIN question_difficulties qd ON q.question_difficulty_id = qd.question_difficulty_id
-    INNER JOIN scenarios s ON q.scenario_id = s.scenario_id
-    ${whereClause}
-  `;
-  queryParams.push(itemsPerPage, offset);
-  return db.manyOrNone<RawUserQuestionRow>(query, queryParams);
 };
 
 export const addUserRole = async (userId: number, roleId: number) => {

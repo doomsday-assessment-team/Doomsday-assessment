@@ -1,8 +1,9 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from "express";
 import { loginUser } from "../repositories/login.user";
 import { validateParamsWithMessage } from "../utils/parameter-validation";
-import { ErrorResponse } from '../types/error-response';
-import { getGroupedUserQuestionHistory } from '../services/admin.service';
+import { ErrorResponse } from "../types/error-response";
+import { transformAssessmentHistoryDetails } from "../services/user.service";
+import { getUserAssessmentSummaries } from "../repositories/user.repository";
 
 const router = express.Router();
 
@@ -32,49 +33,89 @@ router.post("/login", async (req, res) => {
     .json({ error: "Unauthorized: Could not log in successfully." });
 });
 
-router.get('/user-question-history', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const validationError = validateParamsWithMessage(req.query, [
-      { name: 'scenarios', type: 'string', required: false },
-      { name: 'difficulties', type: 'string', required: false },
-      { name: 'start_date', type: 'string', required: false },
-      { name: 'end_date', type: 'string', required: false },
-    ]);
-    
-    if (validationError) {
-      const errorResponse: ErrorResponse = {
-        error: 'ValidationError',
-        message: validationError
-      };
-      res.status(400).json(errorResponse);
-    } else {
-      if (req.query.scenarios && !(/^(\d+,)*\d+$/.test(req.query.scenarios as string))) {
-        res.status(400).json({
-          error: 'ValidationError',
-          message: "scenarios must be a comma-separated list of numbers"
-        });
+router.get(
+  "/assessment-summary",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const validationError = validateParamsWithMessage(req.query, [
+        { name: "scenario", type: "number", required: false },
+        { name: "difficulty", type: "number", required: false },
+        { name: "start_date", type: "string", required: false },
+        { name: "end_date", type: "string", required: false },
+        { name: "order_by", type: "boolean", required: false },
+      ]);
+
+      if (validationError) {
+        const errorResponse: ErrorResponse = {
+          error: "ValidationError",
+          message: validationError,
+        };
+        res.status(400).json(errorResponse);
       } else {
         const userId = req.user?.user_id;
-        if (userId){
-          const scenarios = req.query.scenarios as string | undefined;
-          const difficulties = req.query.difficulties as string | undefined;
+        if (!userId) {
+          res.status(400).json({
+            error: "ValidationError",
+            message: "User does not exist in database",
+          });
+        } else {
+          const scenario = req.query.scenario
+            ? Number(req.query.scenario)
+            : undefined;
+          const difficulty = req.query.difficulty
+            ? Number(req.query.difficulty)
+            : undefined;
           const startDate = req.query.start_date as string | undefined;
           const endDate = req.query.end_date as string | undefined;
-          const result = await getGroupedUserQuestionHistory(undefined, userId, scenarios, difficulties, startDate, endDate);
+          const orderBy = req.query.order_by as boolean | undefined;
+
+          const result = await getUserAssessmentSummaries(
+            userId,
+            scenario,
+            difficulty,
+            startDate,
+            endDate
+          );
           res.json(result);
-        } else {
-          res.status(400).json({
-            error: 'ValidationError',
-            message: "User does not exist in database"
-          });
         }
-        
       }
+    } catch (error) {
+      next(error);
     }
-  
-  } catch (error) {
-    next(error);
   }
-});
+);
+
+router.get(
+  "/assessment-details",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const validationError = validateParamsWithMessage(req.query, [
+        { name: "history_id", type: "number", required: true },
+      ]);
+
+      if (validationError) {
+        const errorResponse: ErrorResponse = {
+          error: "ValidationError",
+          message: validationError,
+        };
+        res.status(400).json(errorResponse);
+      } else {
+        const userId = req.user?.user_id;
+        if (!userId) {
+          res.status(400).json({
+            error: "ValidationError",
+            message: "User does not exist in database",
+          });
+        } else {
+          const historyId = Number(req.query.history_id);
+          const result = await transformAssessmentHistoryDetails(historyId);
+          res.json(result);
+        }
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 export default router;

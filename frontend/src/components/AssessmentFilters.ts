@@ -8,236 +8,160 @@ export class AssessmentFilters extends HTMLElement {
   private selectedDifficulties: number[] = [];
   connectedCallback() {
     this.loadTemplate();
+    this.populateFilters();
   }
   async loadTemplate() {
-    const content = await loadTemplate("./templates/assessment-filters.component.html");
+    const content = await loadTemplate(
+      "./templates/assessment-filters.component.html"
+    );
     this.appendChild(content);
-    // this.populateDifficulties();
-    // this.populateScenarios();
-    // const today = new Date();
-    // const oneYearAgo = new Date();
-    // oneYearAgo.setFullYear(today.getFullYear() - 1);
-    // const todayStr = today.toISOString().split("T")[0];
-    // const oneYearAgoStr = oneYearAgo.toISOString().split("T")[0];
-    // const fromInput = this.shadowRoot?.getElementById(
-    //   "from-date"
-    // ) as HTMLInputElement;
-    // const toInput = this.shadowRoot?.getElementById(
-    //   "to-date"
-    // ) as HTMLInputElement;
-    // if (fromInput) fromInput.value = oneYearAgoStr;
-    // if (toInput) toInput.value = todayStr;
-    // this.addEventListeners();
-    // this.hideUserFilter();
+    this.setDefaultDates();
   }
 
-  private async populateScenarios() {
-    try {
-      const scenarios: Scenario[] = await apiService.get<Scenario[]>(
-        "/scenarios"
-      );
-      const scenarioList = this.shadowRoot?.getElementById("scenarios-list");
-      if (!scenarioList) return;
-      scenarioList.replaceChildren();
-      scenarios.forEach((scenario) => {
-        const listItem = document.createElement("li");
-        const listInput = document.createElement("input");
-        listInput.setAttribute("type", "checkbox");
-        listInput.checked = true;
-        this.selectedScenarios.push(scenario.scenario_id);
-        listInput.setAttribute("name", "scenario");
-        listInput.setAttribute("value", String(scenario.scenario_id));
-        listInput.addEventListener("change", (event) => {
-          const checkbox = event.target as HTMLInputElement;
-          const value = scenario.scenario_id;
-          if (checkbox.checked) {
-            if (!this.selectedScenarios.includes(value)) {
-              this.selectedScenarios.push(value);
-            }
-          } else {
-            this.selectedScenarios = this.selectedScenarios.filter(
-              (id) => id !== value
-            );
-          }
-          this.filterChanged();
-        });
-
-        const labelText = document.createTextNode(" " + scenario.scenario_name);
-        listItem.appendChild(listInput);
-        listItem.appendChild(labelText);
-
-        scenarioList.appendChild(listItem);
+  async populateFilters() {
+    const difficulties = await apiService.get<Difficulty[]>("/difficulties");
+    const difficultySelect = document.getElementById(
+      "difficulty-filter"
+    ) as HTMLSelectElement;
+    if (difficultySelect) {
+      difficultySelect.options.length = 1;
+      difficulties.forEach((difficulty) => {
+        const option = document.createElement("option");
+        option.value = difficulty.question_difficulty_id.toString();
+        option.textContent = difficulty.question_difficulty_name;
+        difficultySelect.appendChild(option);
       });
-    } catch (error) {
-      console.log("Failed to load scenarios:", error);
     }
+
+    const scenarios = await apiService.get<Scenario[]>("/scenarios");
+    const scenarioSelect = document.getElementById(
+      "scenario-filter"
+    ) as HTMLSelectElement;
+    scenarioSelect.options.length = 1;
+    scenarios.forEach((scenario) => {
+      const option = document.createElement("option");
+      option.value = scenario.scenario_id.toString();
+      option.textContent = scenario.scenario_name;
+      scenarioSelect.appendChild(option);
+    });
+
+    this.addEventListeners();
   }
 
-  private async hideUserFilter() {
-    const isAdmin = await checkAdminRole();
-    const userFilterItem = this.shadowRoot?.getElementById("admin-filter");
+  setDefaultDates() {
+    const toDateInput = document.getElementById("to-date") as HTMLInputElement;
+    const fromDateInput = document.getElementById(
+      "from-date"
+    ) as HTMLInputElement;
+    const today = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+    const formatDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
 
-    if (userFilterItem) {
-      (userFilterItem as HTMLElement).style.display = isAdmin
-        ? "list-item"
-        : "none";
-    }
-  }
+    toDateInput.value = formatDate(today);
+    fromDateInput.value = formatDate(oneMonthAgo);
 
-  private async populateDifficulties() {
-    try {
-      const scenarios: Difficulty[] = await apiService.get<Difficulty[]>(
-        "/difficulties"
-      );
-      const difficultiesList =
-        this.shadowRoot?.getElementById("difficulties-list");
-      if (!difficultiesList) return;
-      difficultiesList.replaceChildren();
-      scenarios.map((difficulty) => {
-        const listItem = document.createElement("li");
-        const listInput = document.createElement("input");
-        listInput.setAttribute("type", "checkbox");
-        listInput.checked = true;
-        this.selectedDifficulties.push(difficulty.question_difficulty_id);
-        listInput.setAttribute("name", "difficulty");
-        listInput.setAttribute(
-          "value",
-          String(difficulty.question_difficulty_id)
-        );
-        listInput.addEventListener("change", (event) => {
-          const checkbox = event.target as HTMLInputElement;
-          const value = difficulty.question_difficulty_id;
-          if (checkbox.checked) {
-            this.selectedDifficulties.push(value);
-          } else {
-            this.selectedDifficulties = this.selectedDifficulties.filter(
-              (id) => id !== value
-            );
-          }
+    const sortButton = document.getElementById("sort-button");
+    let ascending = true;
 
-          this.filterChanged();
-        });
-        listItem.appendChild(listInput);
-        const labelText = document.createTextNode(
-          " " + difficulty.question_difficulty_name
-        );
-        listItem.appendChild(labelText);
+    if (sortButton) {
+      sortButton.classList.add("asc");
 
-        difficultiesList.appendChild(listItem);
+      sortButton.addEventListener("click", () => {
+        ascending = !ascending;
+        if (ascending) {
+          sortButton.classList.add("asc");
+          sortButton.classList.remove("desc");
+        } else {
+          sortButton.classList.add("desc");
+          sortButton.classList.remove("asc");
+        }
       });
-    } catch (error) {
-      console.log(error);
     }
   }
-
   addEventListeners() {
-    const dateFromInput = this.shadowRoot?.getElementById("from-date");
-    const dateToInput = this.shadowRoot?.getElementById("to-date");
-    const scenarioFilter = this.shadowRoot?.getElementById("scenario-filter");
-    const difficultyFilter =
-      this.shadowRoot?.getElementById("difficulty-filter");
-    const userFilter = this.shadowRoot?.getElementById("user-filter");
-    dateFromInput?.addEventListener("input", () => {
-      const fromInput = dateFromInput as HTMLInputElement;
-      const toInput = dateToInput as HTMLInputElement;
-      if (toInput && fromInput.value > toInput.value) {
-        toInput.value = fromInput.value;
-      }
-      this.filterChanged();
-    });
-    dateToInput?.addEventListener("input", () => this.filterChanged());
-    scenarioFilter?.addEventListener("change", () => this.filterChanged());
-    difficultyFilter?.addEventListener("change", () => this.filterChanged());
-    userFilter?.addEventListener("input", () => this.filterChanged());
-    const clearFiltersButton = this.shadowRoot?.querySelector(".clear-filters");
-    clearFiltersButton?.addEventListener("click", () => this.clearFilters());
-    this.shadowRoot?.querySelectorAll(".dropdown-toggle").forEach((button) => {
-      button.addEventListener("click", () => {
-        const parent = button.closest(".dropdown");
-        parent?.classList.toggle("open");
+    const difficultySelect =
+      this.querySelector<HTMLSelectElement>("#difficulty-filter");
+    const scenarioSelect =
+      this.querySelector<HTMLSelectElement>("#scenario-filter");
+    const fromDateInput = this.querySelector<HTMLInputElement>("#from-date");
+    const toDateInput = this.querySelector<HTMLInputElement>("#to-date");
+    const sortButton = this.querySelector<HTMLButtonElement>("#sort-button");
+
+    if (difficultySelect) {
+      difficultySelect.addEventListener("change", () => this.filterChanged());
+    }
+    if (scenarioSelect) {
+      scenarioSelect.addEventListener("change", () => this.filterChanged());
+    }
+    if (fromDateInput) {
+      fromDateInput.addEventListener("change", () => this.filterChanged());
+    }
+    if (toDateInput) {
+      toDateInput.addEventListener("change", () => this.filterChanged());
+    }
+    if (sortButton) {
+      sortButton.addEventListener("click", () => {
+        const ascending = sortButton.classList.toggle("asc");
+        if (ascending) {
+          sortButton.classList.remove("desc");
+        } else {
+          sortButton.classList.add("desc");
+        }
+        this.filterChanged();
       });
-    });
+    }
   }
 
   filterChanged() {
-    const filters = this.getCurrentFilters();
-    this.dispatchEvent(
+    const filters = this.getFilters();
+    window.dispatchEvent(
       new CustomEvent("filters-changed", {
         detail: filters,
-        bubbles: true,
-        composed: true,
       })
     );
   }
 
-  getCurrentFilters(): Filters {
-    const dateFrom = (
-      this.shadowRoot?.getElementById("from-date") as HTMLInputElement
-    )?.value;
-    const dateTo = (
-      this.shadowRoot?.getElementById("to-date") as HTMLInputElement
-    )?.value;
-    const userName = (
-      this.shadowRoot?.getElementById("user-filter") as HTMLInputElement
-    )?.value;
+  getFilters(): Filters {
+    const difficultySelect =
+      this.querySelector<HTMLSelectElement>("#difficulty-filter");
+    const scenarioSelect =
+      this.querySelector<HTMLSelectElement>("#scenario-filter");
+    const fromDateInput = this.querySelector<HTMLInputElement>("#from-date");
+    const toDateInput = this.querySelector<HTMLInputElement>("#to-date");
+    const sortButton = this.querySelector<HTMLButtonElement>("#sort-button");
+    const parseDate = (
+      dateStr: string | undefined | null
+    ): Date | undefined => {
+      if (!dateStr) return undefined;
+      const date = new Date(dateStr);
+      return isNaN(date.getTime()) ? undefined : date;
+    };
 
     return {
-      dateFrom: dateFrom ? new Date(dateFrom) : undefined,
-      dateTo: dateTo ? new Date(dateTo) : undefined,
-      userName,
-      difficulties: this.selectedDifficulties,
-      scenarios: this.selectedScenarios,
+      difficulty:
+        difficultySelect && difficultySelect.value
+          ? isNaN(Number(difficultySelect.value))
+            ? undefined
+            : Number(difficultySelect.value)
+          : undefined,
+      scenario:
+        scenarioSelect && scenarioSelect.value
+          ? isNaN(Number(scenarioSelect.value))
+            ? undefined
+            : Number(scenarioSelect.value)
+          : undefined,
+      dateFrom: parseDate(fromDateInput?.value ?? null),
+      dateTo: parseDate(toDateInput?.value ?? null),
+      sortAscending: sortButton?.classList.contains("asc") ?? true,
     };
   }
 
-  clearFilters() {
-    const today = new Date();
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(today.getFullYear() - 1);
-
-    const todayStr = today.toISOString().split("T")[0];
-    const oneYearAgoStr = oneYearAgo.toISOString().split("T")[0];
-
-    const fromInput = this.shadowRoot?.getElementById(
-      "from-date"
-    ) as HTMLInputElement;
-    const toInput = this.shadowRoot?.getElementById(
-      "to-date"
-    ) as HTMLInputElement;
-    const userFilter = this.shadowRoot?.getElementById(
-      "user-filter"
-    ) as HTMLInputElement;
-
-    if (fromInput) fromInput.value = oneYearAgoStr;
-    if (toInput) toInput.value = todayStr;
-    if (userFilter) userFilter.value = "";
-
-    const scenariosList = this.shadowRoot?.getElementById("scenarios-list");
-    if (scenariosList) {
-      const checkboxes = scenariosList.querySelectorAll(
-        'input[type="checkbox"]'
-      ) as NodeListOf<HTMLInputElement>;
-      this.selectedScenarios = [];
-      checkboxes.forEach((checkbox) => {
-        checkbox.checked = true;
-        this.selectedScenarios.push(Number(checkbox.value));
-      });
-    }
-
-    const difficultiesList =
-      this.shadowRoot?.getElementById("difficulties-list");
-    if (difficultiesList) {
-      const checkboxes = difficultiesList.querySelectorAll(
-        'input[type="checkbox"]'
-      ) as NodeListOf<HTMLInputElement>;
-      this.selectedDifficulties = [];
-      checkboxes.forEach((checkbox) => {
-        checkbox.checked = true;
-        this.selectedDifficulties.push(Number(checkbox.value));
-      });
-    }
-
-    this.filterChanged();
-  }
+  clearFilters() {}
 }
 customElements.define("assessment-filters", AssessmentFilters);
