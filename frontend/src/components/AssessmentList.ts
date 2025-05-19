@@ -65,7 +65,6 @@ export class AssessmentList extends HTMLElement {
       let list = this.querySelector<HTMLUListElement>(".tests-grid");
       if (list) {
         list.replaceChildren();
-
         if (historyItems.length === 0) {
           const noItemMessage = document.createElement("li");
           noItemMessage.textContent = "No items found.";
