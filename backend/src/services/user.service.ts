@@ -1,34 +1,27 @@
-import { getUserQuestionHistory } from '../repositories/admin.repository';
+import { getAssessmentHistoryDetails } from '../repositories/user.repository';
 import { AssessmentHistory } from '../types/global-types';
 
-export const getGroupedUserQuestionHistory = async (
-  userName?: string,
-  userId?: number,
-  scenarios?: string,
-  difficulties?: string,
-  startDate?: string,
-  endDate?: string,
-): Promise<AssessmentHistory[]> => {
-  const rows = await getUserQuestionHistory(userName, userId, scenarios, difficulties, startDate, endDate);
+export const transformAssessmentHistoryDetails = async (
+  historyId: number
+): Promise<AssessmentHistory> => {
+  const rows = await getAssessmentHistoryDetails(historyId);
   const grouped = rows.reduce<Record<string, AssessmentHistory>>((acc, row) => {
-    const historyId = row.history_id.toString();
+    const historyIdStr = row.history_id.toString();
     
-    if (!acc[historyId]) {
-      acc[historyId] = {
+    if (!acc[historyIdStr]) {
+      acc[historyIdStr] = {
         history_id: row.history_id,
         feedback: row.feedback,
-        timestamp: row.timestamp,
+        timestamp: row.timestamp.toISOString(),
         scenario_name: row.scenario_name,
         scenario_id: row.scenario_id,
         difficulty_id: row.difficulty_id,
         difficulty_name: row.difficulty_name,
-        user_name: `${row.name} ${row.surname}`,
-        user_id: row.user_id,
         questions: []
       };
     }
 
-    let question = acc[historyId].questions.find(q => q.question_id === row.question_id);
+    let question = acc[historyIdStr].questions.find(q => q.question_id === row.question_id);
 
     if (!question) {
       question = {
@@ -37,7 +30,7 @@ export const getGroupedUserQuestionHistory = async (
         question_text: row.question_text,
         options: []
       };
-      acc[historyId].questions.push(question);
+      acc[historyIdStr].questions.push(question);
     }
 
     const optionExists = question.options.some(o => o.option_id === row.option_id);
@@ -52,5 +45,6 @@ export const getGroupedUserQuestionHistory = async (
 
     return acc;
   }, {});
-  return Object.values(grouped);
+
+  return grouped[historyId.toString()];
 };

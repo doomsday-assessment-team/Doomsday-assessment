@@ -99,6 +99,19 @@
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
       color-scheme: dark;
     }
+
+    .sort-button svg {
+      transition: transform 0.1s ease;
+      transform: rotate(0deg);
+    }
+
+    .sort-button.asc svg {
+      transform: rotate(0deg);
+    }
+
+    .sort-button.desc svg {
+      transform: rotate(180deg);
+    }
   </style>
   <section class="filter-bar">
     <h2 class="filter-header">
@@ -137,20 +150,18 @@
       <section class="filter-dropdown">
         <select class="filter-select" id="difficulty-filter">
           <option value="all">All Difficulties</option>
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
         </select>
       </section>
       <section class="filter-dropdown">
         <select class="filter-select" id="scenario-filter">
           <option value="all">All Scenarios</option>
-          <option value="cyber">Cyber Attack</option>
-          <option value="natural">Natural Disaster</option>
-          <option value="infrastructure">Infrastructure Failure</option>
         </select>
       </section>
-      <button class="sort-button" id="sort-button">
+      <button
+        class="sort-button asc"
+        id="sort-button"
+        aria-label="Sort by date"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="16"

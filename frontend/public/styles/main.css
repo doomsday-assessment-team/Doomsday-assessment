@@ -19,7 +19,6 @@
   --option-bg: rgba(58, 60, 46, 0.3);
   --option-selected-bg: rgba(213, 201, 166, 0.15);
   --option-selected-border: var(--primary-color);
-  --points-color: var(--primary-color);
 }
 
 * {
