@@ -118,7 +118,6 @@ export class QuizQuestion extends HTMLElement {
     }
 
     private handleTimeUp() {
-        console.log(`QuizQuestion ${this._data?.question_id}: Time's up!`);
         // Disable radio buttons to prevent further interaction
         this.shadowRootInstance.querySelectorAll('input[type="radio"]').forEach(radio => {
             (radio as HTMLInputElement).disabled = true;

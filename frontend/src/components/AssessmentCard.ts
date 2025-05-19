@@ -23,7 +23,6 @@ export class AssessmentCard extends HTMLElement {
 
       const scoreTag = this.querySelector(".score-value");
       const scoreMetadata = document.querySelector<HTMLUListElement>("#score");
-      console.log(scoreMetadata);
       if (scoreMetadata) {
         scoreMetadata.textContent = details.questions.reduce((sum, q) => {
           const selected = q.options.find(o => o.option_id === q.selected_option_id);
