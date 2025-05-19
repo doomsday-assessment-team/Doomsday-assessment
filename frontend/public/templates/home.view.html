@@ -180,10 +180,12 @@
             overflow: hidden;
         }
 
-        .user-avatar:hover, .user-avatar:focus {
+        .user-avatar:hover,
+        .user-avatar:focus {
             transform: scale(1.05);
             box-shadow: 0 0 0.5rem rgba(240, 192, 64, 0.5);
-            outline: none; /* Remove default focus outline */
+            outline: none;
+            /* Remove default focus outline */
         }
 
         .avatar-initials {
@@ -669,12 +671,13 @@
             justify-items: center;
             position: relative;
             z-index: 1;
+            width: 100%;
         }
 
         .quick-links ul {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+            gap: clamp(0.75rem, 2vw, 1.5rem);
             list-style: none;
             width: 100%;
         }
